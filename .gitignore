@@ -7,3 +7,6 @@ media/
 .pytest_cache/
 avance-*.md
 .avance/
+.run/
+*.db-shm
+*.db-wal
