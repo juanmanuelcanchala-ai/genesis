@@ -1,0 +1,1746 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Génesis en vivo</title>
+    <style>
+      :root {
+        --bg: #06080c;
+        --bg2: #0b0f16;
+        --card: #10151e;
+        --card2: #141a25;
+        --line: rgba(255, 255, 255, 0.07);
+        --line2: rgba(255, 255, 255, 0.13);
+        --text: #eef1f6;
+        --muted: #8b93a7;
+        --faint: #5b6377;
+        --green: #25d366;
+        --green-ink: #05210f;
+        --blue: #4f8cff;
+        --red: #ff5d5d;
+        --amber: #f5b84b;
+        --violet: #a78bfa;
+        --sans:
+          "Inter", "SF Pro Display", "Segoe UI", system-ui, -apple-system,
+          Roboto, sans-serif;
+        --mono:
+          "JetBrains Mono", "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        background:
+          radial-gradient(
+            1200px 600px at 75% -10%,
+            rgba(79, 140, 255, 0.1),
+            transparent 60%
+          ),
+          radial-gradient(
+            900px 500px at 0% 110%,
+            rgba(37, 211, 102, 0.07),
+            transparent 60%
+          ),
+          var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+      .app {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-height: 100vh;
+        padding: 20px 28px 24px;
+        gap: 18px;
+      }
+
+      /* ---------- header ---------- */
+      header {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 24px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-width: 0;
+      }
+      .logo {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        flex: none;
+        background: conic-gradient(
+          from 210deg,
+          var(--green),
+          var(--blue),
+          var(--violet),
+          var(--green)
+        );
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 40px rgba(37, 211, 102, 0.25);
+      }
+      .logo span {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--bg);
+        box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.92);
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 30px;
+        letter-spacing: -0.02em;
+        font-weight: 750;
+      }
+      .brand p {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .right {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 16px;
+        max-width: 46vw;
+      }
+      .status b {
+        color: var(--text);
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--faint);
+        flex: none;
+      }
+      .status[data-tone="run"] .dot {
+        background: var(--blue);
+        animation: pulse 1.2s infinite;
+      }
+      .status[data-tone="ok"] .dot {
+        background: var(--green);
+      }
+      .status[data-tone="bad"] .dot {
+        background: var(--red);
+      }
+      .status[data-tone="wait"] .dot {
+        background: var(--amber);
+        animation: pulse 1.6s infinite;
+      }
+      .timer {
+        font-family: var(--mono);
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+        font-size: clamp(54px, 7vw, 108px);
+        line-height: 1;
+        letter-spacing: -0.04em;
+        color: var(--text);
+        text-shadow: 0 0 40px rgba(79, 140, 255, 0.18);
+      }
+      .timer small {
+        font-size: 0.45em;
+        color: var(--muted);
+      }
+      .timer.done {
+        color: var(--green);
+        text-shadow: 0 0 50px rgba(37, 211, 102, 0.35);
+      }
+      .timer.bad {
+        color: var(--red);
+      }
+
+      /* ---------- main ---------- */
+      main {
+        display: grid;
+        grid-template-columns: minmax(300px, 0.9fr) 2.6fr;
+        gap: 18px;
+        min-height: 0;
+      }
+      .panel {
+        background: linear-gradient(180deg, var(--card), var(--bg2));
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        min-height: 0;
+      }
+      .ear {
+        display: flex;
+        flex-direction: column;
+        padding: 18px;
+        gap: 14px;
+        overflow: hidden;
+      }
+      .label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--faint);
+        font-weight: 650;
+      }
+      .transcript {
+        font-size: 19px;
+        line-height: 1.55;
+        color: #c9cfdb;
+        overflow: auto;
+        max-height: 34vh;
+        padding-right: 6px;
+      }
+      .seg {
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        gap: 10px;
+        padding: 3px 0;
+      }
+      .seg .t {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--faint);
+        padding-top: 5px;
+      }
+      .seg.lit .t {
+        color: var(--green);
+      }
+      mark.hl {
+        color: var(--text);
+        background: rgba(37, 211, 102, 0);
+        border-radius: 6px;
+        padding: 0 3px;
+        animation: lit 0.9s forwards;
+        box-shadow: inset 0 -2px 0 rgba(37, 211, 102, 0.6);
+      }
+      @keyframes lit {
+        to {
+          background: rgba(37, 211, 102, 0.2);
+        }
+      }
+      .empty {
+        color: var(--faint);
+        font-size: 17px;
+      }
+      .fields {
+        display: grid;
+        gap: 8px;
+        overflow: auto;
+      }
+      .field {
+        display: grid;
+        grid-template-columns: 92px 1fr auto;
+        gap: 10px;
+        align-items: baseline;
+        padding: 9px 12px;
+        border-radius: 12px;
+        background: var(--card2);
+        border: 1px solid var(--line);
+        opacity: 0;
+        transform: translateY(6px);
+        animation: rise 0.45s forwards;
+      }
+      .field .k {
+        color: var(--muted);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .field .v {
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .field .s {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--green);
+        background: rgba(37, 211, 102, 0.1);
+        padding: 2px 8px;
+        border-radius: 999px;
+      }
+      .field .s.photo {
+        color: var(--violet);
+        background: rgba(167, 139, 250, 0.12);
+      }
+      .chat {
+        display: grid;
+        gap: 6px;
+      }
+      .bubble {
+        font-size: 15px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: var(--card2);
+        color: #cfd5e1;
+        max-width: 95%;
+      }
+      .bubble.genesis {
+        border-left: 3px solid var(--green);
+      }
+      .bubble.seller {
+        justify-self: end;
+        border-right: 3px solid var(--blue);
+      }
+
+      .lanes {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+        min-height: 0;
+      }
+      .lane {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px 12px;
+        min-width: 0;
+      }
+      .lane-h {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .lane-h svg {
+        width: 22px;
+        height: 22px;
+        flex: none;
+        color: var(--muted);
+      }
+      .lane-h h2 {
+        margin: 0;
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      .lane-h .n {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--faint);
+      }
+      .lane.complete .lane-h svg,
+      .lane.complete .lane-h .n {
+        color: var(--green);
+      }
+      .cards {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+      .card {
+        position: relative;
+        padding: 11px 12px;
+        border-radius: 14px;
+        background: var(--card2);
+        border: 1px solid var(--line);
+        transition:
+          border-color 0.3s,
+          background 0.3s,
+          transform 0.3s,
+          opacity 0.3s;
+        animation: rise 0.4s;
+      }
+      .card .title {
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.25;
+        padding-right: 22px;
+      }
+      .card .meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 6px;
+        margin-top: 6px;
+        font-size: 12.5px;
+        color: var(--faint);
+      }
+      .card .meta .st {
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 650;
+      }
+      .card .meta .ms {
+        font-family: var(--mono);
+      }
+      .card .detail {
+        margin-top: 6px;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.35;
+        word-break: break-word;
+      }
+      .card .ico {
+        position: absolute;
+        top: 11px;
+        right: 11px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid var(--faint);
+      }
+      .card[data-s="running"] {
+        border-color: rgba(79, 140, 255, 0.55);
+        background: linear-gradient(
+          180deg,
+          rgba(79, 140, 255, 0.1),
+          var(--card2)
+        );
+      }
+      .card[data-s="running"] .ico {
+        border-color: var(--blue);
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+      }
+      .card[data-s="running"] .st {
+        color: var(--blue);
+      }
+      .card[data-s="retry"] {
+        border-color: rgba(245, 184, 75, 0.5);
+      }
+      .card[data-s="retry"] .st {
+        color: var(--amber);
+      }
+      .card[data-s="retry"] .ico {
+        border-color: var(--amber);
+        border-top-color: transparent;
+        animation: spin 0.8s linear infinite;
+      }
+      .card[data-s="done"] {
+        border-color: rgba(37, 211, 102, 0.45);
+        animation: flash 0.7s;
+      }
+      .card[data-s="done"] .st {
+        color: var(--green);
+      }
+      .card[data-s="done"] .ico {
+        border: 0;
+        background: var(--green);
+        animation: pop 0.35s;
+      }
+      .card[data-s="done"] .ico::after {
+        content: "";
+        position: absolute;
+        left: 5px;
+        top: 2px;
+        width: 4px;
+        height: 8px;
+        border: solid var(--green-ink);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+      .card[data-s="failed"] {
+        border-color: rgba(255, 93, 93, 0.6);
+        background: linear-gradient(
+          180deg,
+          rgba(255, 93, 93, 0.1),
+          var(--card2)
+        );
+      }
+      .card[data-s="failed"] .st {
+        color: var(--red);
+      }
+      .card[data-s="failed"] .ico {
+        border-color: var(--red);
+        background: var(--red);
+      }
+      .card[data-s="reverted"] {
+        border-color: rgba(245, 184, 75, 0.5);
+        opacity: 0.75;
+      }
+      .card[data-s="reverted"] .st {
+        color: var(--amber);
+      }
+      .card[data-s="reverted"] .title {
+        text-decoration: line-through;
+        text-decoration-color: rgba(245, 184, 75, 0.6);
+      }
+      .card[data-s="skipped"] {
+        opacity: 0.45;
+      }
+      .thumbs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .thumbs img {
+        width: 56px;
+        height: 56px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid var(--line2);
+        background: #fff;
+        animation: pop 0.4s;
+      }
+      .checks {
+        display: grid;
+        gap: 6px;
+        margin-top: 2px;
+      }
+      .check {
+        display: grid;
+        grid-template-columns: 20px minmax(0, 1fr);
+        gap: 8px;
+        align-items: start;
+        font-size: 14px;
+        overflow-wrap: anywhere;
+        color: #cfd5e1;
+        animation: rise 0.35s;
+      }
+      .check .b {
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        border: 2px solid var(--faint);
+        margin-top: 1px;
+        position: relative;
+      }
+      .check.ok .b {
+        background: var(--green);
+        border-color: var(--green);
+      }
+      .check.ok .b::after {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 0px;
+        width: 4px;
+        height: 9px;
+        border: solid var(--green-ink);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+      .check.bad .b {
+        background: var(--red);
+        border-color: var(--red);
+      }
+      .check .d {
+        display: block;
+        color: var(--faint);
+        font-size: 12.5px;
+      }
+
+      /* ---------- live overlay ---------- */
+      .live {
+        position: fixed;
+        inset: 0;
+        display: none;
+        place-items: center;
+        z-index: 10;
+        background:
+          radial-gradient(
+            900px 600px at 50% 40%,
+            rgba(37, 211, 102, 0.16),
+            transparent 70%
+          ),
+          rgba(6, 8, 12, 0.96);
+        backdrop-filter: blur(6px);
+      }
+      .live.on {
+        display: grid;
+        animation: fade 0.6s;
+      }
+      .live-in {
+        display: grid;
+        grid-template-columns: auto minmax(0, 560px);
+        gap: 56px;
+        align-items: center;
+        padding: 24px;
+        max-width: 1400px;
+      }
+      .qr {
+        width: min(52vh, 520px);
+        aspect-ratio: 1;
+        background: #fff;
+        border-radius: 28px;
+        padding: 18px;
+        box-shadow:
+          0 0 0 10px rgba(37, 211, 102, 0.25),
+          0 30px 120px rgba(37, 211, 102, 0.35);
+        animation: pop 0.6s;
+      }
+      .qr svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .live h2 {
+        margin: 0;
+        font-size: clamp(44px, 5.4vw, 86px);
+        line-height: 1.02;
+        letter-spacing: -0.035em;
+        font-weight: 800;
+      }
+      .live h2 em {
+        font-style: normal;
+        color: var(--green);
+      }
+      .live .biz {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-top: 22px;
+      }
+      .live .biz img {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #fff;
+        display: none;
+      }
+      .live .biz b {
+        font-size: 32px;
+      }
+      .live .stats {
+        display: flex;
+        gap: 28px;
+        margin-top: 24px;
+        color: var(--muted);
+        font-size: 18px;
+      }
+      .live .stats strong {
+        display: block;
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 34px;
+      }
+      .live .link {
+        margin-top: 22px;
+        font-family: var(--mono);
+        font-size: 18px;
+        color: var(--muted);
+        word-break: break-all;
+      }
+      .feed {
+        margin-top: 18px;
+        display: grid;
+        gap: 8px;
+      }
+      .feed div {
+        font-size: 18px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        animation: rise 0.4s;
+      }
+      .feed div.paid {
+        background: rgba(37, 211, 102, 0.16);
+        color: #c9f7da;
+      }
+
+      /* ---------- idle + controls ---------- */
+      .idle {
+        grid-column: 1 / -1;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 40px;
+      }
+      .idle h2 {
+        font-size: clamp(32px, 4vw, 60px);
+        margin: 0 0 12px;
+        letter-spacing: -0.03em;
+      }
+      .idle p {
+        color: var(--muted);
+        font-size: 20px;
+        margin: 0 0 28px;
+      }
+      .btn {
+        font: inherit;
+        font-weight: 700;
+        font-size: 18px;
+        border: 0;
+        border-radius: 14px;
+        padding: 14px 22px;
+        cursor: pointer;
+        background: var(--green);
+        color: var(--green-ink);
+        box-shadow: 0 10px 40px rgba(37, 211, 102, 0.25);
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      .btn.ghost {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--line2);
+        box-shadow: none;
+        font-size: 14px;
+        padding: 9px 14px;
+      }
+      .controls {
+        position: fixed;
+        right: 18px;
+        bottom: 14px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        opacity: 0.35;
+        transition: opacity 0.2s;
+        z-index: 20;
+      }
+      .controls:hover {
+        opacity: 1;
+      }
+      .controls kbd {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--faint);
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      @keyframes pulse {
+        50% {
+          opacity: 0.35;
+        }
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes pop {
+        from {
+          transform: scale(0.6);
+          opacity: 0;
+        }
+        to {
+          transform: none;
+          opacity: 1;
+        }
+      }
+      @keyframes flash {
+        0% {
+          box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.55);
+        }
+        100% {
+          box-shadow: 0 0 0 14px rgba(37, 211, 102, 0);
+        }
+      }
+      @keyframes fade {
+        from {
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 1100px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+        .lanes {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .live-in {
+          grid-template-columns: 1fr;
+          justify-items: center;
+          text-align: center;
+          gap: 28px;
+        }
+        .live .biz,
+        .live .stats {
+          justify-content: center;
+        }
+      }
+      @media (max-width: 640px) {
+        .app {
+          padding: 14px 16px;
+        }
+        header {
+          grid-template-columns: 1fr;
+        }
+        .right {
+          justify-content: space-between;
+        }
+        .status {
+          max-width: 60vw;
+        }
+        .lanes {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .brand p {
+          white-space: normal;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+        .field {
+          opacity: 1;
+          transform: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div class="brand">
+          <div class="logo" aria-hidden="true"><span></span></div>
+          <div>
+            <h1>Génesis</h1>
+            <p id="sub">De una nota de voz a un negocio vivo en WhatsApp</p>
+          </div>
+        </div>
+        <div class="right">
+          <div class="status" id="status" data-tone="idle">
+            <span class="dot"></span
+            ><b id="statusText">Esperando una nota de voz</b>
+          </div>
+          <div class="timer" id="timer">0:00<small>.0</small></div>
+        </div>
+      </header>
+
+      <main id="main">
+        <section class="idle" id="idle">
+          <div>
+            <h2>Mándale una nota de voz a Génesis</h2>
+            <p>
+              Cuéntale qué vendes, a cuánto, tu horario y dónde estás. Génesis
+              hace el resto.
+            </p>
+            <button class="btn" id="demoBig">Lanzar demo de Arepas Rosa</button>
+          </div>
+        </section>
+
+        <section class="panel ear hidden" id="ear">
+          <div class="label">Lo que dijo</div>
+          <div class="transcript" id="transcript">
+            <div class="empty">Escuchando…</div>
+          </div>
+          <div class="label">Lo que entendió</div>
+          <div class="fields" id="fields"></div>
+          <div class="chat" id="chat"></div>
+        </section>
+
+        <section class="lanes hidden" id="lanes"></section>
+      </main>
+    </div>
+
+    <div class="live" id="live" role="dialog" aria-label="Negocio en vivo">
+      <div class="live-in">
+        <div class="qr" id="qr"></div>
+        <div>
+          <h2>Tu negocio<br />está <em>vivo</em></h2>
+          <div class="biz">
+            <img id="liveLogo" alt="" /><b id="liveName"></b>
+          </div>
+          <div class="stats">
+            <div>
+              <strong id="liveTime">0:00</strong>de nota de voz a negocio
+            </div>
+            <div><strong id="liveChecks">0/0</strong>pruebas del inspector</div>
+          </div>
+          <div class="link" id="liveLink"></div>
+          <div class="feed" id="feed"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <kbd>D demo · F pantalla completa · Q QR · Esc cerrar</kbd>
+      <button class="btn ghost" id="demoBtn">Lanzar demo</button>
+    </div>
+
+    <script>
+      /* QR-BEGIN: minimal QR encoder (byte mode, ECC level M, versions 1-40), after Nayuki's QR Code
+   generator algorithm. Verified with zbarimg in tests/test_server.py. */
+      const QR = (() => {
+        const ECC_M = [
+          -1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28,
+          28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+          28, 28, 28, 28, 28, 28, 28,
+        ];
+        const BLK_M = [
+          -1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16,
+          17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43,
+          45, 47, 49,
+        ];
+        const bit = (x, i) => ((x >>> i) & 1) !== 0;
+        const rawModules = (v) => {
+          let r = (16 * v + 128) * v + 64;
+          if (v >= 2) {
+            const n = Math.floor(v / 7) + 2;
+            r -= (25 * n - 10) * n - 55;
+            if (v >= 7) r -= 36;
+          }
+          return r;
+        };
+        const dataCodewords = (v) =>
+          Math.floor(rawModules(v) / 8) - ECC_M[v] * BLK_M[v];
+        const gfMul = (x, y) => {
+          let z = 0;
+          for (let i = 7; i >= 0; i--) {
+            z = (z << 1) ^ ((z >>> 7) * 0x11d);
+            z ^= ((y >>> i) & 1) * x;
+          }
+          return z & 0xff;
+        };
+        const rsDivisor = (deg) => {
+          const r = new Array(deg).fill(0);
+          r[deg - 1] = 1;
+          let root = 1;
+          for (let i = 0; i < deg; i++) {
+            for (let j = 0; j < r.length; j++) {
+              r[j] = gfMul(r[j], root);
+              if (j + 1 < r.length) r[j] ^= r[j + 1];
+            }
+            root = gfMul(root, 2);
+          }
+          return r;
+        };
+        const rsRemainder = (data, div) => {
+          const r = div.map(() => 0);
+          for (const b of data) {
+            const f = b ^ r.shift();
+            r.push(0);
+            div.forEach((c, i) => {
+              r[i] ^= gfMul(c, f);
+            });
+          }
+          return r;
+        };
+        function encode(text) {
+          const bytes = Array.from(new TextEncoder().encode(text));
+          let v = 1;
+          for (; v <= 40; v++)
+            if (
+              4 + (v <= 9 ? 8 : 16) + bytes.length * 8 <=
+              dataCodewords(v) * 8
+            )
+              break;
+          if (v > 40) throw new Error("text too long for QR");
+          const bits = [];
+          const push = (val, len) => {
+            for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1);
+          };
+          push(4, 4);
+          push(bytes.length, v <= 9 ? 8 : 16);
+          bytes.forEach((b) => push(b, 8));
+          const cap = dataCodewords(v) * 8;
+          push(0, Math.min(4, cap - bits.length));
+          push(0, (8 - (bits.length % 8)) % 8);
+          for (let p = 0xec; bits.length < cap; p ^= 0xec ^ 0x11) push(p, 8);
+          const data = [];
+          for (let i = 0; i < bits.length; i += 8) {
+            let b = 0;
+            for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j];
+            data.push(b);
+          }
+          const nBlocks = BLK_M[v],
+            eccLen = ECC_M[v],
+            raw = Math.floor(rawModules(v) / 8);
+          const nShort = nBlocks - (raw % nBlocks),
+            shortLen = Math.floor(raw / nBlocks);
+          const div = rsDivisor(eccLen),
+            blocks = [];
+          for (let i = 0, k = 0; i < nBlocks; i++) {
+            const dat = data.slice(
+              k,
+              k + shortLen - eccLen + (i < nShort ? 0 : 1),
+            );
+            k += dat.length;
+            const ecc = rsRemainder(dat, div);
+            if (i < nShort) dat.push(0);
+            blocks.push(dat.concat(ecc));
+          }
+          const all = [];
+          for (let i = 0; i < blocks[0].length; i++)
+            blocks.forEach((b, j) => {
+              if (i !== shortLen - eccLen || j >= nShort) all.push(b[i]);
+            });
+          const size = v * 4 + 17;
+          const m = Array.from({ length: size }, () =>
+            new Array(size).fill(false),
+          );
+          const fn = Array.from({ length: size }, () =>
+            new Array(size).fill(false),
+          );
+          const set = (x, y, d) => {
+            m[y][x] = d;
+            fn[y][x] = true;
+          };
+          for (let i = 0; i < size; i++) {
+            set(6, i, i % 2 === 0);
+            set(i, 6, i % 2 === 0);
+          }
+          for (const [cx, cy] of [
+            [3, 3],
+            [size - 4, 3],
+            [3, size - 4],
+          ]) {
+            for (let dy = -4; dy <= 4; dy++)
+              for (let dx = -4; dx <= 4; dx++) {
+                const d = Math.max(Math.abs(dx), Math.abs(dy)),
+                  x = cx + dx,
+                  y = cy + dy;
+                if (x >= 0 && x < size && y >= 0 && y < size)
+                  set(x, y, d !== 2 && d !== 4);
+              }
+          }
+          const align = [];
+          if (v > 1) {
+            const n = Math.floor(v / 7) + 2,
+              step = Math.floor((v * 8 + n * 3 + 5) / (n * 4 - 4)) * 2;
+            align.push(6);
+            for (let p = size - 7; align.length < n; p -= step)
+              align.splice(1, 0, p);
+          }
+          align.forEach((ax, i) =>
+            align.forEach((ay, j) => {
+              if (
+                (i === 0 && j === 0) ||
+                (i === 0 && j === align.length - 1) ||
+                (i === align.length - 1 && j === 0)
+              )
+                return;
+              for (let dy = -2; dy <= 2; dy++)
+                for (let dx = -2; dx <= 2; dx++)
+                  set(
+                    ax + dx,
+                    ay + dy,
+                    Math.max(Math.abs(dx), Math.abs(dy)) !== 1,
+                  );
+            }),
+          );
+          const drawFormat = (mask) => {
+            const d = mask; // ECC level M = 0b00
+            let r = d;
+            for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537);
+            const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) set(8, i, bit(b, i));
+            set(8, 7, bit(b, 6));
+            set(8, 8, bit(b, 7));
+            set(7, 8, bit(b, 8));
+            for (let i = 9; i < 15; i++) set(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) set(size - 1 - i, 8, bit(b, i));
+            for (let i = 8; i < 15; i++) set(8, size - 15 + i, bit(b, i));
+            set(8, size - 8, true);
+          };
+          drawFormat(0);
+          if (v >= 7) {
+            let r = v;
+            for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1f25);
+            const b = (v << 12) | r;
+            for (let i = 0; i < 18; i++) {
+              const a = size - 11 + (i % 3),
+                c = Math.floor(i / 3);
+              set(a, c, bit(b, i));
+              set(c, a, bit(b, i));
+            }
+          }
+          let i = 0;
+          for (let right = size - 1; right >= 1; right -= 2) {
+            if (right === 6) right = 5;
+            for (let vert = 0; vert < size; vert++)
+              for (let j = 0; j < 2; j++) {
+                const x = right - j,
+                  up = ((right + 1) & 2) === 0,
+                  y = up ? size - 1 - vert : vert;
+                if (!fn[y][x] && i < all.length * 8) {
+                  m[y][x] = bit(all[i >>> 3], 7 - (i & 7));
+                  i++;
+                }
+              }
+          }
+          const maskFn = [
+            (x, y) => (x + y) % 2 === 0,
+            (x, y) => y % 2 === 0,
+            (x) => x % 3 === 0,
+            (x, y) => (x + y) % 3 === 0,
+            (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0,
+            (x, y) => ((x * y) % 2) + ((x * y) % 3) === 0,
+            (x, y) => (((x * y) % 2) + ((x * y) % 3)) % 2 === 0,
+            (x, y) => (((x + y) % 2) + ((x * y) % 3)) % 2 === 0,
+          ];
+          const applyMask = (k) => {
+            for (let y = 0; y < size; y++)
+              for (let x = 0; x < size; x++)
+                if (!fn[y][x] && maskFn[k](x, y)) m[y][x] = !m[y][x];
+          };
+          const penalty = () => {
+            let p = 0,
+              dark = 0;
+            for (let y = 0; y < size; y++) {
+              for (let pass = 0; pass < 2; pass++) {
+                let run = 1;
+                for (let x = 1; x < size; x++) {
+                  const a = pass ? m[x][y] : m[y][x],
+                    b = pass ? m[x - 1][y] : m[y][x - 1];
+                  if (a === b) {
+                    run++;
+                    if (run === 5) p += 3;
+                    else if (run > 5) p++;
+                  } else run = 1;
+                }
+              }
+              for (let x = 0; x < size; x++) {
+                if (m[y][x]) dark++;
+                if (
+                  x < size - 1 &&
+                  y < size - 1 &&
+                  m[y][x] === m[y][x + 1] &&
+                  m[y][x] === m[y + 1][x] &&
+                  m[y][x] === m[y + 1][x + 1]
+                )
+                  p += 3;
+              }
+            }
+            return (
+              p +
+              Math.floor(
+                Math.abs(dark * 20 - size * size * 10) / (size * size),
+              ) *
+                10
+            );
+          };
+          let best = 0,
+            bestP = Infinity;
+          for (let k = 0; k < 8; k++) {
+            applyMask(k);
+            drawFormat(k);
+            const p = penalty();
+            if (p < bestP) {
+              bestP = p;
+              best = k;
+            }
+            applyMask(k);
+          }
+          applyMask(best);
+          drawFormat(best);
+          return m;
+        }
+        function svg(text, { dark = "#000", light = "#fff", border = 4 } = {}) {
+          const m = encode(text),
+            n = m.length + border * 2;
+          let d = "";
+          m.forEach((row, y) =>
+            row.forEach((on, x) => {
+              if (on) d += `M${x + border},${y + border}h1v1h-1z`;
+            }),
+          );
+          return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges"><rect width="${n}" height="${n}" fill="${light}"/><path d="${d}" fill="${dark}"/></svg>`;
+        }
+        return { encode, svg };
+      })();
+      /* QR-END */
+
+      /* ---------------------------------------------------------------- panel */
+      const $ = (id) => document.getElementById(id);
+      const el = (tag, cls, text) => {
+        const e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (text != null) e.textContent = text;
+        return e;
+      };
+
+      const ICONS = {
+        number:
+          '<path d="M6.5 3h3l1.5 4-2 1.5a11 11 0 0 0 6.5 6.5L17 13l4 1.5v3A2.5 2.5 0 0 1 18.5 20 15.5 15.5 0 0 1 4 5.5 2.5 2.5 0 0 1 6.5 3Z"/>',
+        brand:
+          '<path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.7 1.5-1.5 0-1.2-1-1.5-1-2.5 0-.8.7-1.5 1.5-1.5H16a5 5 0 0 0 5-5c0-4.2-4-7.5-9-7.5Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+        menu: '<path d="M4 6h16M4 12h16M4 18h10"/>',
+        agent:
+          '<path d="M4 5h16v11H9l-5 4V5Z"/><path d="M9 10h.01M15 10h.01"/>',
+        payments:
+          '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/>',
+        inspector:
+          '<path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+      };
+      const LANES = [
+        ["number", "Número"],
+        ["brand", "Marca"],
+        ["menu", "Menú"],
+        ["agent", "Agente"],
+        ["payments", "Pagos"],
+        ["inspector", "Inspector"],
+      ];
+      const LANE_OF = { launch: "inspector" };
+      const STATE_ES = {
+        pending: "en espera",
+        running: "trabajando",
+        retry: "reintento",
+        done: "listo",
+        failed: "falló",
+        reverted: "revertido",
+        skipped: "omitido",
+      };
+
+      const S = {
+        run: null,
+        es: null,
+        seen: new Set(),
+        t0: null,
+        t1: null,
+        skew: null,
+        cards: {},
+        lanes: {},
+        checks: {},
+        images: [],
+        live: null,
+        wa: "",
+      };
+
+      function fmt(sec, tenths = true) {
+        sec = Math.max(0, sec);
+        const m = Math.floor(sec / 60),
+          s = Math.floor(sec % 60),
+          d = Math.floor((sec * 10) % 10);
+        return tenths
+          ? `${m}:${String(s).padStart(2, "0")}<small>.${d}</small>`
+          : `${m}:${String(s).padStart(2, "0")}`;
+      }
+      const mmss = (s) =>
+        s == null
+          ? ""
+          : `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+      function serverNow() {
+        return Date.now() / 1000 - (S.skew || 0);
+      }
+      function tick() {
+        if (S.t0 != null) {
+          const end = S.t1 != null ? S.t1 : serverNow();
+          $("timer").innerHTML = fmt(end - S.t0);
+        }
+        requestAnimationFrame(tick);
+      }
+      function setStatus(text, tone = "run") {
+        $("statusText").textContent = text;
+        $("status").dataset.tone = tone;
+      }
+
+      function resetView() {
+        S.seen.clear();
+        S.t0 = null;
+        S.t1 = null;
+        S.cards = {};
+        S.lanes = {};
+        S.checks = {};
+        S.images = [];
+        S.live = null;
+        S.wa = "";
+        $("timer").className = "timer";
+        $("timer").innerHTML = fmt(0);
+        $("transcript").innerHTML = '<div class="empty">Escuchando…</div>';
+        $("fields").innerHTML = "";
+        $("chat").innerHTML = "";
+        $("feed").innerHTML = "";
+        $("live").classList.remove("on");
+        $("idle").classList.add("hidden");
+        $("ear").classList.remove("hidden");
+        $("lanes").classList.remove("hidden");
+        buildLanes();
+      }
+
+      function buildLanes() {
+        const root = $("lanes");
+        root.innerHTML = "";
+        for (const [key, name] of LANES) {
+          const lane = el("div", "panel lane");
+          lane.dataset.lane = key;
+          const h = el("div", "lane-h");
+          h.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[key]}</svg>`;
+          h.append(el("h2", null, name));
+          const n = el("span", "n", "");
+          h.append(n);
+          const cards = el("div", "cards");
+          lane.append(h, cards);
+          if (key === "inspector") {
+            const ch = el("div", "checks");
+            ch.id = "checks";
+            lane.append(ch);
+          }
+          root.append(lane);
+          S.lanes[key] = { lane, cards, n };
+        }
+      }
+
+      function laneKey(lane) {
+        const k = LANE_OF[lane] || lane;
+        return S.lanes[k] ? k : "inspector";
+      }
+
+      function ensureCard(id, lane, title) {
+        if (S.cards[id]) return S.cards[id];
+        const L = S.lanes[laneKey(lane || id.split(".")[0])];
+        const card = el("div", "card");
+        card.dataset.s = "pending";
+        const t = el("div", "title", title || id);
+        const ico = el("span", "ico");
+        const meta = el("div", "meta");
+        const st = el("span", "st", STATE_ES.pending);
+        const ms = el("span", "ms", "");
+        meta.append(st, ms);
+        const detail = el("div", "detail hidden");
+        const thumbs = el("div", "thumbs hidden");
+        card.append(ico, t, meta, detail, thumbs);
+        L.cards.append(card);
+        const c = {
+          card,
+          t,
+          st,
+          ms,
+          detail,
+          thumbs,
+          lane: laneKey(lane || id.split(".")[0]),
+        };
+        S.cards[id] = c;
+        laneCount(c.lane);
+        return c;
+      }
+      function setCard(id, lane, state, extra = {}) {
+        const c = ensureCard(id, lane, extra.title);
+        c.card.dataset.s = state;
+        c.st.textContent = STATE_ES[state] || state;
+        if (extra.ms != null)
+          c.ms.textContent =
+            extra.ms >= 1000
+              ? `${(extra.ms / 1000).toFixed(1)} s`
+              : `${extra.ms} ms`;
+        if (extra.cached) c.ms.textContent = "ya existía";
+        if (extra.detail) {
+          c.detail.textContent = extra.detail;
+          c.detail.classList.remove("hidden");
+        }
+        laneCount(c.lane);
+      }
+      function laneCount(key) {
+        const L = S.lanes[key];
+        if (!L) return;
+        const all = Object.values(S.cards).filter((c) => c.lane === key);
+        const done = all.filter((c) => c.card.dataset.s === "done").length;
+        L.n.textContent = all.length ? `${done}/${all.length}` : "";
+        L.lane.classList.toggle(
+          "complete",
+          all.length > 0 && done === all.length,
+        );
+      }
+
+      function findImages(obj, out = []) {
+        if (obj == null) return out;
+        if (typeof obj === "string") {
+          if (
+            /^(\/media\/|data:image\/)/.test(obj) ||
+            /^https?:\/\/.+\.(png|jpe?g|webp)(\?|$)/i.test(obj) ||
+            (/\.(png|jpe?g|webp)$/i.test(obj) && obj.startsWith("/"))
+          )
+            out.push(obj);
+        } else if (Array.isArray(obj)) obj.forEach((v) => findImages(v, out));
+        else if (typeof obj === "object")
+          Object.values(obj).forEach((v) => findImages(v, out));
+        return out;
+      }
+      function addImages(id, lane, urls) {
+        if (!urls.length) return;
+        const c = ensureCard(id, lane);
+        c.thumbs.classList.remove("hidden");
+        for (const u of urls) {
+          if (S.images.includes(u)) continue;
+          S.images.push(u);
+          const img = el("img");
+          img.src = u;
+          img.alt = "";
+          img.onerror = () => img.remove();
+          c.thumbs.append(img);
+        }
+      }
+
+      function renderSpec(d) {
+        const tr = d.transcript || {},
+          segs =
+            tr.segments && tr.segments.length
+              ? tr.segments
+              : tr.text
+                ? [{ start: null, end: null, text: tr.text }]
+                : [];
+        const hl = d.highlights || [];
+        const box = $("transcript");
+        box.innerHTML = "";
+        const segEls = segs.map((s) => {
+          const row = el("div", "seg");
+          row.append(el("span", "t", s.start == null ? "" : mmss(s.start)));
+          const tx = el("span", "x", s.text || "");
+          row.append(tx);
+          box.append(row);
+          return { s, row, tx };
+        });
+        if (!segs.length)
+          box.innerHTML = '<div class="empty">(sin transcripción)</div>';
+        const fields = $("fields");
+        fields.innerHTML = "";
+        hl.forEach((h, i) => {
+          const f = el("div", "field");
+          f.style.animationDelay = `${i * 260}ms`;
+          f.append(el("span", "k", h.label), el("span", "v", h.value));
+          const src =
+            h.source_s != null
+              ? el("span", "s", mmss(h.source_s))
+              : h.photo != null
+                ? el("span", "s photo", `foto ${h.photo + 1}`)
+                : el("span", "s hidden", "");
+          f.append(src);
+          fields.append(f);
+          setTimeout(() => markSegment(segEls, h), i * 260);
+        });
+        if (d.spec && d.spec.business_name)
+          $("sub").textContent =
+            `${d.spec.business_name} · ${d.spec.neighborhood ? d.spec.neighborhood + ", " : ""}${d.spec.city || ""}`;
+      }
+      function markSegment(segEls, h) {
+        if (!segEls.length || h.source_s == null) return;
+        let target =
+          segEls.find(
+            ({ s }) =>
+              s.start != null &&
+              h.source_s >= s.start &&
+              h.source_s < (s.end ?? s.start + 1e9),
+          ) || segEls[0];
+        target.row.classList.add("lit");
+        target.row.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        const q = (h.quote || "").trim();
+        if (!q) return;
+        const idx = target.tx.textContent
+          .toLowerCase()
+          .indexOf(q.toLowerCase());
+        if (idx < 0 || (target.marks || []).some(([a]) => a === idx)) return;
+        // Re-render the text with every quote marked so far (textContent-safe).
+        target.marks = (target.marks || [])
+          .concat([[idx, idx + q.length]])
+          .sort((a, b) => a[0] - b[0]);
+        const text = target.s.text || "";
+        target.tx.textContent = "";
+        let pos = 0;
+        for (const [a, b] of target.marks) {
+          if (a < pos) continue;
+          target.tx.append(
+            document.createTextNode(text.slice(pos, a)),
+            el("mark", "hl", text.slice(a, b)),
+          );
+          pos = b;
+        }
+        target.tx.append(document.createTextNode(text.slice(pos)));
+      }
+
+      function addCheck(name, ok, detail) {
+        if (!name) return;
+        let c = S.checks[name];
+        if (!c) {
+          c = el("div", "check");
+          c.append(el("span", "b"));
+          const t = el("span", null, "");
+          c.append(t);
+          c._t = t;
+          $("checks").append(c);
+          S.checks[name] = c;
+        }
+        c.className =
+          "check " + (ok === true ? "ok" : ok === false ? "bad" : "");
+        c._t.textContent = name;
+        if (detail) {
+          const d = el("span", "d", detail);
+          c._t.append(d);
+        }
+      }
+      function chat(who, text) {
+        if (!text) return;
+        const b = el(
+          "div",
+          "bubble " + (who === "seller" ? "seller" : "genesis"),
+          text.length > 220 ? text.slice(0, 220) + "…" : text,
+        );
+        $("chat").append(b);
+        while ($("chat").children.length > 3) $("chat").firstChild.remove();
+      }
+
+      function showLive(d) {
+        S.wa = d.wa_me || S.wa;
+        $("qr").innerHTML = S.wa
+          ? QR.svg(S.wa, { dark: "#06080c", border: 2 })
+          : "";
+        $("liveName").textContent = d.business_name || "";
+        $("liveLink").textContent = S.wa
+          .replace(/^https?:\/\//, "")
+          .replace(/\?.*$/, "");
+        const t =
+          d.elapsed_s != null
+            ? d.elapsed_s
+            : S.t1 != null && S.t0 != null
+              ? S.t1 - S.t0
+              : 0;
+        $("liveTime").textContent = mmss(t);
+        const checks = (d.inspector && d.inspector.checks) || [];
+        const passed = checks.length
+          ? checks.filter((c) => c.ok).length
+          : Object.values(S.checks).filter((c) => c.classList.contains("ok"))
+              .length;
+        const total = checks.length || Object.keys(S.checks).length;
+        $("liveChecks").textContent = `${passed}/${total}`;
+        const logo = S.images.find((u) => /logo/i.test(u)) || S.images[0];
+        if (logo) {
+          $("liveLogo").src = logo;
+          $("liveLogo").style.display = "block";
+        }
+        if (new URLSearchParams(location.search).get("overlay") !== "0")
+          $("live").classList.add("on");
+      }
+
+      function onEvent(ev) {
+        const key = `${ev.kind}|${ev.node}|${ev.ts}|${ev.message}`;
+        if (S.seen.has(key)) return;
+        S.seen.add(key);
+        const lag = Date.now() / 1000 - ev.ts;
+        if (S.skew == null || lag < S.skew) S.skew = lag;
+        const d = ev.data || {};
+        switch (ev.kind) {
+          case "run.started":
+            S.t0 = ev.ts;
+            S.t1 = null;
+            setStatus("Nota de voz recibida", "run");
+            break;
+          case "intake.compiling":
+            setStatus("Escuchando y entendiendo el negocio…", "run");
+            break;
+          case "spec.ready":
+            renderSpec(d);
+            setStatus(`Entendí: ${ev.message}`, "run");
+            break;
+          case "intake.asking":
+            setStatus("Una sola pregunta al vendedor", "wait");
+            chat("genesis", ev.message);
+            break;
+          case "intake.confirming":
+            setStatus("Esperando el «sí» del vendedor", "wait");
+            break;
+          case "intake.building":
+            setStatus("Construyendo el negocio en el número", "run");
+            break;
+          case "msg":
+            chat(d.who, ev.message);
+            break;
+          case "plan.ready":
+            (d.nodes || []).forEach((n) => ensureCard(n.id, n.lane, n.title));
+            setStatus(`Plan: ${ev.message}`, "run");
+            break;
+          case "node.started":
+            setCard(ev.node, ev.lane, "running", { title: ev.message });
+            break;
+          case "node.retry":
+            setCard(ev.node, ev.lane, "retry", { detail: ev.message });
+            break;
+          case "node.done":
+            setCard(ev.node, ev.lane, "done", { ms: d.ms, cached: d.cached });
+            addImages(ev.node, ev.lane, findImages(d.outputs));
+            if (d.outputs && Array.isArray(d.outputs.checks))
+              d.outputs.checks.forEach((c) => addCheck(c.name, c.ok, c.detail));
+            break;
+          case "node.failed":
+            setCard(ev.node, ev.lane, "failed", { detail: ev.message });
+            break;
+          case "node.skipped":
+            setCard(ev.node, ev.lane, "skipped", {
+              detail: "dependencia falló",
+            });
+            break;
+          case "node.reverted":
+            setCard(ev.node, ev.lane, "reverted");
+            break;
+          case "node.revert_failed":
+            setCard(ev.node, ev.lane, "failed", { detail: ev.message });
+            break;
+          case "node.detail":
+            setCard(
+              ev.node,
+              ev.lane,
+              S.cards[ev.node] ? S.cards[ev.node].card.dataset.s : "running",
+              { detail: ev.message },
+            );
+            addImages(ev.node, ev.lane, findImages(d));
+            break;
+          case "run.live":
+            S.t1 = ev.ts;
+            $("timer").className = "timer done";
+            $("timer").innerHTML = fmt(S.t1 - (S.t0 ?? ev.ts));
+            setStatus("Tu negocio está vivo", "ok");
+            showLive(d);
+            break;
+          case "run.failed":
+            S.t1 = ev.ts;
+            $("timer").className = "timer bad";
+            setStatus(
+              d.blocked ? ev.message : `Falló y se revirtió: ${ev.message}`,
+              "bad",
+            );
+            break;
+          case "customer.msg": {
+            const f = el("div", null, `${d.who || "Cliente"}: ${ev.message}`);
+            $("feed").prepend(f);
+            break;
+          }
+          case "order.paid": {
+            const f = el("div", "paid", ev.message);
+            $("feed").prepend(f);
+            break;
+          }
+          default:
+            if (ev.kind === "inspect.started" || ev.kind === "inspect.done") {
+              setStatus(ev.message, ev.kind === "inspect.done" && d.passed === false ? "bad" : "run");
+            } else if (ev.kind.startsWith("inspect.")) {
+              const name = d.name || d.check || ev.message;
+              const ok =
+                d.ok != null
+                  ? !!d.ok
+                  : ev.kind.endsWith(".fail") || ev.kind.endsWith(".failed")
+                    ? false
+                    : ev.kind.endsWith(".ok") || ev.kind.endsWith(".pass")
+                      ? true
+                      : undefined;
+              addCheck(name, ok, d.detail || (d.name ? "" : ""));
+            }
+        }
+        while ($("feed").children.length > 4) $("feed").lastChild.remove();
+      }
+
+      /* Admin token for the stage API: open the panel as /#token=XXXX (GENESIS_ADMIN_TOKEN). */
+      const TOKEN = (() => {
+        const h = new URLSearchParams(location.hash.slice(1)).get("token");
+        try {
+          if (h) sessionStorage.setItem("genesis-token", h);
+          return h || sessionStorage.getItem("genesis-token") || "";
+        } catch (e) {
+          return h || "";
+        }
+      })();
+      function api(path) {
+        if (!TOKEN) return path;
+        return path + (path.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(TOKEN);
+      }
+
+      function follow(runId) {
+        if (!runId || runId === S.run) return;
+        if (S.es) S.es.close();
+        S.run = runId;
+        resetView();
+        // plain=1: unnamed SSE messages, so every event kind (also unknown inspect.*) reaches onmessage.
+        S.es = new EventSource(
+          api(`/api/runs/${encodeURIComponent(runId)}/events?plain=1`),
+        );
+        S.es.onmessage = (m) => handle(m.data);
+      }
+      function handle(raw) {
+        try {
+          onEvent(JSON.parse(raw));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      /* Every run, including the ones a seller starts on WhatsApp: switch to it when it starts. */
+      function watchAll() {
+        const es = new EventSource(api("/api/stream?plain=1"));
+        es.onmessage = (m) => {
+          try {
+            const ev = JSON.parse(m.data);
+            if (ev.kind === "run.started") follow(ev.run_id);
+          } catch (e) {
+            console.error(e);
+          }
+        };
+      }
+
+      async function launchDemo() {
+        const b1 = $("demoBtn"),
+          b2 = $("demoBig");
+        b1.disabled = b2.disabled = true;
+        setStatus("Lanzando demo…", "run");
+        try {
+          const r = await fetch(api("/api/runs?demo=1&auto_confirm=1"), {
+            method: "POST",
+          });
+          const j = await r.json();
+          if (!r.ok) throw new Error(j.detail || r.status);
+          follow(j.run_id);
+        } catch (e) {
+          setStatus(`No se pudo lanzar: ${e.message}`, "bad");
+        } finally {
+          setTimeout(() => {
+            b1.disabled = b2.disabled = false;
+          }, 1500);
+        }
+      }
+
+      $("demoBtn").onclick = launchDemo;
+      $("demoBig").onclick = launchDemo;
+      $("live").onclick = () => $("live").classList.remove("on");
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT" || e.metaKey || e.ctrlKey || e.altKey)
+          return;
+        const k = e.key.toLowerCase();
+        if (k === "d") launchDemo();
+        else if (k === "f")
+          (document.fullscreenElement
+            ? document.exitFullscreen()
+            : document.documentElement.requestFullscreen()
+          ).catch(() => {});
+        else if (k === "escape") $("live").classList.remove("on");
+        else if (k === "q" && S.wa) $("live").classList.toggle("on");
+      });
+
+      (async () => {
+        requestAnimationFrame(tick);
+        watchAll();
+        const want = new URLSearchParams(location.search).get("run");
+        try {
+          if (want) follow(want);
+          else {
+            const runs = await (await fetch(api("/api/runs?limit=1"))).json();
+            if (runs.length) follow(runs[0].run_id);
+          }
+        } catch (e) {
+          console.warn(e);
+        }
+      })();
+    </script>
+  </body>
+</html>
