@@ -11,11 +11,18 @@ from ._common import detail, image_ext, image_size, mod, read_file, save_media
 LANE = "brand"
 
 
+def _singular(word: str) -> str:
+    w = word.strip().lower()
+    return w[:-1] if len(w) > 4 and w.endswith(("as", "os")) else w
+
+
 def _prompts(spec: BusinessSpec) -> list[str]:
-    words = [spec.category.strip()]
-    if spec.products:
-        words.append(spec.products[0].name.strip())
-    return [w for i, w in enumerate(words) if w and w not in words[:i]]
+    """SAM 3.1 grounds short nouns ("arepa") and misses long phrases ("Arepa de choclo con queso") and
+    plurals, so try the singular head nouns first, then the full names, then a generic fallback."""
+    cat = spec.category.strip()
+    names = [p.name.strip() for p in spec.products[:2] if p.name.strip()]
+    words = [_singular(cat.split()[0]) if cat else "", *(_singular(n.split()[0]) for n in names), cat, *names, "food"]
+    return [w for i, w in enumerate(words) if w and w.lower() not in [x.lower() for x in words[:i]]]
 
 
 def apply_crops(ctx: Ctx) -> dict[str, Any]:
