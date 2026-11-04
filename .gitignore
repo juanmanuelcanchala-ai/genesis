@@ -6,3 +6,4 @@ __pycache__/
 media/
 .pytest_cache/
 avance-*.md
+.avance/
