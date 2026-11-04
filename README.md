@@ -200,6 +200,8 @@ Copy `.env.example` to `.env` and fill in:
 ```bash
 make smoke-muse   # one call to every Meta Model API endpoint Génesis uses (needs MODEL_API_KEY)
                   # optional: uv run python scripts/smoke_muse.py voice_note.ogg photo.jpg
+make rehearse     # the whole story with the real models, WhatsApp in dry-run (no WA token needed)
+                  # optional: uv run python scripts/rehearse_real.py voice_note.ogg photo1.jpg photo2.jpg
 make serve MOCK=0 DRY=0
 ```
 
@@ -249,20 +251,21 @@ Verified:
 - WhatsApp payloads (Flow messages, Flows API, Resumable Upload, business profile, catalog products)
   were written against Meta's official documentation; Flow JSON uses version 7.3 and respects the
   documented component limits.
-- Meta Model API request and response shapes in `genesis/muse.py` follow the Meta developer
-  documentation (ASR turns with `startMs`/`endMs`, SAM 3.1 box tokens via `/v1/responses`, image
-  `b64_json` or `url`).
+- Meta Model API, checked with a live key on 4 Nov 2026 (`make smoke-muse`, 11/11 calls OK):
+  Muse Voice Transcribe returns timed turns (`startMs`/`endMs`) in `ENDPOINTING` mode; Spark 1.3
+  follows `json_schema` structured output (including with an image) and returns OpenAI-shaped
+  `tool_calls`; Spark 1.2 accepts `input_audio`; SAM 3.1 through `/v1/responses` returns a box within
+  1 px of the drawn object; Muse Image generates (1600×1600 PNG) and edits (keeps the product, replaces the background).
+- Full story with the real models and WhatsApp in dry-run (`make rehearse`): voice note to "your
+  business is live" in about 60 s (transcribe and compile about 24 s, the question and its answer
+  about 12 s, the 11-node plan with the Inspector 9/9 about 26 s), then the customer chat,
+  Flow order and payment.
 
-Assumed, to be confirmed with live keys (`make smoke-muse` and a live run):
+Assumed, to be confirmed on a live WhatsApp run:
 
-- Muse Voice Transcribe returns timed turns in `ENDPOINTING` mode. If it returns text only, the
-  pipeline still works but fields lose their audio second.
-- The SAM 3.1 token format parser matches real output; otherwise Génesis falls back to Spark grounding.
-- `/v1/images/edits` accepts the image as sent; otherwise it retries through the SDK's multipart edit.
 - Meta returns `validation_errors == []` for the generated Flow and publishes it on each cradle number.
 - Flow message `data` as an object (not a string), catalog `items_batch` deletes, and media MIME handling.
-- End-to-end time on live APIs. In mock the whole run takes about 0.2 s; the "under three minutes"
-  figure depends on model and Graph API latency and must be measured on a live run.
+- Graph API latency on top of the ~60 s measured with the real models.
 
 ## What's next
 

@@ -499,8 +499,9 @@ def _build(run: Run) -> None:
     intake = {"owner_wa_id": run.owner_wa_id, "transcript": _transcript_dict(run.draft)["text"], "via": run.via}
     ctx.put("intake", intake)
     ctx.put("run", intake)  # lanes/_common.owner_wa_id also looks here
-    # In mock every rehearsal should show the whole graph, not "ya existía" cache hits.
-    state = plan.State(":memory:") if settings.mock else None
+    # In mock every rehearsal should show the whole graph, not "ya existía" cache hits. In WhatsApp dry-run
+    # the outputs hold fake ids (flow.dry…), which must never be cached where a live run would reuse them.
+    state = plan.State(":memory:") if settings.mock or not settings.wa_live else None
     try:
         nodes = _mod("blueprint").build(ctx)
         outputs = plan.apply_plan(ctx, nodes, state=state)

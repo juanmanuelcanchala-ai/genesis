@@ -4,7 +4,7 @@ DRY ?= 1
 PORT ?= 8000
 ENV = GENESIS_MOCK=$(MOCK) WA_DRY_RUN=$(DRY)
 
-.PHONY: test demo serve stage smoke smoke-muse
+.PHONY: test demo serve stage smoke smoke-muse rehearse
 
 test:  ## full test suite, offline
 	$(ENV) uv run pytest
@@ -23,3 +23,6 @@ smoke:  ## start the real server, check the panel, run the demo over SSE until r
 
 smoke-muse:  ## one call to every Meta Model API endpoint (needs MODEL_API_KEY)
 	uv run python scripts/smoke_muse.py
+
+rehearse:  ## whole story with the real Meta models, WhatsApp in dry-run (needs MODEL_API_KEY)
+	uv run python scripts/rehearse_real.py

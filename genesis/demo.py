@@ -165,8 +165,11 @@ def _scenario_spec(muse: Any) -> Any:
 
 
 @contextlib.contextmanager
-def _sandbox(workdir: Path) -> Iterator[None]:
-    """Point every module at a throwaway DB/media dir and run the pipeline inline."""
+def _sandbox(workdir: Path, real_models: bool = False) -> Iterator[None]:
+    """Point every module at a throwaway DB/media dir and run the pipeline inline.
+
+    With ``real_models`` the Meta models transcribe and compile the real voice note; otherwise the
+    scenario transcript and spec are injected."""
     from . import muse, onboarding, server, store, whatsapp
 
     saved_mod = [
@@ -187,9 +190,10 @@ def _sandbox(workdir: Path) -> Iterator[None]:
     onboarding.AUTO_COMPILE_S = 0
     server.BACKGROUND = False
     server.MEDIA_DIR = media
-    scenario = _scenario_transcript(muse)
-    muse.transcribe = lambda audio, mime="audio/ogg": scenario  # type: ignore[assignment]
-    muse.MOCK_STRUCTURED["business_spec"] = _scenario_spec(muse)
+    if not real_models:
+        scenario = _scenario_transcript(muse)
+        muse.transcribe = lambda audio, mime="audio/ogg": scenario  # type: ignore[assignment]
+        muse.MOCK_STRUCTURED["business_spec"] = _scenario_spec(muse)
     store.reset(str(workdir / "genesis.db"))
     onboarding.reset()
     whatsapp.reset()
@@ -254,10 +258,17 @@ def _sent_text(op: str, p: dict[str, Any]) -> str:
     return op
 
 
-def run(workdir: str | Path | None = None, *, echo: Any = None) -> Result:
-    """Run the whole demo offline. ``echo(line)`` is called as lines happen (optional)."""
-    if not settings.mock or settings.wa_live:
-        raise RuntimeError("the offline demo needs GENESIS_MOCK=1 and WhatsApp in dry-run (WA_DRY_RUN=1)")
+def run(workdir: str | Path | None = None, *, echo: Any = None, real_models: bool = False,
+        inputs: tuple[bytes, str, list[bytes]] | None = None) -> Result:
+    """Run the whole demo with WhatsApp in dry-run. ``echo(line)`` is called as lines happen (optional).
+
+    ``real_models=True`` calls the real Meta Model API (needs MODEL_API_KEY and GENESIS_MOCK=0) on
+    ``inputs`` = (voice note, mime, photos), or on fixtures/rosa_* when not given."""
+    if settings.wa_live:
+        raise RuntimeError("the rehearsal needs WhatsApp in dry-run (WA_DRY_RUN=1)")
+    if settings.mock == real_models:
+        raise RuntimeError("real_models needs GENESIS_MOCK=0 and a MODEL_API_KEY" if real_models
+                           else "the offline demo needs GENESIS_MOCK=1")
     from fastapi.testclient import TestClient
 
     from . import flowgen, onboarding, server, store, whatsapp
@@ -289,7 +300,7 @@ def run(workdir: str | Path | None = None, *, echo: Any = None) -> Result:
         return mid
 
     try:
-        with _sandbox(wd):
+        with _sandbox(wd, real_models):
             whatsapp._record = record  # type: ignore[assignment]
             client = TestClient(server.app)
             intake = settings.intake_phone_id or "intake"
@@ -306,7 +317,7 @@ def run(workdir: str | Path | None = None, *, echo: Any = None) -> Result:
                     raise RuntimeError(f"webhook {r.status_code}: {r.text}")
 
             # --- 1. Rosa on the intake number: voice note + photos + "listo"
-            audio, mime, photos = server._demo_inputs()
+            audio, mime, photos = inputs or server._demo_inputs()
             if len(photos) < 2:
                 photos = photos + [server._placeholder_photo()]
             whatsapp.DRY_MEDIA["rosa-voice-1"] = (audio, mime)
@@ -321,11 +332,13 @@ def run(workdir: str | Path | None = None, *, echo: Any = None) -> Result:
             res.run_id = run_id
             info = onboarding.get_run(run_id) or {}
             res.question = info.get("question", "")
-            if info.get("state") != "asking":
-                raise RuntimeError(f"expected a clarifying question, run is {info.get('state')}")
+            # The scripted scenario always asks; real models may already have everything.
+            if info.get("state") != "asking" and not (real_models and info.get("state") == "confirming"):
+                raise RuntimeError(f"expected a clarifying question, run is {info.get('state')} {info.get('error', '')}")
 
             # --- 2. answer, read-back, "sí"
-            post(intake, INTAKE_DISPLAY, ROSA_WA_ID, ROSA_NAME, msg_text(ANSWER), ANSWER)
+            if info.get("state") == "asking":
+                post(intake, INTAKE_DISPLAY, ROSA_WA_ID, ROSA_NAME, msg_text(ANSWER), ANSWER)
             if (onboarding.get_run(run_id) or {}).get("state") != "confirming":
                 raise RuntimeError("expected the summary read-back after the answer")
             post(intake, INTAKE_DISPLAY, ROSA_WA_ID, ROSA_NAME, msg_text("Sí"), "Sí")
