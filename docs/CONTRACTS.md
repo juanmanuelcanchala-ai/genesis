@@ -105,7 +105,7 @@ def publish_flow(flow_id) -> None
 def deprecate_or_delete_flow(flow_id) -> None                                         # DRAFT → delete, PUBLISHED → deprecate
 def create_product(catalog_id, retailer_id, name, description, price_cop: int, image_url: str, url: str) -> str
 def delete_product(catalog_id, retailer_id) -> None
-def verify_signature(raw_body: bytes, header: str) -> bool                           # X-Hub-Signature-256 with app_secret; True if no secret configured
+def verify_signature(raw_body: bytes, header: str) -> bool                           # X-Hub-Signature-256 with app_secret; no secret: True in dry-run, False live
 def parse_webhook(payload: dict) -> list[Inbound]
 @dataclass
 class Inbound:
@@ -143,13 +143,17 @@ def is_yes(text: str) -> bool                 # sí/si/dale/listo/de una/ok/👍
 `flowgen.py`:
 
 ```python
-def order_flow(spec: BusinessSpec) -> dict    # Flow JSON version "7.0": screen ORDER (product checkboxes or
+def order_flow(spec: BusinessSpec) -> dict    # Flow JSON version "7.3" (flowgen.FLOW_JSON_VERSION): screen ORDER (product checkboxes or
     # per-product quantity dropdowns 0-10, pickup time dropdown derived from hours, fulfillment radio if both,
     # name, optional note) → screen CONFIRM → complete action with payload. No data_exchange endpoint (navigate only).
 def lint(flow_json: dict) -> list[str]        # local checks: ids unique, screen ids uppercase, terminal screen, footer, label lengths
 def parse_order(response_json: dict, spec: BusinessSpec) -> dict
     # → {"items":[{"product_id","name","qty","unit_cop"}], "total_cop", "pickup_time", "fulfillment", "customer_name", "note"}
+    # raises ValueError when no product has qty > 0. Prices always come from the spec.
+def example_response(spec, quantities: dict[str, int] | None = None, **extra) -> dict  # synthetic nfm_reply (inspector, tests, demo)
 ```
+
+`compile_spec` raises `compiler.CompileError` if the spec is still invalid after one retry.
 
 ## D. `genesis/blueprint.py` and `genesis/lanes/`
 
@@ -165,7 +169,7 @@ Lanes and node ids (deps in brackets). Each node: apply/verify/revert using `wha
 - `number.photo` [brand.logo] — upload_profile_picture + update_business_profile(profile_picture_handle). non-critical.
 - `menu.catalog` [brand.hero] — create_product per product (skip with output {"skipped": "no catalog"} if no CATALOG_ID). non-critical. revert deletes.
 - `menu.flow` — flowgen.order_flow → lint → create_flow → update_flow_json (validation_errors must be []) → publish. revert deprecate/delete.
-- `agent.config` [menu.flow] — store.save_business(cradle, spec, flow_id, system_prompt, knowledge) with live=False.
+- `agent.config` [menu.flow] — store.save_business(cradle, owner_wa_id, spec, flow_id, system_prompt, run_id) (signature of section E) with live=False.
 - `payments.ready` — payments.check() (token valid or mock). output {"provider": "mercadopago"|"mock"}.
 - `inspector.run` [agent.config, payments.ready, number.profile] — inspector.inspect(cradle) must pass, else raise.
 - `launch.live` [inspector.run] — store.set_live(cradle, True); send Rosa "Tu negocio está vivo" + wa_me_link. revert set_live False.
@@ -182,6 +186,7 @@ def get_business(cradle_phone_id) -> dict | None   # {"spec": BusinessSpec, "flo
 def set_live(cradle_phone_id, live: bool) -> None
 def create_order(cradle_phone_id, customer_wa_id, order: dict, test: bool = False) -> dict  # adds "id" (#1, #2...), status "pending"
 def set_order_status(order_id: str, status: str, payment_id: str = "") -> dict
+def mark_paid_once(order_id: str, payment_id: str = "") -> bool  # atomic pending→paid; True only for the caller that did it
 def list_orders(cradle_phone_id) -> list[dict]
 def history(cradle_phone_id, wa_id, limit=20) -> list[dict]; def append(cradle_phone_id, wa_id, role, content) -> None
 
@@ -205,7 +210,7 @@ def inspect(cradle_phone_id: str, ctx_emit=None) -> dict
     # 5 questions: price of first product, hours, pickup/delivery, "¿venden cerveza?" (must refuse),
     # "quiero 2 de <product>" (must call crear_pedido or offer the Flow). Then a test order through
     # flowgen.parse_order on a synthetic response_json → store.create_order(test=True) → payments.link →
-    # payments.mock_pay in mock / check link format live. Returns {"passed": bool, "checks":[{"name","ok","detail"}]}.
+    # payments.mock_pay in mock / check link format live. Returns {"passed": bool, "checks":[{"name","ok","detail","warn"?}]}; one soft miss (Precio/Horario/Entrega/Toma pedidos) is warn=True and does not block (GENESIS_INSPECTOR_STRICT=1 blocks).
 ```
 
 ## F. `genesis/onboarding.py`, `genesis/server.py`, `panel/index.html`
@@ -233,3 +238,22 @@ with fields lighting up next to their audio second, 6 lane columns (Número, Mar
 Inspector) with node cards (pending/running/done/failed/reverted, ms), the Inspector checklist, and at
 the end a large QR (generate client-side with a tiny inline QR encoder or `https://api.qrserver.com`-free
 approach: inline JS library code is fine) for the wa.me link plus "Tu negocio está vivo".
+
+## Integration notes (integrator, 4-nov)
+
+- `plan.Ctx` has `owner_wa_id: str = ""` (the seller); onboarding also puts `{"owner_wa_id"}` under
+  `ctx.outputs["run"]` / `["intake"]`. `lanes/_common.owner_wa_id(ctx)` reads either.
+- `config.Settings` gained `app_id` (`WA_APP_ID`, Resumable Upload) and `demo_owner_wa_id` (`DEMO_OWNER_WA_ID`).
+- `GENESIS_STAGE_DELAY_S` (default 0): seconds `plan.apply_plan` waits inside each node, so the panel animations are
+  visible when the stage demo runs in mock (`make stage`).
+- `onboarding.start_run(..., *, auto_confirm=True, via="api")`; extras `confirm(run_id)`, `flush(wa_id)`,
+  `assign_cradle(owner)`. Server extras: `POST /api/runs/{id}/confirm`, `GET /api/stream` (all runs),
+  `GET /api/runs`, SSE `?plain=1` / `?close=1`, `GET /pay/done`, `GET /health`.
+  Every `/api/*` route needs `GENESIS_ADMIN_TOKEN` (header `X-Genesis-Token` or `?token=`) when it is set,
+  and is closed (503) live without it. `/webhook`, `/mp/webhook`, `/pay/*`, `/media/*` stay public.
+- Event kinds beyond `events.py`: `intake.compiling|asking|confirming|building`, `plan.ready`, `node.detail`,
+  `node.skipped`, `inspect.started|check|done`, `customer.msg`, `order.paid`.
+- `launch.live` sends the seller "Tu negocio está vivo"; `run.live` is emitted by onboarding after `apply_plan`
+  returns (so after the non-critical brand/catalog nodes too).
+- `genesis/demo.py` + `scripts/demo_offline.py` + `tests/test_e2e.py`: the whole stage demo offline through
+  real webhook payloads. `scripts/smoke_server.py` (`make smoke`) checks the real uvicorn process.

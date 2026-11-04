@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
 import threading
 import time
@@ -31,6 +32,7 @@ class Ctx:
     photos: list[bytes] = field(default_factory=list)
     cradle_phone_id: str = ""
     cradle_display_number: str = ""
+    owner_wa_id: str = ""  # seller's WhatsApp id (gets "Tu negocio está vivo" and order notifications)
     outputs: dict[str, dict[str, Any]] = field(default_factory=dict)
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
@@ -98,6 +100,13 @@ class State:
             self._db.commit()
 
 
+def STAGE_DELAY_S() -> float:  # noqa: N802 - read at call time so the server can be tuned per rehearsal
+    try:
+        return max(0.0, float(os.getenv("GENESIS_STAGE_DELAY_S", "0") or 0))
+    except ValueError:
+        return 0.0
+
+
 class PlanError(RuntimeError):
     pass
 
@@ -137,18 +146,26 @@ def apply_plan(ctx: Ctx, nodes: list[Node], state: State | None = None, workers:
     done: set[str] = set()
     failed: set[str] = set()
     applied: list[Node] = []
+    # Nodes served from State ("ya existía") belong to an earlier run that may already be live:
+    # a failure in this run must never revert them.
+    cached_ids: set[str] = set()
+    cached_lock = threading.Lock()
     ctx.emit("plan.ready", message=f"{len(order)} nodes", nodes=[{"id": n.id, "lane": n.lane, "title": n.title, "deps": n.deps} for n in order])
 
     def run_node(n: Node) -> dict[str, Any]:
         key = n.key(ctx)
         cached = state.get(key)
         if cached is not None and (n.verify is None or _safe_verify(n, ctx, cached)):
+            with cached_lock:
+                cached_ids.add(n.id)
             ctx.emit("node.done", n.lane, n.id, f"{n.title} (ya existía)", outputs=cached, cached=True)
             return cached
         last: Exception | None = None
         for attempt in range(n.retries + 1):
             ctx.emit("node.started", n.lane, n.id, n.title, attempt=attempt)
             t0 = time.time()
+            if STAGE_DELAY_S() > 0:  # stage pacing in mock mode so the panel animations are visible
+                time.sleep(STAGE_DELAY_S())
             try:
                 out = n.apply(ctx) or {}
                 if n.verify is not None and not n.verify(ctx, out):
@@ -195,7 +212,9 @@ def apply_plan(ctx: Ctx, nodes: list[Node], state: State | None = None, workers:
                             if not f.cancelled() and f.exception() is None:
                                 ctx.put(rn.id, f.result())
                                 applied.append(rn)
-                        _revert_all(ctx, applied, state)
+                        with cached_lock:
+                            fresh = [a for a in applied if a.id not in cached_ids]
+                        _revert_all(ctx, fresh, state)
                         ctx.emit("run.failed", message=str(exc))
                         raise PlanError(str(exc)) from exc
     return {nid: ctx.out(nid) for nid in done if nid in by_id}

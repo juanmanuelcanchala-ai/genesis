@@ -41,6 +41,8 @@ class Settings:
     app_secret: str = os.getenv("WA_APP_SECRET", "")
     catalog_id: str = os.getenv("CATALOG_ID", "")
     test_customer_wa_id: str = os.getenv("TEST_CUSTOMER_WA_ID", "")
+    app_id: str = os.getenv("WA_APP_ID", "")  # Resumable Upload API (profile photo)
+    demo_owner_wa_id: str = os.getenv("DEMO_OWNER_WA_ID", "")  # seller's phone for the stage demo
 
     # Payments (link opened in WhatsApp's in-app browser; never card data in chat)
     mp_access_token: str = os.getenv("MP_ACCESS_TOKEN", "")
