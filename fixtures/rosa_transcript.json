@@ -1,0 +1,12 @@
+{
+  "text": "Hola, soy Rosa y vendo arepas aquí en San Fernando, en Cali. Tengo arepa de choclo con queso y arepa de carne desmechada, cada una a cinco mil pesos. Abro de lunes a sábado, de seis a once de la mañana. La gente pasa y las recoge aquí en el puesto, no hago domicilios. Me pagan en efectivo o por link, como les quede más fácil. El negocio se llama Arepas Rosa.",
+  "segments": [
+    {"start": 0.0, "end": 4.2, "text": "Hola, soy Rosa y vendo arepas aquí en San Fernando, en Cali."},
+    {"start": 4.2, "end": 9.8, "text": "Tengo arepa de choclo con queso y arepa de carne desmechada, cada una a cinco mil pesos."},
+    {"start": 9.8, "end": 14.5, "text": "Abro de lunes a sábado, de seis a once de la mañana."},
+    {"start": 14.5, "end": 18.6, "text": "La gente pasa y las recoge aquí en el puesto, no hago domicilios."},
+    {"start": 18.6, "end": 22.4, "text": "Me pagan en efectivo o por link, como les quede más fácil."},
+    {"start": 22.4, "end": 25.0, "text": "El negocio se llama Arepas Rosa."}
+  ],
+  "model": "muse-voice-transcribe-1.0"
+}

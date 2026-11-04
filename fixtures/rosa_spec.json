@@ -1,0 +1,50 @@
+{
+  "business_name": "Arepas Rosa",
+  "owner_name": "Rosa",
+  "category": "arepas",
+  "blocked_category": null,
+  "city": "Cali",
+  "neighborhood": "San Fernando",
+  "address_hint": "Puesto de arepas en San Fernando",
+  "products": [
+    {
+      "id": "arepa-de-choclo-con-queso",
+      "name": "Arepa de choclo con queso",
+      "description": "Arepa de choclo dulce con queso derretido, hecha al momento.",
+      "price_cop": 5000,
+      "photo": 0,
+      "evidence": {"source_s": 4.2, "photo": 0, "quote": "arepa de choclo con queso ... a cinco mil pesos"}
+    },
+    {
+      "id": "arepa-de-carne-desmechada",
+      "name": "Arepa de carne desmechada",
+      "description": "Arepa rellena de carne desmechada jugosa.",
+      "price_cop": 5000,
+      "photo": 1,
+      "evidence": {"source_s": 4.2, "photo": 1, "quote": "arepa de carne desmechada, cada una a cinco mil pesos"}
+    }
+  ],
+  "hours": {
+    "days": ["mon", "tue", "wed", "thu", "fri", "sat"],
+    "open": "06:00",
+    "close": "11:00",
+    "evidence": {"source_s": 9.8, "photo": null, "quote": "de lunes a sábado, de seis a once de la mañana"}
+  },
+  "fulfillment": "pickup",
+  "delivery_zone": "",
+  "payment_methods": ["cash", "link"],
+  "tone": "cercano, colombiano, breve",
+  "about": "Arepas de choclo con queso y de carne desmechada en San Fernando, Cali. Lun a sáb, 6 a 11 a. m.",
+  "description": "Arepas Rosa: arepas hechas al momento en San Fernando, Cali. Arepa de choclo con queso y arepa de carne desmechada a $5.000. Atendemos de lunes a sábado de 6:00 a 11:00 a. m. Pide por WhatsApp y recoge en el puesto. Pagas en efectivo o con link de pago.",
+  "missing": [],
+  "clarifying_question": "",
+  "evidence": {
+    "owner_name": {"source_s": 0.0, "photo": null, "quote": "soy Rosa"},
+    "category": {"source_s": 0.0, "photo": null, "quote": "vendo arepas"},
+    "neighborhood": {"source_s": 0.0, "photo": null, "quote": "aquí en San Fernando, en Cali"},
+    "city": {"source_s": 0.0, "photo": null, "quote": "en Cali"},
+    "fulfillment": {"source_s": 14.5, "photo": null, "quote": "las recoge aquí en el puesto, no hago domicilios"},
+    "payment_methods": {"source_s": 18.6, "photo": null, "quote": "en efectivo o por link"},
+    "business_name": {"source_s": 22.4, "photo": null, "quote": "El negocio se llama Arepas Rosa"}
+  }
+}
