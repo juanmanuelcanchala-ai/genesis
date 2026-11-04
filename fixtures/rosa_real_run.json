@@ -1,0 +1,259 @@
+{
+ "transcript": {
+  "text": "Hola, soy Rosa, vendo arepas aquí en San Fernando, en en Cali, tengo arepa de choclo con queso y arepa de carne desmechada.ada. Eh, cada una a cinco mil pesos, abro de lunes a sábado de seis a once de la mañana, me pagan en efectivo o por link, como les quede más fácil, ah, y el negocio se llama Arepas Rosa.",
+  "segments": [
+   {
+    "start": 0.0,
+    "end": 6.86,
+    "text": "Hola, soy Rosa, vendo arepas aquí en San Fernando, en en Cali, tengo arepa de choclo con queso y arepa de carne desmechada.ada."
+   },
+   {
+    "start": 7.42,
+    "end": 19.26,
+    "text": "Eh, cada una a cinco mil pesos, abro de lunes a sábado de seis a once de la mañana, me pagan en efectivo o por link, como les quede más fácil, ah, y el negocio se llama Arepas Rosa."
+   }
+  ],
+  "model": "muse-voice-transcribe-1.0"
+ },
+ "first_raw": {
+  "business_name": "Arepas Rosa",
+  "owner_name": "Rosa",
+  "category": "arepas",
+  "blocked_category": null,
+  "city": "Cali",
+  "neighborhood": "San Fernando",
+  "address_hint": "",
+  "products": [
+   {
+    "id": "arepa-choclo-con-queso",
+    "name": "Arepa de choclo con queso",
+    "description": "",
+    "price_cop": 5000,
+    "photo": null,
+    "evidence": {
+     "source_s": 0.0,
+     "photo": null,
+     "quote": ""
+    }
+   },
+   {
+    "id": "arepa-carne-desmechada",
+    "name": "Arepa de carne desmechada",
+    "description": "",
+    "price_cop": 5000,
+    "photo": null,
+    "evidence": {
+     "source_s": 0.0,
+     "photo": null,
+     "quote": ""
+    }
+   }
+  ],
+  "hours": null,
+  "fulfillment": "pickup",
+  "delivery_zone": "",
+  "payment_methods": [
+   "cash",
+   "link"
+  ],
+  "tone": "cercano, colombiano, breve",
+  "about": "Arepas en San Fernando, Cali. Pide por aquí.",
+  "description": "Arepas Rosa: Arepa de choclo con queso, Arepa de carne desmechada. En San Fernando, Cali. Pide por WhatsApp.",
+  "missing": [
+   "fulfillment"
+  ],
+  "clarifying_question": "¿Tus clientes recogen el pedido en el puesto, o también haces domicilios?",
+  "evidence": {
+   "business_name": {
+    "source_s": 7.42,
+    "photo": null,
+    "quote": ""
+   },
+   "owner_name": {
+    "source_s": 0.0,
+    "photo": null,
+    "quote": ""
+   },
+   "neighborhood": {
+    "source_s": 0.0,
+    "photo": null,
+    "quote": ""
+   },
+   "city": {
+    "source_s": 0.0,
+    "photo": null,
+    "quote": ""
+   },
+   "category": {
+    "source_s": 0.0,
+    "photo": null,
+    "quote": ""
+   }
+  }
+ },
+ "second_raw": {
+  "business_name": "Arepas Rosa",
+  "owner_name": "",
+  "category": "arepas",
+  "blocked_category": null,
+  "city": "Cali",
+  "neighborhood": "",
+  "address_hint": "",
+  "products": [
+   {
+    "id": "arepa-choclo-con-queso",
+    "name": "Arepa de choclo con queso",
+    "description": "",
+    "price_cop": 5000,
+    "photo": null,
+    "evidence": {
+     "source_s": 0.0,
+     "photo": null,
+     "quote": ""
+    }
+   },
+   {
+    "id": "arepa-choclo-con-queso-2",
+    "name": "Arepa de choclo con queso",
+    "description": "",
+    "price_cop": 5000,
+    "photo": null,
+    "evidence": {
+     "source_s": 0.0,
+     "photo": null,
+     "quote": ""
+    }
+   },
+   {
+    "id": "arepa-choclo-con-queso-3",
+    "name": "Arepa de choclo con queso",
+    "description": "",
+    "price_cop": 5000,
+    "photo": null,
+    "evidence": {
+     "source_s": 0.0,
+     "photo": null,
+     "quote": ""
+    }
+   }
+  ],
+  "hours": null,
+  "fulfillment": "pickup",
+  "delivery_zone": "",
+  "payment_methods": [
+   "cash",
+   "link"
+  ],
+  "tone": "cercano, colombiano, breve",
+  "about": "Arepas en Cali. Pide por aquí.",
+  "description": "Arepas Rosa: Arepa de choclo con queso, Arepa de choclo con queso, Arepa de choclo con queso. En Cali. Pide por WhatsApp.",
+  "missing": [],
+  "clarifying_question": "",
+  "evidence": {
+   "business_name": {
+    "source_s": 7.42,
+    "photo": null,
+    "quote": ""
+   },
+   "owner_name": {
+    "source_s": 0.0,
+    "photo": null,
+    "quote": ""
+   },
+   "category": {
+    "source_s": 0.0,
+    "photo": null,
+    "quote": ""
+   }
+  }
+ },
+ "question": "¿Tus clientes recogen el pedido en el puesto, o también haces domicilios?",
+ "answer": "Solo para recoger aquí en el puesto, no hago domicilios.",
+ "thin_transcript": {
+  "text": "Hola, soy Rosa, vendo arepas aquí en San Fernando, en Cali, tengo arepa de choclo con queso y arepa de carne desmechada. Eh, cada una a cinco mil pesos. Abro de lunes lunes a sábado de seis a once de la mañana, me pagan en efectivo o por link, ¿cómo les quede más fácil? Ah, y el negocio se llama Arepas Rosa,",
+  "segments": [
+   {
+    "start": 0.0,
+    "end": 7.02,
+    "text": "Hola, soy Rosa, vendo arepas aquí en San Fernando, en Cali, tengo arepa de choclo con queso y arepa de carne desmechada."
+   },
+   {
+    "start": 7.5,
+    "end": 16.3,
+    "text": "Eh, cada una a cinco mil pesos. Abro de lunes lunes a sábado de seis a once de la mañana, me pagan en efectivo o por link, ¿cómo les quede más fácil?"
+   },
+   {
+    "start": 16.86,
+    "end": 19.5,
+    "text": "Ah, y el negocio se llama Arepas Rosa,"
+   }
+  ],
+  "model": "muse-voice-transcribe-1.0"
+ },
+ "thin_raw": {
+  "business_name": "Arepas Rosa",
+  "owner_name": "",
+  "category": "arepas",
+  "blocked_category": null,
+  "city": "Cali",
+  "neighborhood": "",
+  "address_hint": "",
+  "products": [
+   {
+    "id": "arepa-de-choclo-con-queso",
+    "name": "Arepa de choclo con queso",
+    "description": "",
+    "price_cop": 5000,
+    "photo": null,
+    "evidence": {
+     "source_s": 3.9,
+     "photo": null,
+     "quote": ""
+    }
+   },
+   {
+    "id": "x",
+    "name": "x",
+    "description": "",
+    "price_cop": 0,
+    "photo": null,
+    "evidence": {
+     "source_s": null,
+     "photo": null,
+     "quote": ""
+    }
+   }
+  ],
+  "hours": null,
+  "fulfillment": "pickup",
+  "delivery_zone": "",
+  "payment_methods": [
+   "cash",
+   "link"
+  ],
+  "tone": "cercano, colombiano, breve",
+  "about": "Arepas en Cali. Pide por aquí.",
+  "description": "Arepas Rosa: Arepa de choclo con queso, x. En Cali. Pide por WhatsApp.",
+  "missing": [
+   "fulfillment"
+  ],
+  "clarifying_question": "¿A cómo vendes x?",
+  "evidence": {
+   "business_name": {
+    "source_s": 16.86,
+    "photo": null,
+    "quote": ""
+   },
+   "owner_name": {
+    "source_s": 0.4,
+    "photo": null,
+    "quote": ""
+   },
+   "category": {
+    "source_s": 1.3,
+    "photo": null,
+    "quote": ""
+   }
+  }
+ }
+}

@@ -87,7 +87,8 @@ def _build_prompt(transcript: Any, n_photos: int, answer: str = "", previous: Dr
     parts.append(f"Fotos adjuntas: {n_photos} (índices 0..{n_photos - 1})." if n_photos else "No hay fotos.")
     if previous is not None:
         parts += [
-            "Especificación anterior (consérvala y solo corrige o completa lo que responde el vendedor):",
+            "Especificación anterior (consérvala completa: todos sus productos sin repetirlos, dueña, barrio y horario; "
+            "solo corrige o completa lo que responde el vendedor):",
             previous.spec.model_dump_json(),
             f'Le preguntamos: "{previous.question or previous.spec.clarifying_question}"',
             f'El vendedor respondió: "{answer}"',
@@ -243,8 +244,22 @@ def detect_blocked(spec_data: dict) -> str | None:
     return None
 
 
+# Sentence-level segments (<= this long) are precise enough: evidence points at the segment start.
+# Real Muse Voice Transcribe returns coarse turns (7-20 s); inside those we interpolate by character offset.
+COARSE_SEGMENT_S = 6.0
+
+
+def _at(seg: dict, pos: int, length: int) -> float:
+    """Second of character `pos` inside a segment: its start, or a linear interpolation in a coarse turn."""
+    start = float(seg.get("start", 0.0))
+    end = float(seg.get("end", start) or start)
+    if end - start <= COARSE_SEGMENT_S or length <= 0:
+        return start
+    return round(start + (end - start) * min(max(pos, 0), length) / length, 1)
+
+
 def _locate(segments: list[dict], *needles: str) -> float | None:
-    """Start second of the segment that best matches the needles (quote or name)."""
+    """Second where the needles (quote or name) were said: segment start, or interpolated in a coarse turn."""
     if not segments:
         return None
     best, best_score = None, 0.0
@@ -255,54 +270,192 @@ def _locate(segments: list[dict], *needles: str) -> float | None:
         tokens = [t for t in re.findall(r"[a-z0-9]+", n) if len(t) >= 3]
         for seg in segments:
             st = _norm(seg.get("text", ""))
-            if n in st:
+            pos = st.find(n)
+            if pos >= 0:
                 score = 100.0 + len(n)
             elif tokens:
-                score = sum(t in st for t in tokens) / len(tokens)
+                hits = [t for t in tokens if t in st]
+                score = len(hits) / len(tokens)
                 score = score if score >= 0.5 else 0
+                if score:
+                    m = re.search(r"\b" + re.escape(hits[0]), st)
+                    pos = m.start() if m else st.find(hits[0])
             else:
                 score = 0
             if score > best_score:
-                best, best_score = float(seg.get("start", 0.0)), score
+                best, best_score = _at(seg, pos, len(st)), score
     return best
 
 
 def _snap(segments: list[dict], s: Any) -> float | None:
-    """Clamp a model-given second to the start of the segment that contains it."""
+    """Clamp a model-given second to its segment: the start of a fine segment, or inside a coarse turn."""
     try:
         s = float(s)
     except (TypeError, ValueError):
         return None
     if not segments:
         return max(0.0, s)
-    starts = sorted(float(x.get("start", 0)) for x in segments)
-    prior = [x for x in starts if x <= s + 1e-6]
-    return prior[-1] if prior else starts[0]
+    segs = sorted(segments, key=lambda x: float(x.get("start", 0)))
+    prior = [x for x in segs if float(x.get("start", 0)) <= s + 1e-6]
+    seg = prior[-1] if prior else segs[0]
+    start = float(seg.get("start", 0))
+    end = float(seg.get("end", start) or start)
+    if end - start <= COARSE_SEGMENT_S:
+        return start
+    return round(min(max(s, start), end), 1)
 
 
-def _fix_evidence(ev: Any, segments: list[dict], *needles: str, n_photos: int = 0) -> dict:
+def _fix_evidence(ev: Any, segments: list[dict], *needles: str, n_photos: int = 0, needles_first: bool = False) -> dict:
     ev = dict(ev) if isinstance(ev, dict) else {}
     ev["quote"] = str(ev.get("quote") or "")
     src = _snap(segments, ev.get("source_s")) if ev.get("source_s") is not None else None
     # Prefer a textual match when the quote is found; it is more reliable than the model's arithmetic.
-    found = _locate(segments, ev["quote"], *needles) if segments else None
+    # Products use their own name first: one quote often lists several products ("tengo X y Y").
+    found = None
+    if segments:
+        if needles_first:
+            found = _locate(segments, *needles)
+        if found is None:
+            found = _locate(segments, ev["quote"], *needles)
     ev["source_s"] = found if found is not None else src
     photo = ev.get("photo")
     ev["photo"] = photo if isinstance(photo, int) and 0 <= photo < n_photos else None
     return ev
 
 
-def normalize(raw: dict, segments: list[dict], n_photos: int) -> dict:
+def _norm_map(text: str) -> tuple[str, list[int]]:
+    """Per-character _norm (accents off, lowercase) plus the original index of every output character."""
+    chars, idx = [], []
+    for i, ch in enumerate(str(text)):
+        for c in unicodedata.normalize("NFKD", ch).encode("ascii", "ignore").decode().lower():
+            chars.append(c)
+            idx.append(i)
+    return "".join(chars), idx
+
+
+_CAP = r"[A-ZÁÉÍÓÚÑ][a-záéíóúñü]+"
+
+
+def _backfill_from_transcript(d: dict, text: str, segments: list[dict]) -> None:
+    """Fill what the model dropped but the seller clearly said (real models sometimes return a thin spec).
+
+    Only values literally present in the transcript are used: owner ("soy Rosa"), neighborhood ("aquí en
+    San Fernando"), a shared price ("cada una a cinco mil") and product phrases that start with the
+    category word ("arepa de carne desmechada").
+    """
+    if not text:
+        return
+    if not d.get("owner_name"):
+        m = re.search(r"\b(?:[Ss]oy|me llamo|[Mm]i nombre es)\s+(?:la |el |doña |don )?(" + _CAP + ")", text)
+        if m:
+            d["owner_name"] = m.group(1)
+    if not d.get("neighborhood"):
+        m = re.search(r"\b(?:[Bb]arrio|aqu[ií] en|ac[aá] en|[Qq]uedo en|[Ee]stoy en)\s+(?:el |la )?(" + _CAP + r"(?:\s+(?:de\s+)?" + _CAP + ")*)", text)
+        if m and _norm(m.group(1)) != _norm(d.get("city") or "Cali"):
+            d["neighborhood"] = m.group(1)
+    t = _norm(text)
+    shared = 0
+    m = re.search(r"\bcada (?:una|uno)\s+(?:a|en|vale|cuesta|sale)\s+([^,.;]+)", t)
+    if m:
+        shared = parse_cop(m.group(1))
+    products = d.get("products") or []
+    if not products:  # an empty answer is a failed call: let the validation retry ask the model again
+        return
+    cat = _norm(d.get("category") or (products[0]["name"].split()[0] if products else ""))
+    sing = re.sub(r"(es|s)$", "", cat.split()[0]) if cat else ""
+    if len(sing) < 3:
+        return
+    have = [_tokens(p["name"]) for p in products]
+    ids = {p["id"] for p in products}
+    for frag in re.split(r"[,.;:!?]", t):
+        for piece in re.split(r"\s+(?:y|e|o)\s+(?=" + re.escape(sing) + r"s?\b)", frag):
+            m = re.search(r"\b" + re.escape(sing) + r"s?\s+(?:de|con)\s+[a-z ]+", piece)
+            if not m:
+                continue
+            name = re.split(r"\s+(?:cada|a|por|que|para|en|y)\s", m.group(0).strip() + " ")[0].strip()
+            words = name.split()
+            if len(words) < 3 or len(words) > 7:
+                continue
+            toks = _tokens(name)
+            if any(toks <= h or h <= toks for h in have if h):
+                continue
+            pid = slugify(name)
+            if pid in ids:
+                continue
+            ids.add(pid)
+            have.append(toks)
+            products.append({"id": pid, "name": name[0].upper() + name[1:], "description": "", "price_cop": shared,
+                             "photo": None, "evidence": _fix_evidence({}, segments, name, needles_first=True)})
+            if not shared:
+                d.setdefault("missing", []).append(f"price:{pid}")
+            d["description"] = ""  # the model's text missed this product: _finish rewrites it from the menu
+    d["products"] = products
+
+
+def _name_key(name: str) -> str:
+    return " ".join(re.findall(r"[a-z0-9]+", _norm(name)))
+
+
+_TIME = (r"(\d{1,2}(?::\d{2})?|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce)"
+         r"((?:\s+y\s+media)?(?:\s*(?:de|en|por)\s+la\s+(?:manana|tarde|noche)|\s*(?:a\.?\s?m\.?|p\.?\s?m\.?)(?![a-z]))?)")
+_RANGE = re.compile(r"\b(?:de|desde)\s+(?:las\s+)?" + _TIME + r"\s+(?:a|hasta)\s+(?:las\s+)?" + _TIME)
+_DAY_WORD = r"(lunes|martes|miercoles|jueves|viernes|sabados?|domingos?)"
+
+
+def extract_hours(text: str) -> dict | None:
+    """Deterministic backstop: 'abro de lunes a sábado de seis a once de la mañana' -> days + open/close."""
+    t, idx = _norm_map(text)
+    for m in _RANGE.finditer(t):
+        o_num, o_sfx, c_num, c_sfx = m.groups()
+        close = parse_hhmm(c_num + c_sfx)
+        open_ = parse_hhmm(o_num + o_sfx)
+        if not open_ or not close:
+            continue
+        if not re.search(r"manana|tarde|noche|m\b", o_sfx) and re.search(r"manana|tarde|noche|m\b", c_sfx):
+            shared = parse_hhmm(o_num + " " + c_sfx.replace("y media", "").strip())  # "de 2 a 8 de la noche"
+            if shared and shared < close:
+                open_ = shared[:3] + open_[3:]
+        o, c = int(open_[:2]), int(close[:2])
+        if c <= o and c < 12 and c + 12 > o:
+            close = f"{c + 12:02d}{close[2:]}"
+        if close <= open_:
+            continue
+        window = t[max(0, m.start() - 60): m.end() + 60]
+        days: list[str] = []
+        if re.search(r"todos los dias|toda la semana|diario", window):
+            days = list(_WEEK)
+        else:
+            rng = re.search(r"\b(?:de\s+)?" + _DAY_WORD + r"\s+a\s+" + _DAY_WORD, window)
+            if rng:
+                a, b = (_DAYS[x[:-1] if x.endswith("os") else x] for x in rng.groups())
+                i, j = _WEEK.index(a), _WEEK.index(b)
+                days = _WEEK[i: j + 1] if i <= j else _WEEK[i:] + _WEEK[: j + 1]
+            else:
+                days = _norm_days([x[:-1] if x.endswith("os") else x for x in re.findall(_DAY_WORD, window)])
+        quote_start = t.rfind("abro", 0, m.start())
+        a = quote_start if 0 <= quote_start and m.start() - quote_start < 60 else m.start()
+        quote = str(text)[idx[a]: idx[m.end() - 1] + 1]  # original words, with accents
+        return {"days": days or _WEEK[:6], "open": open_, "close": close, "quote": quote}
+    return None
+
+
+def normalize(raw: dict, segments: list[dict], n_photos: int, text: str = "") -> dict:
     """Best-effort deterministic cleanup of the model JSON before pydantic validation."""
     d = dict(raw) if isinstance(raw, dict) else {}
     # Products
-    products, ids = [], set()
+    products, ids, by_name = [], set(), {}
     for p in d.get("products") or []:
         if not isinstance(p, dict):
             continue
         p = dict(p)
         p["name"] = str(p.get("name") or "").strip()
-        if not p["name"]:
+        if len(re.findall(r"[a-z]", _norm(p["name"]))) < 3:  # "x", "", "?": placeholders, not products
+            continue
+        key = _name_key(p["name"])
+        if key in by_name:  # the model repeated a product: keep the first, fill its price if it had none
+            first = by_name[key]
+            if first["price_cop"] <= 0:
+                first["price_cop"] = parse_cop(p.get("price_cop", p.get("price")))
             continue
         pid = slugify(str(p.get("id") or p["name"]))
         base, i = pid, 2
@@ -315,10 +468,11 @@ def normalize(raw: dict, segments: list[dict], n_photos: int) -> dict:
         p["description"] = str(p.get("description") or "")
         photo = p.get("photo")
         p["photo"] = photo if isinstance(photo, int) and 0 <= photo < n_photos else None
-        p["evidence"] = _fix_evidence(p.get("evidence"), segments, p["name"], n_photos=n_photos)
+        p["evidence"] = _fix_evidence(p.get("evidence"), segments, p["name"], n_photos=n_photos, needles_first=True)
         if p["evidence"]["photo"] is None and p["photo"] is not None:
             p["evidence"]["photo"] = p["photo"]
         products.append(p)
+        by_name[key] = p
     d["products"] = products
 
     # Hours
@@ -337,6 +491,13 @@ def normalize(raw: dict, segments: list[dict], n_photos: int) -> dict:
             d["hours"] = None
     elif h is not None:
         d["hours"] = None
+    if d.get("hours") is None:  # the model sometimes leaves hours null although they were said
+        said = text or " ".join(str(s.get("text", "")) for s in segments)
+        found = extract_hours(said)
+        if found:
+            ev = _fix_evidence({"quote": found.pop("quote")}, segments, "abro", "horario", n_photos=n_photos)
+            d["hours"] = {**found, "evidence": ev}
+            d["missing"] = [m for m in d.get("missing") or [] if m != "hours"]
 
     # Enums
     f = _norm(d.get("fulfillment") or "")
@@ -379,10 +540,17 @@ def normalize(raw: dict, segments: list[dict], n_photos: int) -> dict:
         d.pop("tone", None)
     d["missing"] = [str(x) for x in d.get("missing") or []]
 
+    _backfill_from_transcript(d, text, segments)
+    pids = {p["id"] for p in d["products"]}
+    d["missing"] = [m for m in d["missing"] if not m.startswith("price:") or m[6:] in pids]
+
     # Top-level evidence
     ev = d.get("evidence") if isinstance(d.get("evidence"), dict) else {}
     needles = {"business_name": [d.get("business_name", "")], "owner_name": [f"soy {d.get('owner_name', '')}"],
-               "neighborhood": [d.get("neighborhood", "")], "city": [d.get("city", "")], "category": [d.get("category", "")]}
+               "neighborhood": [d.get("neighborhood", "")], "city": [d.get("city", "")], "category": [d.get("category", "")],
+               "payment_methods": [w for m in d.get("payment_methods") or []
+                                   for w in {"cash": ["efectivo"], "link": ["link"], "transfer": ["nequi", "transferencia"]}[m]],
+               "fulfillment": ["domicilio", "recogen", "recoger", "en el puesto"]}
     out_ev = {}
     for key, val in ev.items():
         out_ev[str(key)] = _fix_evidence(val, segments, *needles.get(key, []), n_photos=n_photos)
@@ -393,6 +561,131 @@ def normalize(raw: dict, segments: list[dict], n_photos: int) -> dict:
                 out_ev[key] = {"source_s": src, "photo": None, "quote": ""}
     d["evidence"] = out_ev
     return d
+
+
+# ---------------------------------------------------------------- answer merge
+
+_STOP = {"con", "del", "las", "los", "para", "por", "una", "uno"}
+
+
+def _tokens(name: str) -> set[str]:
+    return {t for t in _name_key(name).split() if len(t) >= 3 and t not in _STOP}
+
+
+def _mentions(answer_norm: str, name: str, common: set[str]) -> bool:
+    """The answer names this product by a distinctive word ('la de carne a 6' -> 'Arepa de carne desmechada')."""
+    words = set(re.findall(r"[a-z0-9]+", answer_norm))
+    return bool((_tokens(name) - common) & words)
+
+
+def _fulfillment_from(answer_norm: str) -> Fulfillment | None:
+    a = answer_norm
+    if re.search(r"\b(no|ni) (hago|hacemos|tengo|tenemos|manejo|manejamos|hay|mando|llevo)( los| el)? domicilios?|sin domicilios?|solo (para )?recog|solo en el puesto", a):
+        return Fulfillment.pickup
+    if re.search(r"\bsolo (a |por |con )?domicilios?|no (pueden|se puede) recoger", a):
+        return Fulfillment.delivery
+    if re.search(r"\b(tambien|y) (hago |hacemos |tengo |manejo )?domicilios?|las dos|ambas|ambos|de las dos", a):
+        return Fulfillment.both
+    return None
+
+
+_PAY_WORDS = r"\b(efectivo|nequi|daviplata|bancolombia|transfer|link|tarjeta|pagan|pago)"
+
+
+def merge_answer(prev: BusinessSpec, new: BusinessSpec, answer: str) -> BusinessSpec:
+    """The seller's answer can only ADD what was missing or change what it clearly names.
+
+    The model re-emits the whole spec after an answer and, with real models, sometimes drops or
+    duplicates fields (3x the same product, owner and neighborhood gone). So the previous draft is
+    the base and only these values come from the new output: fields listed in `missing`, empty
+    fields the answer fills, values the answer mentions verbatim, prices for unpriced products and
+    products the answer names.
+    """
+    a = _norm(answer)
+    missing = set(prev.missing)
+    out = prev.model_dump()
+    nd = new.model_dump()
+    taken: set[str] = set()
+
+    def take(key: str) -> None:
+        out[key] = nd[key]
+        taken.add(key)
+        if key in nd["evidence"]:
+            out["evidence"][key] = nd["evidence"][key]
+
+    for key in ("business_name", "owner_name", "category", "city", "neighborhood", "address_hint"):
+        val = str(nd.get(key) or "").strip()
+        if not val or val == out.get(key):
+            continue
+        if key in missing or (not out.get(key) and _norm(val) in a) or (len(val) >= 3 and _norm(val) in a):
+            take(key)
+
+    ful = _fulfillment_from(a)
+    if ful is not None:
+        out["fulfillment"] = ful.value
+        out["evidence"]["fulfillment"] = {"source_s": None, "photo": None, "quote": answer.strip()[:200]}
+        taken.add("fulfillment")
+    elif "fulfillment" in missing or re.search(r"domicilio|recog|puesto|entrega|envio", a):
+        take("fulfillment")
+    if out["fulfillment"] != "pickup" and nd.get("delivery_zone") and (not out.get("delivery_zone") or "fulfillment" in taken):
+        take("delivery_zone")
+
+    if "payment_methods" in missing or re.search(_PAY_WORDS, a):
+        take("payment_methods")
+
+    said = extract_hours(answer) if answer else None
+    if said:
+        quote = said.pop("quote")
+        out["hours"] = {**said, "evidence": {"source_s": None, "photo": None, "quote": quote}}
+        taken.add("hours")
+    elif nd.get("hours") and (out.get("hours") is None or "hours" in missing):
+        take("hours")
+
+    # Products: previous list is the base, matched by normalized name (then id, then word overlap).
+    prev_products = [dict(p) for p in out["products"]]
+    names = [p["name"] for p in prev_products] + [p["name"] for p in nd["products"]]
+    counts: dict[str, int] = {}
+    for n in names:
+        for t in _tokens(n):
+            counts[t] = counts.get(t, 0) + 1
+    common = {t for t, c in counts.items() if c >= 2} | _tokens(out.get("category", ""))
+    ids = {p["id"] for p in prev_products}
+    added = False
+    for np_ in nd["products"]:
+        key = _name_key(np_["name"])
+        match = next((p for p in prev_products if _name_key(p["name"]) == key), None)
+        match = match or next((p for p in prev_products if p["id"] == np_["id"]), None)
+        if match is None:
+            nt = _tokens(np_["name"])
+            best = max(prev_products, key=lambda p: len(nt & _tokens(p["name"])) / max(1, len(nt | _tokens(p["name"]))), default=None)
+            if best is not None and best["price_cop"] <= 0 and nt and len(nt & _tokens(best["name"])) / len(nt | _tokens(best["name"])) >= 0.5:
+                match = best
+        if match is not None:
+            price = int(np_.get("price_cop") or 0)
+            if price > 0 and (match["price_cop"] <= 0 or (price != match["price_cop"] and _mentions(a, match["name"], common))):
+                match["price_cop"] = price
+            if match.get("photo") is None and np_.get("photo") is not None:
+                match["photo"] = np_["photo"]
+        elif _mentions(a, np_["name"], common) and _name_key(np_["name"]) not in {_name_key(p["name"]) for p in prev_products}:
+            p = dict(np_)
+            pid, i = p["id"], 2
+            while pid in ids:
+                pid, i = f"{np_['id']}-{i}", i + 1
+            p["id"] = pid
+            ids.add(pid)
+            prev_products.append(p)
+            added = True
+    out["products"] = prev_products
+    if added:
+        out["description"] = ""  # regenerated from the new menu by _finish
+
+    if nd.get("blocked_category") and not out.get("blocked_category"):
+        out["blocked_category"] = nd["blocked_category"]
+    priced = {f"price:{p['id']}" for p in prev_products if p["price_cop"] > 0}
+    out["missing"] = [m for m in out["missing"] if m not in taken and m not in priced
+                      and not (m == "hours" and out.get("hours"))]
+    out["clarifying_question"] = ""
+    return BusinessSpec.model_validate(out)
 
 
 # ---------------------------------------------------------------- essentials and question
@@ -456,9 +749,10 @@ def compile_spec(audio: bytes, mime: str, photos: list[bytes], answer: str = "",
         return muse.structured(p, schema, "business_spec", system=SYSTEM, images=photos or None,
                                model=settings.model_spec, reasoning=settings.model_reasoning)
 
+    text = str(getattr(transcript, "text", "") or "")
     raw = call(prompt)
     try:
-        spec = BusinessSpec.model_validate(normalize(raw, segments, len(photos)))
+        spec = BusinessSpec.model_validate(normalize(raw, segments, len(photos), text))
     except ValidationError as err:
         retry_prompt = (
             f"{prompt}\n\nTu respuesta anterior no pasó la validación del esquema:\n{err}\n\n"
@@ -467,9 +761,14 @@ def compile_spec(audio: bytes, mime: str, photos: list[bytes], answer: str = "",
         )
         raw = call(retry_prompt)
         try:
-            spec = BusinessSpec.model_validate(normalize(raw, segments, len(photos)))
+            spec = BusinessSpec.model_validate(normalize(raw, segments, len(photos), text))
         except ValidationError as err2:
-            raise CompileError(f"BusinessSpec invalid after retry: {err2}") from err2
+            if previous is None:
+                raise CompileError(f"BusinessSpec invalid after retry: {err2}") from err2
+            spec = previous.spec  # the answer can still patch it deterministically below
+
+    if previous is not None:
+        spec = merge_answer(previous.spec, spec, answer)
 
     blocked = spec.blocked_category or detect_blocked(spec.model_dump())
     if blocked and blocked != spec.blocked_category:

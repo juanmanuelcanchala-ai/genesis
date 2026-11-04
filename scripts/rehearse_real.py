@@ -66,6 +66,24 @@ def _jpeg(img: bytes) -> bytes:
     return buf.getvalue()
 
 
+def _dump(res) -> None:
+    """Everything the run did, relative to its start, for the presentation video (media/rehearsal/run.json)."""
+    import json
+    from dataclasses import asdict
+
+    t0 = res.t0
+    data = {
+        "run_id": res.run_id, "question": res.question, "cradle": res.cradle, "wa_me": res.wa_me,
+        "elapsed_ms": res.elapsed_ms, "order": res.paid or res.order,
+        "lines": [{"t": round(x.t - t0, 3), "who": x.who, "text": x.text, "kind": x.kind}
+                  for x in sorted(res.lines, key=lambda x: x.t)],
+        "events": [{**asdict(e), "t": round(e.ts - t0, 3)} for e in res.events],
+        "sent": [{"t": round(s["t"] - t0, 3), "op": s["op"], "payload": s["payload"]} for s in res.sent],
+    }
+    (DIR / "run.json").write_text(json.dumps(data, ensure_ascii=False, indent=1, default=str))
+    print(f"datos de la corrida -> {DIR / 'run.json'}")
+
+
 def main() -> int:
     if not settings.model_api_key:
         sys.exit("falta MODEL_API_KEY en .env")
@@ -101,6 +119,7 @@ def main() -> int:
     print("\n== panel ==")
     for ln in sorted((x for x in res.lines if x.who == "panel"), key=lambda x: x.t):
         print(f"{int((ln.t - res.t0) * 1000):>7} ms  {ln.text}")
+    _dump(res)
     order = res.paid or res.order
     print(f"\nrun_id   {res.run_id}\npregunta {res.question or '(ninguna)'}\ncuna     {res.cradle} {res.wa_me}")
     print(f"pedido   {order.get('id')} · ${order.get('total_cop', 0):,} · {order.get('status')}".replace(",", "."))
