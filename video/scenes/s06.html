@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .cam {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 30%;
+      }
+      .grid-bg {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(#ffffff06 1px, transparent 1px),
+          linear-gradient(90deg, #ffffff06 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: radial-gradient(
+          1100px 700px at 50% 40%,
+          #000 30%,
+          transparent 80%
+        );
+      }
+      /* Header */
+      .head {
+        left: 120px;
+        top: 96px;
+        right: 120px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .head .ttl {
+        display: flex;
+        align-items: baseline;
+        gap: 18px;
+      }
+      .head .ttl .h3 {
+        font-size: 34px;
+      }
+      .chips {
+        display: flex;
+        gap: 14px;
+      }
+      .chip.dim {
+        filter: grayscale(1);
+      }
+      .chip .st {
+        font: 600 15px/1 var(--mono);
+        color: #8fb6ff;
+        margin-left: 4px;
+      }
+
+      /* Audio strip */
+      .strip {
+        left: 120px;
+        right: 120px;
+        top: 168px;
+        height: 150px;
+        padding: 16px 26px 0;
+        border-radius: 20px;
+      }
+      .strip .lab {
+        position: absolute;
+        left: 26px;
+        top: 14px;
+        font: 600 16px/1 var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      .strip .dur {
+        position: absolute;
+        right: 26px;
+        top: 14px;
+        font: 600 16px/1 var(--mono);
+        color: var(--faint);
+      }
+      .wave {
+        position: absolute;
+        left: 26px;
+        right: 26px;
+        top: 52px;
+        height: 58px;
+      }
+      .wave i {
+        position: absolute;
+        bottom: 50%;
+        width: 4px;
+        border-radius: 2px;
+        background: #3a4b43;
+        transform-origin: 50% 100%;
+      }
+      .wave i.b {
+        bottom: auto;
+        top: 50%;
+        transform-origin: 50% 0%;
+        opacity: 0.55;
+      }
+      .wave i.on {
+        background: var(--green);
+      }
+      .segbar {
+        position: absolute;
+        top: 112px;
+        height: 6px;
+        border-radius: 3px;
+        background: #2b3a33;
+      }
+      .segbar.on {
+        background: #25d36688;
+      }
+      .ticks {
+        position: absolute;
+        left: 26px;
+        right: 26px;
+        top: 124px;
+        height: 18px;
+      }
+      .ticks span {
+        position: absolute;
+        white-space: nowrap;
+        transform: translateX(-50%);
+        font: 500 14px/1 var(--mono);
+        color: var(--faint);
+      }
+      .playhead {
+        position: absolute;
+        top: 42px;
+        width: 2px;
+        height: 78px;
+        background: var(--text);
+        box-shadow: 0 0 12px #fff8;
+      }
+      .playhead b {
+        position: absolute;
+        top: 76px;
+        left: 0;
+        transform: translateX(-50%);
+        padding: 3px 7px;
+        border-radius: 6px;
+        background: var(--text);
+        color: var(--bg) !important;
+        font: 700 14px/1 var(--mono);
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .marker {
+        position: absolute;
+        top: 46px;
+        width: 0;
+        height: 70px;
+      }
+      .marker .ln {
+        position: absolute;
+        left: -1px;
+        top: 0;
+        width: 2px;
+        height: 70px;
+        background: var(--gold);
+        box-shadow: 0 0 10px var(--gold);
+      }
+      .marker .pin {
+        position: absolute;
+        left: -7px;
+        top: -8px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--gold);
+        box-shadow: 0 0 14px var(--gold);
+      }
+      .marker .names {
+        position: absolute;
+        left: 12px;
+        top: -12px;
+        display: flex;
+        gap: 6px;
+        white-space: nowrap;
+      }
+      .marker .names span {
+        padding: 4px 9px;
+        border-radius: 999px;
+        background: #2e2612;
+        border: 1px solid #f2b33d66;
+        font: 650 14px/1 var(--font);
+        color: #ffd98c;
+      }
+
+      /* Two panels */
+      .col {
+        top: 340px;
+        height: 556px;
+        border-radius: 22px;
+        padding: 24px 30px;
+        display: flex;
+        flex-direction: column;
+      }
+      .left {
+        left: 120px;
+        width: 800px;
+      }
+      .right {
+        left: 950px;
+        width: 850px;
+      }
+      .col .hd {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        flex: none;
+      }
+      .col .hd .kicker {
+        font-size: 20px;
+      }
+      .col .hd .by {
+        font: 600 15px/1 var(--mono);
+        color: #8fb6ff;
+      }
+      .segs {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .seg {
+        display: flex;
+        gap: 18px;
+        align-items: flex-start;
+        padding: 12px 14px 12px 12px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+      }
+      .seg.lit {
+        background: #f2b33d0d;
+        border-color: #f2b33d33;
+      }
+      .seg .ts {
+        flex: none;
+        width: 128px;
+        padding: 8px 0;
+        text-align: center;
+        border-radius: 10px;
+        background: var(--surface-2);
+        color: var(--green);
+        font: 700 17px/1.2 var(--mono);
+      }
+      .seg .ts small {
+        display: block;
+        font: 500 13px/1.2 var(--mono);
+        color: var(--faint);
+      }
+      .seg .tx {
+        font: 450 var(--tf, 27px) / 1.45 var(--font);
+        color: #e9e3d8;
+      }
+      .seg .tx mark {
+        background: transparent;
+        color: inherit;
+        border-radius: 5px;
+        padding: 0 2px;
+        margin: 0 -2px;
+      }
+      .seg .tx mark.on {
+        background: #f2b33d33;
+        color: #ffe2a3;
+        box-shadow: inset 0 -2px 0 var(--gold);
+      }
+      .cursor {
+        display: inline-block;
+        width: 3px;
+        height: 1em;
+        margin-left: 2px;
+        vertical-align: -0.12em;
+        background: var(--green);
+      }
+
+      .fields {
+        display: flex;
+        flex-direction: column;
+        gap: var(--fg, 10px);
+      }
+      .f {
+        position: relative;
+        display: grid;
+        grid-template-columns: 150px 1fr auto;
+        align-items: center;
+        gap: 18px;
+        padding: var(--fp, 12px) 18px;
+        border-radius: 14px;
+        background: var(--surface-2);
+        border: 1px solid #ffffff08;
+      }
+      .f.lit {
+        border-color: #f2b33d66;
+        box-shadow:
+          0 0 0 1px #f2b33d22,
+          0 8px 30px #f2b33d12;
+      }
+      .f .k {
+        font: 650 17px/1.15 var(--font);
+        color: var(--muted);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .f .k code {
+        display: block;
+        margin-top: 5px;
+        font: 500 13px/1.1 var(--mono);
+        color: var(--faint);
+        letter-spacing: 0;
+        text-transform: none;
+      }
+      .f .v {
+        font: 650 var(--vf, 27px) / 1.2 var(--display);
+        color: var(--text);
+        min-width: 0;
+      }
+      .f .v .prod {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 3px 0;
+      }
+      .f .v .prod .nm {
+        flex: 1;
+        min-width: 0;
+        font-size: calc(var(--vf, 27px) - 3px);
+      }
+      .f .v .prod .pr {
+        font: 700 calc(var(--vf, 27px) - 2px) / 1 var(--mono);
+        color: var(--gold);
+      }
+      .badge {
+        justify-self: end;
+        padding: 7px 11px;
+        border-radius: 9px;
+        background: #25d3661a;
+        border: 1px solid #25d36655;
+        color: #9cf0bd;
+        font: 700 16px/1 var(--mono);
+        white-space: nowrap;
+      }
+      .badge.none {
+        visibility: hidden;
+      }
+      .f .v .prod .badge {
+        flex: none;
+      }
+      .f .v .prod .ph {
+        flex: none;
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 1px solid #ffffff22;
+      }
+      .f.pr .v {
+        grid-column: 2 / 4;
+      }
+      .f .v .prod .pr {
+        margin-left: auto;
+      }
+      .skel {
+        position: absolute;
+        left: 30px;
+        right: 30px;
+        top: 84px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .skel .st {
+        font: 600 16px/1 var(--mono);
+        color: var(--faint);
+        margin-bottom: 6px;
+      }
+      .skel i {
+        display: block;
+        height: 64px;
+        border-radius: 14px;
+        background: linear-gradient(100deg, #1f2b26 30%, #2a3a33 50%, #1f2b26 70%) 0 0 / 300% 100%;
+      }
+      .f.miss {
+        background: #ff6b5b12;
+        border-color: #ff6b5b88;
+      }
+      .f.miss .v {
+        color: #ffb3aa;
+      }
+      .falta {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .falta .pill {
+        font-size: 17px;
+        background: #ff6b5b26;
+        color: var(--red);
+        padding: 7px 12px;
+      }
+      .q {
+        grid-column: 2 / 4;
+        font: 500 italic 19px/1.35 var(--font);
+        color: #d9cfc4;
+      }
+      .q b {
+        font-style: normal;
+        font-weight: 650;
+        color: var(--muted);
+      }
+      .foot {
+        margin-top: auto;
+        padding-top: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font: 550 18px/1 var(--font);
+        color: var(--muted);
+      }
+      .foot .mono {
+        color: var(--faint);
+        font-size: 15px;
+      }
+      .foot .cnt b {
+        color: var(--text);
+      }
+      .foot .cnt .r {
+        color: var(--red);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body data-scene="s06">
+    <div class="stage">
+      <div class="cam" id="cam">
+        <div class="grid-bg"></div>
+        <div class="abs head" id="head">
+          <div class="ttl">
+            <span class="kicker">Panel de Génesis</span>
+            <span class="h3">De la nota de voz a la ficha del negocio</span>
+          </div>
+          <div class="chips">
+            <span class="chip dim" id="c1">Muse Voice Transcribe</span>
+            <span class="chip dim" id="c2">Muse Spark 1.3</span>
+          </div>
+        </div>
+
+        <div class="abs card strip" id="strip">
+          <div class="dur" id="dur"></div>
+          <div class="wave" id="wave"></div>
+          <div id="segbars"></div>
+          <div class="ticks" id="ticks"></div>
+          <div id="markers"></div>
+          <div class="playhead" id="ph"><b id="phT"></b></div>
+        </div>
+
+        <div class="abs card col left" id="left">
+          <div class="hd">
+            <span class="kicker">Lo que dijo</span>
+            <span class="by" id="byL">Muse Voice Transcribe · con tiempos</span>
+          </div>
+          <div class="segs" id="segs"></div>
+        </div>
+
+        <div class="abs card col right" id="right">
+          <div class="hd">
+            <span class="kicker">Lo que entendió</span>
+            <span class="by">Muse Spark 1.3 · ficha con tipos</span>
+          </div>
+          <div class="skel" id="skel">
+            <div class="st" id="skelSt"></div>
+            <i></i><i></i><i style="width: 80%"></i><i></i><i style="width: 65%"></i>
+          </div>
+          <div class="fields" id="fields"></div>
+          <div class="foot" id="foot">
+            <span class="cnt" id="cnt"></span>
+            <span class="mono" id="lat"></span>
+          </div>
+        </div>
+      </div>
+      <div class="tag">
+        <span class="dot"></span>Ensayo real · modelos de Meta en vivo ·
+        WhatsApp simulado
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const mk = (tag, cls, txt) => {
+        const e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (txt != null) e.textContent = txt;
+        return e;
+      };
+      const sec = (s) =>
+        s.toLocaleString("es-CO", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        }) + " s";
+
+      // Real envelope of assets/rosa_voz.mp3 (RMS, 180 bins over the 20 s note, ffmpeg).
+      const ENV = [
+        0.88, 1.0, 0.6, 0.23, 0.36, 0.45, 0.52, 0.26, 0.17, 0.32, 0.24, 0.7,
+        0.38, 0.14, 0.32, 0.17, 0.16, 0.16, 0.2, 0.17, 0.19, 0.34, 0.27, 0.33,
+        0.3, 0.18, 0.16, 0.23, 0.57, 0.26, 0.1, 0.0, 0.01, 0.01, 0.15, 0.29,
+        0.64, 0.46, 0.18, 0.43, 0.15, 0.24, 0.09, 0.18, 0.23, 0.11, 0.49, 0.35,
+        0.37, 0.48, 0.35, 0.35, 0.47, 0.08, 0.46, 0.21, 0.31, 0.3, 0.2, 0.11,
+        0.38, 0.26, 0.04, 0.01, 0.02, 0.01, 0.02, 0.02, 0.02, 0.01, 0.01, 0.32,
+        0.31, 0.36, 0.9, 0.46, 0.62, 0.64, 0.35, 0.19, 0.13, 0.42, 0.27, 0.17,
+        0.5, 0.05, 0.01, 0.01, 0.18, 0.71, 0.64, 0.33, 0.26, 0.34, 0.29, 0.17,
+        0.25, 0.57, 0.61, 0.46, 0.47, 0.08, 0.01, 0.04, 0.42, 0.26, 0.44, 0.18,
+        0.29, 0.19, 0.43, 0.36, 0.27, 0.2, 0.28, 0.4, 0.29, 0.01, 0.0, 0.34,
+        0.29, 0.73, 0.36, 0.25, 0.28, 0.17, 0.14, 0.22, 0.79, 0.21, 0.87, 0.23,
+        0.46, 0.27, 0.07, 0.11, 0.31, 0.37, 0.15, 0.29, 0.26, 0.25, 0.08, 0.76,
+        0.33, 0.15, 0.05, 0.01, 0.01, 0.01, 0.02, 0.02, 0.01, 0.02, 0.02, 0.0,
+        0.79, 0.89, 0.16, 0.52, 0.36, 0.46, 0.3, 0.25, 0.23, 0.34, 0.35, 0.34,
+        0.47, 0.24, 0.45, 0.26, 0.21, 0.7, 0.24, 0.17, 0.01, 0.01, 0.01, 0.0,
+      ];
+      const AUDIO = 19.97;
+
+      // ---------- Data from the real rehearsal (first spec.ready = before Rosa's answer) ----------
+      const RUN = window.RUN || { events: [] };
+      const evSpec = RUN.events.find((e) => e.kind === "spec.ready") || {
+        data: {},
+        t: 0,
+      };
+      const evStart = RUN.events.find((e) => e.kind === "intake.compiling");
+      const D = evSpec.data || {};
+      const sp = D.spec || {};
+      const hl = D.highlights || [];
+      const tr = D.transcript || {};
+      const segsData = (tr.segments || []).length
+        ? tr.segments
+        : [{ start: 0, end: AUDIO, text: tr.text || "" }];
+      const hv = (f) => (hl.find((h) => h.field === f) || {}).value;
+      const hs = (f) => (hl.find((h) => h.field === f) || {}).source_s;
+      const evs = (k) => {
+        const e = sp.evidence && sp.evidence[k];
+        return e && e.source_s != null ? e.source_s : (hs(k) ?? null);
+      };
+      const missing = sp.missing || [];
+      const PAY = {
+        cash: "efectivo",
+        link: "link",
+        card: "tarjeta",
+        transfer: "transferencia",
+        nequi: "nequi",
+        daviplata: "daviplata",
+      };
+
+      const F = [];
+      F.push({
+        k: "Negocio",
+        code: "business_name: str",
+        v: sp.business_name,
+        s: evs("business_name"),
+        needles: [sp.business_name],
+      });
+      const prods = sp.products || [];
+      F.push({
+        k: "Productos",
+        code: `products[${prods.length}] · COP`,
+        prods: prods.map((p) => ({
+          n: p.name,
+          pr: "$" + (p.price_cop || 0).toLocaleString("es-CO"),
+          s: p.evidence ? p.evidence.source_s : null,
+          photo: p.evidence && p.evidence.photo != null ? p.evidence.photo : null,
+        })),
+        s: null,
+        needles: prods.map((p) => p.name),
+      });
+      const where = [sp.neighborhood, sp.city].filter(Boolean).join(", ");
+      if (where)
+        F.push({
+          k: "Dónde",
+          code: "neighborhood, city",
+          v: hv("neighborhood") || where,
+          s: evs(sp.neighborhood ? "neighborhood" : "city"),
+          needles: [sp.neighborhood, sp.city],
+        });
+      if (sp.hours)
+        F.push({
+          k: "Horario",
+          code: "hours",
+          v:
+            hv("hours") ||
+            (typeof sp.hours === "string"
+              ? sp.hours
+              : Object.values(sp.hours)
+                  .filter((x) => typeof x === "string")
+                  .join(" · ")),
+          s: evs("hours"),
+          needles: (() => {
+            const DAY = { mon: "lunes", tue: "martes", wed: "miércoles", thu: "jueves", fri: "viernes", sat: "sábado", sun: "domingo" };
+            const d = (sp.hours && sp.hours.days) || [];
+            if (d.length < 2 || !DAY[d[0]] || !DAY[d[d.length - 1]]) return [];
+            return [{ re: new RegExp(DAY[d[0]] + "[^.,;?]{0,12}?" + DAY[d[d.length - 1]], "i") }];
+          })(),
+        });
+      const pm = sp.payment_methods || [];
+      if (pm.length)
+        F.push({
+          k: "Pagos",
+          code: `payment_methods[${pm.length}]`,
+          v: hv("payment_methods") || pm.join(" + "),
+          s: evs("payment_methods"),
+          needles: pm.map((m) => PAY[m]).filter(Boolean),
+        });
+      const fMiss = missing.includes("fulfillment");
+      F.push({
+        k: "Entrega",
+        code: "fulfillment",
+        miss: fMiss,
+        v: fMiss ? "" : hv("fulfillment") || sp.fulfillment,
+        s: fMiss ? null : evs("fulfillment"),
+        q: fMiss ? sp.clarifying_question || D.question : "",
+        needles: [],
+      });
+
+      // ---------- Build: audio strip ----------
+      const wave = $("wave");
+      const WW = 1680 - 52;
+      const xOf = (s) => 26 + (Math.max(0, Math.min(AUDIO, s)) / AUDIO) * WW;
+      const bars = [];
+      ENV.forEach((a, i) => {
+        const h = 3 + a * 24;
+        const x = (i / ENV.length) * WW;
+        const up = mk("i");
+        up.style.left = x + "px";
+        up.style.height = h + "px";
+        const dn = mk("i", "b");
+        dn.style.left = x + "px";
+        dn.style.height = h * 0.8 + "px";
+        wave.append(up, dn);
+        bars.push({ up, dn, s: ((i + 0.5) / ENV.length) * AUDIO });
+      });
+      $("dur").textContent =
+        "NOTA DE VOZ DE ROSA · 0:" + String(Math.round(AUDIO)).padStart(2, "0");
+      const tickEls = [];
+      for (let s = 0; s <= 20; s += 5) {
+        const sp_ = mk("span", null, s + " s");
+        tickEls.push({ el: sp_, s });
+        sp_.style.left = (s / AUDIO) * WW + "px";
+        if (s === 0) sp_.style.transform = "none";
+        if (s >= 20) sp_.style.transform = "translateX(-100%)";
+        $("ticks").append(sp_);
+      }
+      const segbars = segsData.map((sg) => {
+        const b = mk("div", "segbar");
+        b.style.left = xOf(sg.start) + "px";
+        b.style.width = xOf(sg.end ?? AUDIO) - xOf(sg.start) + "px";
+        $("segbars").append(b);
+        return b;
+      });
+
+      // Markers: one per distinct second, with the names of the fields tied to it.
+      const markers = {};
+      const addMark = (s, name, fi) => {
+        if (s == null) return;
+        const key = s.toFixed(2);
+        let m = markers[key];
+        if (!m) {
+          const el = mk("div", "marker");
+          el.style.left = xOf(s) + "px";
+          el.append(mk("div", "ln"), mk("div", "pin"));
+          const names = mk("div", "names");
+          el.append(names);
+          $("markers").append(el);
+          m = markers[key] = { el, names, items: [], s };
+        }
+        if (m.items.some((x) => x.name === name)) {
+          m.items.find((x) => x.name === name).fi = Math.min(
+            m.items.find((x) => x.name === name).fi,
+            fi,
+          );
+          return;
+        }
+        const tagEl = mk("span", null, name);
+        m.names.append(tagEl);
+        m.items.push({ name, fi, el: tagEl });
+      };
+
+      // ---------- Build: transcript with marks ----------
+      const segEls = segsData.map((sg) => {
+        const row = mk("div", "seg");
+        const ts = mk("div", "ts");
+        ts.append(document.createTextNode(sec(sg.start || 0)));
+        if (sg.end != null) ts.append(mk("small", null, "a " + sec(sg.end)));
+        const tx = mk("div", "tx");
+        row.append(ts, tx);
+        $("segs").append(row);
+        // pieces of text: [{a,b,fi}] marks (non-overlapping)
+        const text = sg.text || "";
+        const low = text.toLowerCase();
+        const marks = [];
+        F.forEach((f, fi) =>
+          (f.needles || []).forEach((n) => {
+            if (!n) return;
+            let i, b;
+            if (n.re) {
+              const m = n.re.exec(text);
+              if (!m) return;
+              i = m.index;
+              b = i + m[0].length;
+            } else {
+              i = low.indexOf(n.toLowerCase());
+              if (i < 0) return;
+              b = i + n.length;
+            }
+            if (marks.some((m) => i < m.b && b > m.a)) return;
+            marks.push({ a: i, b, fi });
+          }),
+        );
+        marks.sort((x, y) => x.a - y.a);
+        const pieces = [];
+        let pos = 0;
+        marks.forEach((m) => {
+          if (m.a > pos) pieces.push({ a: pos, b: m.a, fi: -1 });
+          pieces.push(m);
+          pos = m.b;
+        });
+        if (pos < text.length) pieces.push({ a: pos, b: text.length, fi: -1 });
+        pieces.forEach((p) => {
+          p.el = p.fi >= 0 ? mk("mark") : mk("span");
+          tx.append(p.el);
+        });
+        const cur = mk("span", "cursor");
+        tx.append(cur);
+        return { sg, row, ts, tx, text, pieces, cur };
+      });
+
+      // ---------- Build: fields ----------
+      const fieldEls = F.map((f, fi) => {
+        const row = mk("div", "f" + (f.miss ? " miss" : "") + (f.prods ? " pr" : ""));
+        const k = mk("div", "k", f.k);
+        k.append(mk("code", null, f.code));
+        const v = mk("div", "v");
+        const badges = [];
+        if (f.prods) {
+          f.prods.forEach((p) => {
+            const r = mk("div", "prod");
+            if (p.photo != null) {
+              const im = mk("img", "ph");
+              im.src = `../assets/foto_${p.photo + 1}.png`;
+              r.append(im);
+            }
+            r.append(mk("span", "nm", p.n), mk("span", "pr", p.pr));
+            const b = mk(
+              "span",
+              "badge" + (p.s == null ? " none" : ""),
+              p.s == null ? "" : sec(p.s),
+            );
+            r.append(b);
+            badges.push(b);
+            v.append(r);
+            addMark(p.s, "Producto", fi);
+          });
+          row.append(k, v);
+        } else if (f.miss) {
+          const w = mk("span", "falta");
+          w.append(mk("span", "pill", "Falta"), mk("span", null, "no lo dijo"));
+          v.append(w);
+          row.append(k, v, mk("span", "badge none"));
+        } else {
+          v.textContent = f.v || "";
+          const b = mk(
+            "span",
+            "badge" + (f.s == null ? " none" : ""),
+            f.s == null ? "" : sec(f.s),
+          );
+          badges.push(b);
+          row.append(k, v, b);
+          addMark(f.s, f.k, fi);
+        }
+        let q = null;
+        if (f.q) {
+          q = mk("div", "q");
+          q.append(
+            mk("b", null, "Génesis pregunta: "),
+            document.createTextNode(`«${f.q}»`),
+          );
+          row.append(q);
+        }
+        $("fields").append(row);
+        return { row, badges, q };
+      });
+      const nOk = F.filter((f) => !f.miss).length;
+      const nMiss = F.filter((f) => f.miss).length;
+      $("cnt").innerHTML = "";
+      $("cnt").append(
+        mk("b", null, `${nOk} datos`),
+        document.createTextNode(" entendidos"),
+      );
+      if (nMiss) {
+        $("cnt").append(document.createTextNode(" · "));
+        $("cnt").append(
+          mk(
+            "span",
+            "r",
+            nMiss === 1 ? "falta 1 dato" : `faltan ${nMiss} datos`,
+          ),
+        );
+      }
+      if (evStart)
+        $("lat").textContent =
+          `voz → ficha en ${sec(evSpec.t - evStart.t)} · ensayo`;
+
+      // Fit: shrink fonts if a re-run brings more/longer content.
+      const over = (box) => {
+        const last = box.lastElementChild.getBoundingClientRect().bottom;
+        return last > box.getBoundingClientRect().bottom - 18;
+      };
+      const fit = (box, vars) => {
+        for (let i = 0; i < 14 && over(box); i++)
+          vars.forEach(([n, v0, step]) =>
+            box.style.setProperty(n, v0 - step * (i + 1) + "px"),
+          );
+      };
+      // measure with everything visible
+      segEls.forEach((s) =>
+        s.pieces.forEach((p) => (p.el.textContent = s.text.slice(p.a, p.b))),
+      );
+      fieldEls.forEach((e) => e.q && (e.q.style.display = ""));
+      for (let z = 1; z > 0.66 && over($("right")); z -= 0.02)
+        $("fields").style.zoom = z - 0.02;
+      fit($("left"), [["--tf", 27, 1]]);
+
+
+      // ---------- Animate ----------
+      scene((t, S) => {
+        const k = S.p(t, 0, S.D);
+        $("cam").style.transform =
+          `scale(${1 + 0.03 * S.ease(k)}) translateY(${-6 * k}px)`;
+
+        S.fade($("head"), S.p(t, 0, 0.6), 14);
+        S.fade($("strip"), S.p(t, 0.1, 0.7), 18);
+        S.fade($("left"), S.p(t, 0.3, 0.9), 22);
+        S.fade($("right"), S.p(t, 0.45, 1.05), 22);
+
+        // Model chips
+        const cT = S.cue("transcribe") - 0.25;
+        const cS = S.cue("spark") - 0.15;
+        [
+          ["c1", cT],
+          ["c2", cS],
+        ].forEach(([id, at]) => {
+          const x = S.p(t, at, at + 0.4);
+          const c = $(id);
+          c.classList.toggle("dim", x <= 0);
+          c.style.opacity = 0.35 + 0.65 * S.easeOut(x);
+          c.style.transform = `scale(${1 + 0.06 * Math.sin(Math.PI * x)})`;
+          c.style.boxShadow = x > 0 ? `0 0 ${24 * x}px #3d8bff55` : "none";
+        });
+
+        // Wave bars grow in, then the playhead sweeps the 20 s note.
+        const grow = S.p(t, 0.2, 1.1);
+        const pa = cT + 0.15,
+          pb = S.cue("tiempos") + 0.9; // sweep window
+        const audioS = S.lerp(0, AUDIO, S.ease(S.p(t, pa, pb)));
+        const sweeping = t >= pa;
+        bars.forEach((b, i) => {
+          const gx = S.easeOut(
+            S.p(grow, i / bars.length - 0.1, i / bars.length + 0.15),
+          );
+          b.up.style.transform = b.dn.style.transform = `scaleY(${gx})`;
+          const on = sweeping && b.s <= audioS;
+          b.up.classList.toggle("on", on);
+          b.dn.classList.toggle("on", on);
+        });
+        const ph = $("ph");
+        ph.style.left = xOf(audioS) - 1 + "px";
+        ph.style.opacity =
+          S.p(t, pa - 0.2, pa) * (1 - S.p(t, pb + 0.2, pb + 0.7));
+        $("phT").textContent =
+          "0:" + String(Math.floor(audioS)).padStart(2, "0");
+        // keep the time label inside the strip at both ends of the sweep
+        {
+          const lb = $("phT"), hw = lb.offsetWidth / 2, x0 = xOf(audioS);
+          const cx = Math.max(hw + 12, Math.min(1680 - hw - 12, x0));
+          lb.style.transform = `translateX(${cx - x0 - hw}px)`;
+        }
+        // tick labels step aside while the playhead's time label passes over them
+        const phX = xOf(audioS) - 26;
+        tickEls.forEach(({ el, s }) => {
+          const x = (s / AUDIO) * WW;
+          const c = s === 0 ? x + 14 : s >= 20 ? x - 18 : x;
+          const near = 1 - S.p(Math.abs(phX - c), 34, 60);
+          el.style.opacity = 1 - near * parseFloat(ph.style.opacity || 0);
+        });
+        segbars.forEach((b, i) =>
+          b.classList.toggle("on", sweeping && audioS >= segsData[i].start),
+        );
+
+        // Transcript types in step with the playhead (text revealed across each segment's real time span).
+        segEls.forEach((s, i) => {
+          const a = s.sg.start || 0,
+            e = s.sg.end ?? AUDIO;
+          const x = sweeping ? S.p(audioS, a, e) : 0;
+          S.pop(s.ts, sweeping ? S.p(audioS, a - 0.2, a + 1.6) : 0);
+          s.row.style.opacity = sweeping && audioS >= a - 0.2 ? 1 : 0.0;
+          const n = Math.round(x * s.text.length);
+          s.pieces.forEach(
+            (p) =>
+              (p.el.textContent = s.text.slice(
+                p.a,
+                Math.max(p.a, Math.min(p.b, n)),
+              )),
+          );
+          s.cur.style.display = x > 0 && x < 1 ? "inline-block" : "none";
+          s.cur.style.opacity = Math.floor(t * 4) % 2 ? 0.4 : 1;
+        });
+
+        // Fields light one by one (Muse Spark "convierte ... ficha de negocio con tipos").
+        const f0 = S.cue("convierte") - 0.1;
+        const step = Math.min(
+          0.6,
+          (S.cue("tipos") + 0.4 - f0) / Math.max(1, F.length - 1),
+        );
+        const litAt = F.map((_, i) => f0 + i * step);
+        const pulseA = S.cue("pegado"),
+          pulseB = S.cue("dijo", 1) + 0.6;
+        const pulse = Math.sin(Math.PI * S.p(t, pulseA, pulseB));
+        fieldEls.forEach((e, i) => {
+          const x = S.p(t, litAt[i], litAt[i] + 0.45);
+          S.fade(e.row, x, 18);
+          const glow =
+            S.p(t, litAt[i], litAt[i] + 0.3) *
+            (1 - S.p(t, litAt[i] + 0.9, litAt[i] + 1.6));
+          e.row.classList.toggle("lit", !F[i].miss && glow > 0.05);
+          e.badges.forEach((b, j) => {
+            S.pop(
+              b,
+              S.p(t, litAt[i] + 0.2 + j * 0.12, litAt[i] + 0.55 + j * 0.12),
+            );
+            b.style.boxShadow =
+              pulse > 0.02 ? `0 0 ${18 * pulse}px #25d36699` : "none";
+            b.style.borderColor = pulse > 0.02 ? "#25d366" : "";
+          });
+          if (F[i].miss) {
+            const m = S.p(t, litAt[i] + 0.3, litAt[i] + 0.8);
+            const breathe = 0.5 + 0.5 * Math.sin((t - litAt[i]) * 3.2);
+            e.row.style.boxShadow =
+              m > 0
+                ? `0 0 0 ${1 + 2 * m}px #ff6b5b${Math.round(
+                    40 + 60 * breathe * m,
+                  )
+                    .toString(16)
+                    .padStart(2, "0")}`
+                : "none";
+          }
+          if (e.q) S.fade(e.q, S.p(t, litAt[i] + 0.6, litAt[i] + 1.1), 10);
+        });
+        // transcript marks + lit segments follow their field
+        segEls.forEach((s) => {
+          let lit = false;
+          s.pieces.forEach((p) => {
+            if (p.fi < 0) return;
+            const on = t >= litAt[p.fi] + 0.15;
+            p.el.classList.toggle("on", on);
+            if (on) lit = true;
+          });
+          s.row.classList.toggle("lit", lit);
+        });
+        // marker label placement (right of pin, else left, else lower row)
+        {
+          const ms = Object.values(markers).sort((a, b) => a.s - b.s);
+          const limit = WW + 26;
+          let edgeA = -1e9, edgeB = -1e9;
+          ms.forEach((m) => {
+            const x = xOf(m.s), w = m.names.offsetWidth;
+            let left = x + 12, row = 0;
+            if (left < edgeA + 8 || left + w > limit) {
+              const l2 = x - 12 - w;
+              if (l2 > edgeA + 8 && l2 > 0) left = l2;
+              else {
+                row = 1;
+                left = Math.max(x + 12, edgeB + 8);
+              }
+            }
+            m.names.style.left = left - x + "px";
+            m.names.style.top = row ? "50px" : "-12px";
+            if (row) edgeB = left + w;
+            else edgeA = left + w;
+          });
+        }
+        // waveform markers appear with their first field; pulse on "pegado al segundo"
+        Object.values(markers).forEach((m) => {
+          const first = Math.min(...m.items.map((x) => litAt[x.fi]));
+          const x = S.p(t, first + 0.15, first + 0.5);
+          m.el.style.opacity = S.easeOut(x);
+          m.el.querySelector(".pin").style.transform =
+            `scale(${S.lerp(0.4, 1, S.back(x)) * (1 + 0.45 * pulse)})`;
+          m.el.querySelector(".ln").style.opacity = 0.55 + 0.45 * pulse;
+          m.items.forEach((it) =>
+            S.pop(it.el, S.p(t, litAt[it.fi] + 0.15, litAt[it.fi] + 0.5)),
+          );
+        });
+
+        // Skeleton while waiting for Muse Spark
+        const sk = $("skel");
+        sk.style.opacity = S.p(t, 0.6, 1.1) * (1 - S.p(t, f0 - 0.2, f0 + 0.5));
+        $("skelSt").textContent =
+          t < Math.min(cS, pb) ? "esperando la transcripción…" : "Muse Spark 1.3 · armando la ficha…";
+        [...sk.querySelectorAll("i")].forEach((b, i) => {
+          b.style.backgroundPosition = `${100 - (((t * 0.7 + i * 0.12) % 1.4) / 1.4) * 200}% 0`;
+          b.style.opacity = t < Math.min(cS, pb) ? 0.55 : 0.95;
+        });
+        S.fade($("foot"), S.p(t, S.cue("cada") - 0.3, S.cue("cada") + 0.3), 10);
+      });
+    </script>
+  </body>
+</html>

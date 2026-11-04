@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .rig {
+        position: absolute;
+        inset: 0;
+        transform-origin: 40% 50%;
+      }
+      .hdr {
+        left: 120px;
+        top: 84px;
+      }
+      .hdr .h2 {
+        margin-top: 14px;
+        font-size: 56px;
+      }
+      .term {
+        position: absolute;
+        left: 120px;
+        top: 232px;
+        width: 1080px;
+        height: 640px;
+        border-radius: 18px;
+        background: #070b09;
+        border: 1px solid #2b3a33;
+        box-shadow:
+          0 40px 100px #000a,
+          0 0 0 1px #0006;
+        overflow: hidden;
+      }
+      .term .bar {
+        height: 46px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 0 18px;
+        background: #121a17;
+        border-bottom: 1px solid #22302a;
+      }
+      .term .bar i {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: #34433c;
+      }
+      .term .bar i:nth-child(1) {
+        background: #ff6b5b;
+      }
+      .term .bar i:nth-child(2) {
+        background: #f2b33d;
+      }
+      .term .bar i:nth-child(3) {
+        background: #25d366;
+      }
+      .term .bar span {
+        margin-left: 14px;
+        font: 500 16px/1 var(--mono);
+        color: var(--faint);
+      }
+      .term .body {
+        padding: 22px 28px;
+        font: 450 19px/30px var(--mono);
+        color: #d7e0db;
+      }
+      .ln {
+        white-space: pre;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: 30px;
+      }
+      .ln .ps {
+        color: var(--green);
+      }
+      .ln .cmd {
+        color: var(--text);
+      }
+      .ln .h {
+        color: var(--gold);
+      }
+      .ln .ok {
+        color: var(--green);
+        font-weight: 700;
+      }
+      .ln .dim {
+        color: #6d7f76;
+      }
+      .cur {
+        display: inline-block;
+        width: 11px;
+        height: 22px;
+        margin-left: 2px;
+        vertical-align: -4px;
+        background: var(--text);
+      }
+      .col {
+        position: absolute;
+        left: 1250px;
+        width: 550px;
+      }
+      .stats {
+        top: 232px;
+        display: flex;
+        gap: 18px;
+      }
+      .stat {
+        flex: 1;
+        height: 190px;
+        padding: 26px 26px;
+      }
+      .stat .v {
+        font: 800 76px/1 var(--display);
+        letter-spacing: -0.03em;
+      }
+      .stat .l {
+        margin-top: 12px;
+        font: 550 19px/1.3 var(--font);
+        color: var(--muted);
+      }
+      #fc {
+        top: 446px;
+        height: 250px;
+        padding: 28px 28px;
+        display: flex;
+        flex-direction: column;
+      }
+      #fc .k {
+        font: 650 15px/1 var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      #fc .t {
+        margin-top: 12px;
+        font: 700 30px/1.15 var(--display);
+      }
+      .item {
+        margin-top: 26px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+      .item .ic {
+        flex: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 700 15px/1 var(--mono);
+        color: var(--gold);
+      }
+      .item b {
+        display: block;
+        font: 650 24px/1.2 var(--font);
+      }
+      .item span {
+        display: block;
+        margin-top: 3px;
+        font: 500 18px/1.3 var(--font);
+        color: var(--muted);
+      }
+      #repo {
+        top: 722px;
+        height: 150px;
+        padding: 34px 26px;
+      }
+      #repo .k {
+        font: 650 15px/1 var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      #repo .u {
+        margin-top: 14px;
+        font: 600 19px/1.2 var(--mono);
+        color: var(--text);
+        white-space: nowrap;
+      }
+      #repo .u b {
+        color: var(--gold);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body data-scene="s14">
+    <div class="stage">
+      <div class="rig" id="rig">
+        <div class="abs hdr" id="hdr">
+          <div class="kicker">Código de Génesis</div>
+          <div class="h2">Hecho durante el hackathon</div>
+        </div>
+
+        <div class="term" id="term">
+          <div class="bar">
+            <i></i><i></i><i></i><span>~/genesis — zsh</span>
+          </div>
+          <div class="body" id="tb"></div>
+        </div>
+
+        <div class="col stats" id="stats">
+          <div class="card stat" id="st2">
+            <div class="v gold" id="nCommits">0</div>
+            <div class="l">commits en el repo<br />(git log)</div>
+          </div>
+          <div class="card stat" id="st1">
+            <div class="v green" id="nTests">0</div>
+            <div class="l">pruebas pasan<br />(make test)</div>
+          </div>
+        </div>
+
+        <div class="col card" id="fc">
+          <div class="k">FunnelChat aporta solo infraestructura</div>
+          <div class="item" id="i1">
+            <div class="ic">01</div>
+            <div>
+              <b>Número preverificado (cuna)</b>
+              <span>donde nace cada negocio nuevo</span>
+            </div>
+          </div>
+          <div class="item" id="i2">
+            <div class="ic">02</div>
+            <div>
+              <b>Cuenta de Solution Partner</b>
+              <span>para operar la API de WhatsApp Cloud</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col card" id="repo">
+          <div class="k">Repo público</div>
+          <div class="u">github.com/<b>juanmanuelcanchala-ai/genesis</b></div>
+        </div>
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      // Real output, re-captured on 2026-11-04 (review) in /home/juan/Programacion/genesis:
+      //   make test 2>&1 | tail -3 ; git log --oneline | head -8 ; git log --oneline | wc -l
+      const TESTS_TAIL = [
+        "........................................................................ [ 96%]",
+        ".........                                                                [100%]",
+        "225 passed in 2.06s",
+      ];
+      const GITLOG = [
+        "8f940c4 Compiler hardened against real Muse output: answer merges into the previous draft, dedupe products, hours fallback from the transcript, interpolated evidence seconds, backfill of literal facts",
+        "c546090 Rehearsal with the real Meta models (make rehearse); never cache dry-run plan outputs; README: Meta Model API verified with a live key",
+        "c712737 README, video script, go-live scripts (tunnel, per-number webhook override, key prompt); isolate tests from local .env",
+        "0ed7aa7 End-to-end offline demo, server smoke test, Makefile; plan cache revert fix; docs",
+        "02a11ce Onboarding state machine, FastAPI webhooks/SSE and stage panel",
+        "a2b0f32 Business runtime: per-business Spark agent with tools, orders, Mercado Pago links, pre-launch Inspector",
+        "c65d9f1 Blueprint: parallel lanes (number, brand, menu, agent, payments, inspector, launch) compiled into the plan graph",
+        "8d740a4 Compiler: voice note + photos to BusinessSpec with one clarifying question; Flow JSON order form generator",
+      ];
+      const N_COMMITS = 12;
+      const N_TESTS = parseInt(TESTS_TAIL[2], 10);
+
+      const $ = (id) => document.getElementById(id);
+      const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      const tb = $("tb");
+      const mk = (html) => {
+        const d = document.createElement("div");
+        d.className = "ln";
+        d.innerHTML = html;
+        tb.appendChild(d);
+        return d;
+      };
+
+      // Build lines; each gets a show time. Commands are typed.
+      const L = [];
+      const cmd = (text, at, dur) => {
+        const d = mk(`<span class="ps">❯ </span><span class="cmd"></span>`);
+        L.push({ d, at, kind: "cmd", text, dur });
+      };
+      const out = (html, at) => L.push({ d: mk(html), at, kind: "out" });
+
+      scene((t, S) => {
+        if (!L.length) {
+          const a = 0.35;
+          cmd("git log --oneline | head -8", a, 0.9);
+          GITLOG.forEach((g, i) => {
+            const [h, ...m] = g.split(" ");
+            out(
+              `<span class="h">${h}</span> ${esc(m.join(" "))}`,
+              a + 1.2 + i * 0.22,
+            );
+          });
+          const d = S.cue("doscientas");
+          cmd("make test", d - 0.75, 0.45);
+          out(`<span class="dim">${TESTS_TAIL[0]}</span>`, d - 0.1);
+          out(`<span class="dim">${TESTS_TAIL[1]}</span>`, d + 0.12);
+          out(`<span class="ok">${TESTS_TAIL[2]}</span>`, d + 0.35);
+          const c = S.cue("pruebas") + 0.6;
+          cmd("git log --oneline | wc -l", c, 0.8);
+          out(`<span class="gold">${N_COMMITS}</span>`, c + 1.0);
+          cmd("", c + 1.3, 0.01);
+        }
+        const k = S.p(t, 0, S.D);
+        $("rig").style.transform = `scale(${1 + 0.03 * S.ease(k)})`;
+        S.fade($("hdr"), S.p(t, 0.05, 0.7), 20);
+        S.pop($("term"), S.p(t, 0.1, 0.6));
+
+        // Terminal lines + blinking cursor on the active prompt.
+        let active = null;
+        L.forEach((l) => {
+          const on = t >= l.at;
+          l.d.style.display = on ? "" : "none";
+          if (l.kind === "cmd") {
+            S.type(
+              l.d.querySelector(".cmd"),
+              l.text,
+              S.p(t, l.at, l.at + l.dur),
+            );
+            if (on) active = l;
+          }
+        });
+        tb.querySelectorAll(".cur").forEach((c) => c.remove());
+        if (active) {
+          const typing = t < active.at + active.dur + 0.15;
+          const lastOut = L.filter(
+            (l) => l.kind === "out" && l.at > active.at && t >= l.at,
+          ).length;
+          if (!lastOut || active.text === "") {
+            const c = document.createElement("span");
+            c.className = "cur";
+            c.style.opacity = typing || Math.floor(t * 2.2) % 2 === 0 ? 1 : 0;
+            active.d.appendChild(c);
+          }
+        }
+
+        // Stats.
+        const st = S.cue("doscientas");
+        $("nTests").textContent = S.num(
+          S.easeOut(S.p(t, st - 0.2, st + 0.9)),
+          0,
+          N_TESTS,
+        );
+        const cc = S.cue("hackathon");
+        S.pop($("st1"), S.p(t, st - 0.5, st));
+        S.pop($("st2"), S.p(t, cc - 0.7, cc - 0.2));
+        $("nCommits").textContent = S.num(
+          S.easeOut(S.p(t, cc - 0.4, cc + 0.6)),
+          0,
+          N_COMMITS,
+        );
+
+        // FunnelChat infra card + repo.
+        const f = S.cue("funnelchat");
+        S.fade($("fc"), S.p(t, f - 0.2, f + 0.4), 24);
+        S.fade(
+          $("i1"),
+          S.p(t, S.cue("numero") - 0.1, S.cue("numero") + 0.4),
+          14,
+        );
+        S.fade(
+          $("i2"),
+          S.p(t, S.cue("solution") - 0.3, S.cue("solution") + 0.2),
+          14,
+        );
+        const fcLit = S.p(t, f, f + 0.5);
+        $("fc").style.borderColor = `rgba(242,179,61,${0.15 + 0.4 * fcLit})`;
+        $("term").style.opacity =
+          parseFloat($("term").style.opacity) * (1 - 0.35 * S.p(t, f, f + 0.8));
+        S.fade($("repo"), S.p(t, 2.2, 2.8), 16);
+      });
+    </script>
+  </body>
+</html>

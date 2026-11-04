@@ -1,0 +1,96 @@
+{
+  "voice": "o2vbTbO3g4GrKUg7rehy",
+  "scenes": [
+    {
+      "id": "s01",
+      "min": 8,
+      "es": "Rosa vende arepas en Cali. Sus clientes ya le escriben por WhatsApp, pero ella no tiene computador.",
+      "en": "Rosa sells arepas in Cali. Her customers already message her on WhatsApp, but she has no computer."
+    },
+    {
+      "id": "s02",
+      "min": 7,
+      "es": "Y no es un caso raro: el cincuenta y cuatro coma siete por ciento de quienes trabajan en Colombia lo hacen en la informalidad.",
+      "en": "She is not rare: 54.7% of Colombia's workers are informal."
+    },
+    {
+      "id": "s03",
+      "min": 9,
+      "es": "En las veinticuatro ciudades principales hay dos coma cuatro millones de micronegocios. Solo el diecisiete por ciento tiene computador; casi todos trabajan con el celular.",
+      "en": "There are 2.4 million micro-businesses in the 24 main cities. Only 17% have a computer; almost all run on a phone."
+    },
+    {
+      "id": "s04",
+      "min": 9,
+      "es": "Para vender en serio por WhatsApp hacen falta perfil, catálogo, formulario de pedidos, cobros, y alguien que conteste a las seis de la mañana. Todo eso se configura desde un computador.",
+      "en": "Selling on WhatsApp takes a profile, a catalog, an order form, payments, and someone answering at 6 a.m. All of it is set up from a computer."
+    },
+    {
+      "id": "s05",
+      "min": 6,
+      "es": "Así que Rosa hace lo que ya sabe hacer: le manda a Génesis una nota de voz y dos fotos.",
+      "en": "So Rosa does what she already knows: a voice note and two photos to Génesis.",
+      "rosa_audio": true
+    },
+    {
+      "id": "s06",
+      "min": 13,
+      "es": "Muse Voice Transcribe la transcribe con tiempos, y Muse Spark convierte lo que dijo en una ficha de negocio con tipos. Cada dato queda pegado al segundo del audio en que ella lo dijo.",
+      "en": "Muse Voice Transcribe gives a timed transcript. Muse Spark turns it into a typed business spec, every field tied to the second she said it."
+    },
+    {
+      "id": "s07",
+      "min": 9,
+      "es": "Como faltaba un dato, Génesis hace una sola pregunta. Le lee el resumen, y Rosa confirma con un sí.",
+      "en": "One missing detail, one question. A read-back, and she says yes."
+    },
+    {
+      "id": "s08",
+      "min": 20,
+      "es": "Entonces un grafo de plan y aplicación arma el negocio en carriles paralelos. SAM tres punto uno recorta la arepa de sus fotos, Muse Image crea el logo y una foto limpia, se genera el formulario de pedido con WhatsApp Flows, y se configura un agente solo para su negocio. Cada paso es idempotente, y si algo crítico falla, se revierte.",
+      "en": "A plan/apply graph builds the business in parallel lanes. SAM 3.1 crops the arepa, Muse Image makes the logo and a clean photo, a WhatsApp Flow order form is generated, and a business-only agent is set up. Every step is idempotent and reverts on failure."
+    },
+    {
+      "id": "s09",
+      "min": 12,
+      "es": "Antes de abrir, un Inspector se hace pasar por cliente: pregunta precios y horario, intenta comprar cerveza para ver si el agente se niega, y hace un pedido y un pago de prueba.",
+      "en": "Before opening, an Inspector poses as a customer: prices, hours, a beer it must refuse, and a full test order and payment."
+    },
+    {
+      "id": "s10",
+      "min": 6,
+      "es": "Aprobado. De nota de voz a negocio vivo, en menos de un minuto.",
+      "en": "Approved. Voice note to live business in under a minute."
+    },
+    {
+      "id": "s11",
+      "min": 16,
+      "es": "Andrés escanea el código del puesto. Le contesta el asistente de Rosa, que dice que es una IA y solo habla de su negocio. Pide con un formulario nativo de WhatsApp: cantidades, hora de recogida, y listo.",
+      "en": "Andrés scans the code at the stand. Rosa's assistant answers: it says it is an AI and only talks about her business. He orders with a native WhatsApp Flow: quantities, pickup time, done."
+    },
+    {
+      "id": "s12",
+      "min": 9,
+      "es": "Paga con un link de Mercado Pago dentro de WhatsApp, sin escribir datos de tarjeta en el chat. Y a Rosa le llega el aviso: pedido pagado.",
+      "en": "He pays on a Mercado Pago link inside WhatsApp, with no card data in the chat. And Rosa gets the alert: order paid."
+    },
+    {
+      "id": "s13",
+      "min": 13,
+      "es": "Cada modelo de Meta tiene un trabajo visible: transcribir con tiempos, entender y atender, recortar el producto y crear la marca. Encima corren la API de WhatsApp Cloud, Flows, el perfil y el catálogo.",
+      "en": "Each Meta model has a visible job: timed transcription, understanding and serving, cropping the product, creating the brand. On top: WhatsApp Cloud API, Flows, profile and catalog."
+    },
+    {
+      "id": "s14",
+      "min": 12,
+      "es": "Todo el código de Génesis se escribió durante este hackathon, con más de doscientas pruebas. FunnelChat solo pone infraestructura: el número preverificado que sirve de cuna y su cuenta de Solution Partner.",
+      "en": "All Génesis code was written during this hackathon, with 200+ tests. FunnelChat only provides infrastructure: the pre-verified cradle number and its Solution Partner account."
+    },
+    {
+      "id": "s15",
+      "min": 10,
+      "es": "Rosa no aprendió a usar ninguna plataforma. Habló, y ahora tiene un negocio que atiende, cobra y le avisa. Génesis: de una nota de voz a un negocio vivo.",
+      "en": "Rosa didn't learn any platform. She talked, and now her business answers, takes payment and alerts her. Génesis: from a voice note to a live business."
+    }
+  ]
+}

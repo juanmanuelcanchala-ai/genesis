@@ -1,0 +1,423 @@
+/* Génesis video: shared visual system. 1920x1080 stage, dark warm editorial look. */
+:root {
+  --bg: #0c110f;
+  --bg-2: #121a17;
+  --surface: #17211d;
+  --surface-2: #1f2b26;
+  --line: #2b3a33;
+  --text: #f4efe6;
+  --muted: #9fb0a7;
+  --faint: #6d7f76;
+  --gold: #f2b33d; /* arepa */
+  --gold-soft: #f2b33d22;
+  --green: #25d366; /* WhatsApp-related */
+  --green-dark: #128c4b;
+  --meta: #3d8bff; /* Meta model chips */
+  --meta-soft: #3d8bff22;
+  --red: #ff6b5b;
+  --wa-wall: #efe7dc;
+  --wa-in: #ffffff;
+  --wa-out: #d9fdd3;
+  --wa-head: #0b5c4a;
+  --wa-text: #111b21;
+  --wa-meta: #667781;
+  --font: "Inter", "Noto Color Emoji", sans-serif;
+  --display: "Inter Display", "Inter", "Noto Color Emoji", sans-serif;
+  --mono:
+    "JetBrainsMono NF", "JetBrainsMono Nerd Font", "DejaVu Sans Mono", monospace;
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  width: 1920px;
+  height: 1080px;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "ss01", "cv11";
+}
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(1200px 700px at 78% 18%, #f2b33d14, transparent 60%),
+    radial-gradient(900px 600px at 10% 90%, #25d36610, transparent 60%),
+    var(--bg);
+}
+/* Safe area: keep important content out of the bottom 150px (burned-in subtitles live there). */
+.safe {
+  position: absolute;
+  left: 120px;
+  right: 120px;
+  top: 90px;
+  bottom: 170px;
+}
+.abs {
+  position: absolute;
+}
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Typography */
+.kicker {
+  font: 600 22px/1 var(--font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.h1 {
+  font: 800 92px/1.02 var(--display);
+  letter-spacing: -0.03em;
+}
+.h2 {
+  font: 750 60px/1.08 var(--display);
+  letter-spacing: -0.02em;
+}
+.h3 {
+  font: 650 36px/1.2 var(--display);
+  letter-spacing: -0.01em;
+}
+.body {
+  font: 450 28px/1.4 var(--font);
+  color: var(--muted);
+}
+.small {
+  font: 500 20px/1.35 var(--font);
+  color: var(--muted);
+}
+.mono {
+  font-family: var(--mono);
+}
+.gold {
+  color: var(--gold);
+}
+.green {
+  color: var(--green);
+}
+.muted {
+  color: var(--muted);
+}
+.source {
+  font: 500 18px/1.3 var(--font);
+  color: var(--faint);
+  letter-spacing: 0.02em;
+}
+
+/* Small corner tag (honesty labels: "Ensayo real ·  modelos de Meta en vivo · WhatsApp simulado") */
+.tag {
+  position: absolute;
+  top: 40px;
+  right: 48px;
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #0c110fcc;
+  border: 1px solid var(--line);
+  font: 600 17px/1 var(--font);
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.tag .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 12px var(--green);
+}
+.brandmark {
+  position: absolute;
+  top: 40px;
+  left: 48px;
+  font: 800 26px/1 var(--display);
+  letter-spacing: -0.01em;
+  color: var(--text);
+  opacity: 0.9;
+}
+.brandmark b {
+  color: var(--gold);
+}
+
+/* Meta model chip */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: var(--meta-soft);
+  border: 1px solid #3d8bff66;
+  color: #cfe0ff;
+  font: 650 22px/1 var(--font);
+  white-space: nowrap;
+}
+.chip::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--meta);
+  box-shadow: 0 0 10px var(--meta);
+}
+.chip.wa {
+  background: #25d3661c;
+  border-color: #25d36666;
+  color: #c9f5da;
+}
+.chip.wa::before {
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+}
+
+/* Cards (panel look) */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 22px 26px;
+}
+.card.lit {
+  border-color: #f2b33d88;
+  box-shadow:
+    0 0 0 1px #f2b33d33,
+    0 10px 40px #f2b33d18;
+}
+.pill {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font: 650 16px/1 var(--font);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.pill.run {
+  background: #f2b33d22;
+  color: var(--gold);
+}
+.pill.done {
+  background: #25d36622;
+  color: var(--green);
+}
+.pill.fail {
+  background: #ff6b5b22;
+  color: var(--red);
+}
+
+/* ---------------- Phone mockup with a WhatsApp-style chat ----------------
+ * <div class="phone"><div class="screen">
+ *   <div class="wa-head"><div class="avatar"><img></div><div><div class="name">Génesis</div><div class="status">en línea</div></div></div>
+ *   <div class="wa-body"><div class="msgs"> <div class="bubble in|out">text<span class="time">6:12</span></div> ... </div></div>
+ *   <div class="wa-input"><div class="field">Mensaje</div><div class="send"></div></div>
+ * </div></div>
+ * Scroll the chat by translating .msgs (translateY negative) from t.
+ */
+.phone {
+  position: absolute;
+  width: 430px;
+  height: 900px;
+  border-radius: 62px;
+  background: #050706;
+  padding: 14px;
+  box-shadow:
+    0 0 0 2px #2c3832,
+    0 40px 120px #000a,
+    inset 0 0 0 2px #111;
+}
+.phone .screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50px;
+  overflow: hidden;
+  background: var(--wa-wall);
+  display: flex;
+  flex-direction: column;
+}
+.phone .notch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 120px;
+  height: 34px;
+  margin-left: -60px;
+  border-radius: 20px;
+  background: #050706;
+  z-index: 5;
+}
+.wa-head {
+  flex: none;
+  height: 128px;
+  padding: 58px 20px 12px;
+  background: var(--wa-head);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.wa-head .avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #cfd8d3;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 800 22px/1 var(--display);
+  color: var(--wa-head);
+}
+.wa-head .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wa-head .name {
+  font: 650 21px/1.15 var(--font);
+}
+.wa-head .status {
+  font: 450 15px/1.2 var(--font);
+  opacity: 0.8;
+}
+.wa-body {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  padding: 14px 14px 0;
+}
+.msgs {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bubble {
+  position: relative;
+  max-width: 84%;
+  padding: 9px 12px 22px;
+  border-radius: 14px;
+  font: 450 18px/1.38 var(--font);
+  color: var(--wa-text);
+  white-space: pre-wrap;
+  box-shadow: 0 1px 1px #0000001f;
+}
+.bubble.in {
+  align-self: flex-start;
+  background: var(--wa-in);
+  border-top-left-radius: 4px;
+}
+.bubble.out {
+  align-self: flex-end;
+  background: var(--wa-out);
+  border-top-right-radius: 4px;
+}
+.bubble .time {
+  position: absolute;
+  right: 10px;
+  bottom: 5px;
+  font: 450 12px/1 var(--font);
+  color: var(--wa-meta);
+}
+.bubble b {
+  font-weight: 700;
+}
+.bubble .btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 10px -12px -22px;
+  border-top: 1px solid #e3e6e8;
+}
+.bubble .btns div {
+  padding: 11px;
+  text-align: center;
+  color: #027eb5;
+  font: 600 17px/1 var(--font);
+  border-bottom: 1px solid #e3e6e8;
+}
+.bubble .btns div:last-child {
+  border-bottom: 0;
+}
+.bubble.photo {
+  padding: 4px 4px 22px;
+}
+.bubble.photo img {
+  display: block;
+  width: 240px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.voice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 270px;
+  padding-bottom: 2px;
+}
+.voice .play {
+  width: 0;
+  height: 0;
+  border-left: 16px solid #54656f;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+}
+.voice .wave {
+  flex: 1;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.voice .wave i {
+  flex: 1;
+  background: #b5c2bb;
+  border-radius: 2px;
+}
+.voice .wave i.on {
+  background: #1fa855;
+}
+.voice .dur {
+  font: 500 13px/1 var(--font);
+  color: var(--wa-meta);
+}
+.wa-input {
+  flex: none;
+  height: 78px;
+  padding: 10px 12px 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--wa-wall);
+}
+.wa-input .field {
+  flex: 1;
+  height: 46px;
+  border-radius: 24px;
+  background: #fff;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  font: 450 18px/1 var(--font);
+  color: #8696a0;
+}
+.wa-input .send {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #1fa855;
+}

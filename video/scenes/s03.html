@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .wrap {
+        position: absolute;
+        inset: 0;
+        transform-origin: 30% 40%;
+      }
+      .kick {
+        left: 120px;
+        top: 104px;
+      }
+      .count {
+        left: 112px;
+        top: 218px;
+        display: flex;
+        align-items: baseline;
+        gap: 34px;
+        white-space: nowrap;
+      }
+      .count .n {
+        font: 800 180px/1 var(--display);
+        letter-spacing: -0.045em;
+        font-variant-numeric: tabular-nums;
+        color: var(--text);
+      }
+      .count .u {
+        font: 700 58px/1 var(--display);
+        letter-spacing: -0.02em;
+        color: var(--text);
+      }
+      .sub {
+        left: 120px;
+        top: 158px;
+        font: 500 36px/1.2 var(--font);
+        color: var(--muted);
+        transform-origin: left bottom;
+        white-space: nowrap;
+      }
+      .sub b {
+        color: var(--gold);
+        font-weight: 650;
+      }
+      .chart {
+        left: 120px;
+        top: 470px;
+        width: 1680px;
+        height: 400px;
+      }
+      .axis {
+        position: absolute;
+        left: 0;
+        width: 1360px;
+        top: 0;
+        bottom: 0;
+      }
+      .axis .g {
+        position: absolute;
+        top: 34px;
+        bottom: 28px;
+        width: 1px;
+        background: #2b3a3399;
+      }
+      .axis .g span {
+        position: absolute;
+        bottom: -28px;
+        left: 0;
+        transform: translateX(-50%);
+        font: 500 16px/1 var(--font);
+        color: var(--faint);
+        white-space: nowrap;
+      }
+      .row {
+        position: absolute;
+        left: 0;
+        width: 1680px;
+      }
+      .row .lab {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font: 600 30px/1 var(--font);
+        color: var(--text);
+        margin-bottom: 16px;
+        white-space: nowrap;
+      }
+      .row .lab svg {
+        width: 34px;
+        height: 34px;
+        flex: none;
+      }
+      .track {
+        position: relative;
+        width: 1360px;
+        height: 60px;
+        border-radius: 12px;
+        background: #17211d;
+      }
+      .fill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        border-radius: 12px;
+      }
+      .val {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        font: 800 54px/1 var(--display);
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+      }
+      .r1 .fill {
+        background: #6d7f76;
+      }
+      .r1 .val {
+        color: var(--muted);
+      }
+      .r2 .fill {
+        background: linear-gradient(90deg, #d99a26, var(--gold));
+        box-shadow: 0 0 40px #f2b33d33;
+      }
+      .r2 .val {
+        color: var(--gold);
+      }
+      .r2 .lab {
+        color: var(--gold);
+      }
+      .src {
+        right: 120px;
+        top: 120px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .src .bar {
+        width: 28px;
+        height: 2px;
+        background: var(--faint);
+      }
+    </style>
+  </head>
+  <body data-scene="s03">
+    <div class="stage">
+      <div class="wrap" id="wrap">
+        <div class="abs" id="top" style="inset: 0">
+        <div class="abs kicker kick" id="kick">Micronegocios en Colombia</div>
+        <div class="abs count" id="count">
+          <span class="n" id="n">0</span
+          ><span class="u" id="u">micronegocios</span>
+        </div>
+        <div class="abs sub" id="sub">
+          En las <b>24 ciudades principales</b> hay
+        </div>
+
+        </div>
+        <div class="abs chart" id="chart">
+          <div class="axis" id="axis">
+            <div class="g" style="left: 0"><span>0 %</span></div>
+            <div class="g" style="left: 25%"><span>25 %</span></div>
+            <div class="g" style="left: 50%"><span>50 %</span></div>
+            <div class="g" style="left: 75%"><span>75 %</span></div>
+            <div class="g" style="left: 100%"><span>100 %</span></div>
+          </div>
+          <div class="row r1" id="r1" style="top: 40px">
+            <div class="lab">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#9fb0a7"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="4" y="5" width="16" height="11" rx="1.5" />
+                <path d="M2 19h20" />
+              </svg>
+              Tiene computador, tableta o portátil
+            </div>
+            <div class="track">
+              <div class="fill" id="f1"></div>
+              <div class="val" id="v1">0,0 %</div>
+            </div>
+          </div>
+          <div class="row r2" id="r2" style="top: 200px">
+            <div class="lab">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#f2b33d"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="6.5" y="2.5" width="11" height="19" rx="2.2" />
+                <path d="M10.5 18.5h3" />
+              </svg>
+              Usa el celular
+            </div>
+            <div class="track">
+              <div class="fill" id="f2"></div>
+              <div class="val" id="v2">0,0 %</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="abs src source" id="src">
+        <span class="bar"></span>Fuente: DANE, EMICRON 2025
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const TOTAL = 2434942;
+      const PC = 17.4;
+      const CEL = 83.9;
+      const TRACK = 1360;
+      function bar(fill, val, pct, x, S) {
+        const w = (TRACK * pct * x) / 100;
+        fill.style.width = `${w}px`;
+        fill.style.opacity = x > 0 ? 1 : 0;
+        val.textContent = `${S.num(x, 0, pct, 1)} %`;
+        val.style.left = `${w + 22}px`;
+        val.style.opacity = S.easeOut(Math.min(1, x * 4));
+      }
+      scene((t, S) => {
+        const k = S.p(t, 0, S.D);
+        $("wrap").style.transform = `scale(${1 + 0.035 * S.ease(k)})`;
+        S.fade($("kick"), S.p(t, 0.1, 0.7));
+        S.fade($("src"), S.p(t, 0.3, 1.0), 8);
+
+        // 2.434.942 counts up on "dos coma cuatro millones"
+        const a = S.cue("dos") - 0.25;
+        const b = S.cue("micronegocios") + 0.4;
+        S.fade($("count"), S.p(t, a, a + 0.45), 26);
+        $("n").textContent = S.num(S.easeOut(S.p(t, a, b)), 0, TOTAL, 0);
+        S.fade(
+          $("u"),
+          S.p(t, S.cue("micronegocios") - 0.1, S.cue("micronegocios") + 0.4),
+          12,
+        );
+        S.fade(
+          $("sub"),
+          S.p(t, S.cue("veinticuatro") - 0.1, S.cue("veinticuatro") + 0.5),
+          12,
+        );
+        // the sentence opens large and centred, then settles above the counter on "dos"
+        const m = S.ease(S.p(t, a - 0.35, a + 0.25));
+        $("sub").style.transform +=
+          ` translateY(${(1 - m) * 250}px) scale(${1 + 0.75 * (1 - m)})`;
+
+        // chart frame and rows; the headline block rises to make room
+        const c = S.cue("solo");
+        const up = S.ease(S.p(t, c - 0.9, c + 0.1));
+        $("top").style.transform = `translateY(${(1 - up) * 190}px)`;
+        S.fade($("axis"), S.p(t, c - 0.05, c + 0.5), 0);
+        S.fade($("r1"), S.p(t, c - 0.15, c + 0.35), 16);
+        S.fade($("r2"), S.p(t, c + 0.05, c + 0.55), 16);
+        const d = S.cue("diecisiete") - 0.15;
+        bar($("f1"), $("v1"), PC, S.easeOut(S.p(t, d, S.cue("computador"))), S);
+        const e = S.cue("casi") - 0.1;
+        bar(
+          $("f2"),
+          $("v2"),
+          CEL,
+          S.easeOut(S.p(t, e, S.cue("celular") + 0.4)),
+          S,
+        );
+
+        // once the phone bar lands, dim the computer row a little
+        const land = S.p(t, S.cue("celular"), S.cue("celular") + 0.6);
+        $("r1").style.opacity = String(
+          Number($("r1").style.opacity) * (1 - 0.2 * land),
+        );
+      });
+    </script>
+  </body>
+</html>

@@ -229,6 +229,19 @@ Live checklist:
 
 Module boundaries and signatures: [`docs/CONTRACTS.md`](docs/CONTRACTS.md). Video script: [`docs/VIDEO.md`](docs/VIDEO.md).
 
+## Presentation video
+
+`video/` builds the 3-minute presentation video from the real rehearsal (`make rehearse`, live Meta models,
+WhatsApp in dry-run): every chat line, timing, Inspector answer and spec field on screen is read from
+`media/rehearsal/run.json`. Product photos, B-roll, the logo and the clean product shot were generated
+with Muse Image and the crops with SAM 3.1; narration is ElevenLabs. Scenes are HTML rendered frame by
+frame with headless Chromium (`video/render.mjs`), then cut with narration and burned-in English
+subtitles (`video/assemble.py`).
+
+```bash
+uv run python video/assemble.py timeline && (cd video && npm i && node render.mjs all) && uv run python video/assemble.py final
+```
+
 ## Limitations
 
 - One seller per cradle number. Rosa's business runs on a pre-verified number from FunnelChat's pool;

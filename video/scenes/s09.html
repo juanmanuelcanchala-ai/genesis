@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .world {
+        position: absolute;
+        inset: 0;
+        transform-origin: 45% 45%;
+      }
+      .glow {
+        position: absolute;
+        width: 1100px;
+        height: 1100px;
+        left: 980px;
+        top: -160px;
+        border-radius: 50%;
+        background: radial-gradient(closest-side, #25d36614, transparent 70%);
+      }
+      /* ---------- left column: header + checklist ---------- */
+      .col {
+        position: absolute;
+        left: 120px;
+        top: 92px;
+        width: 1040px;
+      }
+      .head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .head .ttl {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        margin-top: 16px;
+      }
+      .shield {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        background: #25d3661f;
+        border: 1px solid #25d36655;
+        color: var(--green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: none;
+      }
+      .shield svg {
+        width: 38px;
+        height: 38px;
+      }
+      .head .h2 {
+        font-size: 50px;
+      }
+      .count {
+        flex: none;
+        text-align: right;
+        padding-bottom: 6px;
+      }
+      .count b {
+        display: block;
+        font: 800 54px/1 var(--display);
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+      }
+      .count span {
+        font: 600 18px/1 var(--font);
+        color: var(--muted);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .list {
+        margin-top: 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .row {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 7px 22px 7px 16px;
+        border-radius: 16px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+      }
+      .row .ic {
+        position: relative;
+        width: 38px;
+        height: 38px;
+        flex: none;
+      }
+      .row .ic .ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 2px solid #3a4a42;
+      }
+      .row .ic .ok {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: var(--green);
+        color: #06210f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 900 22px/1 var(--font);
+        box-shadow: 0 0 18px #25d36655;
+      }
+      .row .ic .spin {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        border-top-color: var(--gold);
+        border-right-color: var(--gold);
+      }
+      .row .txt {
+        flex: 1;
+        min-width: 0;
+      }
+      .row .nm {
+        font: 650 23px/1.2 var(--font);
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .row .dt {
+        margin-top: 3px;
+        font: 450 17px/1.25 var(--font);
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .row .dt .q {
+        color: #cfd9d3;
+      }
+      .row .ms {
+        flex: none;
+        font: 500 17px/1 var(--mono);
+        color: var(--faint);
+      }
+      .row .pill {
+        flex: none;
+      }
+      .row.feat {
+        border-color: #f2b33d99;
+        box-shadow:
+          0 0 0 1px #f2b33d33,
+          0 12px 44px #f2b33d1f;
+      }
+      .row.feat .nm {
+        color: var(--gold);
+      }
+      /* ---------- right: customer phone ---------- */
+      .phonewrap {
+        position: absolute;
+        left: 1316px;
+        top: 150px;
+        width: 430px;
+        height: 900px;
+        transform-origin: 0 0;
+      }
+      .phone {
+        left: 0;
+        top: 0;
+      }
+      .bubble {
+        max-width: 88%;
+      }
+      .bubble .clamp {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        overflow: hidden;
+      }
+      .bubble.featq,
+      .bubble.feata {
+        box-shadow:
+          0 0 0 3px var(--gold),
+          0 6px 24px #f2b33d55;
+      }
+      .bubble.sys {
+        align-self: center;
+        max-width: 96%;
+        background: #fff7e0;
+        padding: 8px 12px;
+        font: 500 16px/1.35 var(--font);
+        color: #54656f;
+        text-align: center;
+        border-radius: 10px;
+      }
+      .bubble.sys b {
+        color: #128c4b;
+      }
+      .bubble.sys.date {
+        background: #ffffffd9;
+        font: 600 13px/1 var(--font);
+        letter-spacing: 0.06em;
+        padding: 7px 12px;
+      }
+      .whohead {
+        position: absolute;
+        left: 1316px;
+        top: 98px;
+        width: 344px;
+        display: flex;
+        justify-content: center;
+      }
+      /* soft top edge so bubbles scrolling under the header don't show a hard cut */
+      .wa-body::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 30px;
+        background: linear-gradient(var(--wa-wall), #efe7dc00);
+        z-index: 2;
+      }
+      /* ---------- the cerveza callout ---------- */
+      .callout {
+        position: absolute;
+        left: 1290px;
+        top: 292px;
+        width: 400px;
+        padding: 18px 22px;
+        border-radius: 20px;
+        background: #1c1710;
+        border: 1px solid #f2b33daa;
+        box-shadow:
+          0 20px 60px #000a,
+          0 0 40px #f2b33d22;
+        transform-origin: 50% 0%;
+      }
+      .callout .big {
+        font: 800 30px/1.1 var(--display);
+        color: var(--gold);
+        letter-spacing: -0.01em;
+      }
+      .callout .sub {
+        margin-top: 8px;
+        font: 500 19px/1.35 var(--font);
+        color: #e8dfcf;
+      }
+      .callout .no {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: #ff6b5b22;
+        border: 2px solid var(--red);
+        font: 400 24px/1 var(--font);
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body data-scene="s09">
+    <div class="stage">
+      <div class="world" id="world">
+        <div class="glow"></div>
+        <div class="col">
+          <div class="head">
+            <div>
+              <div class="kicker" id="kick">
+                Antes de abrir · prueba automática
+              </div>
+              <div class="ttl" id="ttl">
+                <div class="shield">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"
+                    />
+                    <path d="m8.5 12 2.5 2.5 4.5-5" />
+                  </svg>
+                </div>
+                <div class="h2">El Inspector se hace pasar por cliente</div>
+              </div>
+            </div>
+            <div class="count" id="countBox">
+              <b id="count">0/9</b><span>pruebas</span>
+            </div>
+          </div>
+          <div class="list" id="list"></div>
+        </div>
+
+        <div class="whohead" id="whohead">
+          <span class="chip">Inspector · cliente de prueba</span>
+        </div>
+        <div class="phonewrap" id="pw">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="screen">
+              <div class="wa-head">
+                <div class="avatar">
+                  <img src="../assets/logo.png" alt="" />
+                </div>
+                <div>
+                  <div class="name" id="bizname">Arepas Rosa</div>
+                  <div class="status" id="status">en línea</div>
+                </div>
+              </div>
+              <div class="wa-body"><div class="msgs" id="msgs"></div></div>
+              <div class="wa-input">
+                <div class="field">Mensaje</div>
+                <div class="send"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout" id="callout">
+          <div class="no">🍺</div>
+          <div class="big" id="calloutName">No vende lo prohibido</div>
+          <div class="sub" id="calloutSub"></div>
+        </div>
+      </div>
+      <div class="tag">
+        <span class="dot"></span>Ensayo real · modelos de Meta en vivo ·
+        WhatsApp simulado
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const S0 = window.__S;
+      const R = S0.run || {};
+      const evs = R.events || [];
+
+      /* ---- the 9 real checks (run.live data, else inspect.check events) ---- */
+      const live = evs.find((e) => e.kind === "run.live");
+      let checks =
+        (live &&
+          live.data &&
+          live.data.inspector &&
+          live.data.inspector.checks) ||
+        [];
+      if (!checks.length)
+        checks = evs
+          .filter((e) => e.kind === "inspect.check")
+          .map((e) => e.data || {});
+      const N = checks.length;
+      const bizName =
+        (live && live.data && live.data.business_name) || "Arepas Rosa";
+      $("bizname").textContent = bizName;
+
+      const norm = (s) =>
+        (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+      const isBeer = (c) =>
+        /prohibid|cerveza|alcohol/.test(
+          norm(c.name + " " + (c.question || "")),
+        );
+      const fmtDetail = (c) => {
+        let d = c.detail || "";
+        d = d.replace(/\bpaid\b/g, "pagado");
+        const m = d.match(/https?:\/\/[^/]+(\/\S*)/);
+        if (m)
+          d = "link generado · " + decodeURIComponent(m[1]).replace(/^\//, "");
+        return d;
+      };
+      const md = (s) =>
+        (s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/\*([^*]+)\*/g, "<b>$1</b>");
+
+      /* ---- timing: synced to the narration ---- */
+      const cue = (w, n) => S0.cue(w, n);
+      const tCliente = cue("cliente") || 3.0;
+      const tPrecio = cue("precios") || 4.4;
+      const tHorario = cue("horario") || 5.0;
+      const tComprar = cue("comprar") || 6.1;
+      const tCerveza = cue("cerveza") || 6.5;
+      const tNiega = cue("niega") || 8.0;
+      const tPedido = cue("pedido") || 9.2;
+      const tPago = cue("pago") || 9.85;
+      const tPrueba = cue("prueba") || 10.26;
+      // Each check: when its question is sent, when the answer arrives, when it ticks.
+      const plan = checks.map((c, i) => {
+        const n = norm(c.name);
+        if (/ia|present/.test(n) && !c.question)
+          return { q: null, a: null, tick: tCliente - 0.1 };
+        if (isBeer(c))
+          return { q: tCerveza - 0.15, a: tCerveza + 0.75, tick: tNiega };
+        if (/precio/.test(n))
+          return { q: tPrecio - 0.55, a: tPrecio + 0.1, tick: tPrecio + 0.3 };
+        if (/horario/.test(n))
+          return {
+            q: tHorario - 0.15,
+            a: tHorario + 0.35,
+            tick: tHorario + 0.5,
+          };
+        if (/entrega|domicil/.test(n))
+          return {
+            q: tHorario + 0.55,
+            a: tComprar - 0.05,
+            tick: tComprar + 0.1,
+          };
+        if (/toma pedido/.test(n))
+          return { q: tPedido - 0.45, a: tPedido + 0.05, tick: tPedido + 0.2 };
+        if (/formulario/.test(n))
+          return { q: tPedido + 0.25, a: null, tick: tPedido + 0.4 };
+        if (/link/.test(n))
+          return { q: tPago - 0.1, a: null, tick: tPago + 0.05 };
+        if (/pago/.test(n))
+          return { q: tPrueba - 0.05, a: null, tick: tPrueba + 0.1 };
+        return { q: null, a: null, tick: tCliente + i * 0.6 };
+      });
+      // Ticks must be monotonic for the counter; nudge any out-of-order ones.
+      plan.forEach((p, i) => {
+        if (i && p.tick < plan[i - 1].tick + 0.12)
+          p.tick = plan[i - 1].tick + 0.12;
+      });
+      const beerIdx = checks.findIndex(isBeer);
+
+      /* ---- build checklist rows ---- */
+      const rows = checks.map((c, i) => {
+        const r = document.createElement("div");
+        r.className = "row";
+        const ms =
+          c.ms >= 100
+            ? (c.ms / 1000).toLocaleString("es-CO", {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              }) + " s"
+            : "";
+        const sub = c.question
+          ? `<span class="q">«${md(c.question)}»</span> · ${md(fmtDetail(c))}`
+          : md(fmtDetail(c));
+        r.innerHTML = `<div class="ic"><div class="ring"></div><div class="spin"></div><div class="ok">✓</div></div>
+          <div class="txt"><div class="nm">${md(c.name)}</div><div class="dt">${sub}</div></div>
+          ${ms ? `<div class="ms">${ms}</div>` : ""}`;
+        $("list").append(r);
+        return r;
+      });
+      // Long lists: shrink rows a little so 9 (or a few more) fit above the subtitle band.
+      if (N > 9)
+        document
+          .querySelectorAll(".row")
+          .forEach((r) => (r.style.padding = "6px 22px 6px 16px"));
+
+      /* ---- build chat bubbles (customer view: Inspector = out, agent = in) ---- */
+      const bubbles = [];
+      const addB = (cls, html, t) => {
+        const b = document.createElement("div");
+        b.className = "bubble " + cls;
+        b.innerHTML = html;
+        $("msgs").append(b);
+        bubbles.push({ el: b, t });
+        return b;
+      };
+      checks.forEach((c, i) => {
+        const p = plan[i];
+        const feat = i === beerIdx;
+        if (c.question && p.q != null)
+          addB(
+            "out" + (feat ? " featq" : ""),
+            `${md(c.question)}<span class="time">6:${String(14 + i).padStart(2, "0")}</span>`,
+            p.q,
+          );
+        if (c.answer && p.a != null)
+          addB(
+            "in" + (feat ? " feata" : ""),
+            `<div class="${feat ? "" : "clamp"}">${md(c.answer)}</div><span class="time">6:${String(14 + i).padStart(2, "0")}</span>`,
+            p.a,
+          );
+        if (!c.question)
+          addB("sys", `<b>✓ ${md(c.name)}</b><br>${md(fmtDetail(c))}`, p.q != null ? p.q : p.tick);
+      });
+      addB("sys date", "HOY", 0.55);
+      addB("sys", "Prueba automática antes de abrir", 0.9);
+      bubbles.sort((a, b) => a.t - b.t);
+      bubbles.forEach((b) => $("msgs").append(b.el));
+      if (beerIdx >= 0) {
+        $("calloutName").textContent = checks[beerIdx].name;
+        $("calloutSub").textContent = checks[beerIdx].detail || "";
+      }
+
+      scene((t, S) => {
+        const D = S.D;
+        // slow camera push
+        const k = S.p(t, 0, D);
+        $("world").style.transform =
+          `scale(${1 + 0.025 * S.ease(k)}) translateY(${-6 * k}px)`;
+
+        S.fade($("kick"), S.p(t, 0.0, 0.5));
+        S.fade(
+          $("ttl"),
+          S.p(
+            t,
+            cue("inspector") - 0.25 || 1.4,
+            (cue("inspector") || 1.6) + 0.4,
+          ),
+          20,
+        );
+        const tIns = cue("inspector") || 1.68;
+        S.fade($("countBox"), S.p(t, tIns + 0.1, tIns + 0.6));
+        // counter pops when the last check passes
+        const allIn = N ? S.p(t, plan[N - 1].tick, plan[N - 1].tick + 0.5) : 0;
+        $("count").style.transform =
+          `scale(${1 + 0.14 * Math.sin(Math.PI * allIn)})`;
+        $("count").style.transformOrigin = "100% 70%";
+        $("count").style.textShadow =
+          `0 0 ${28 * S.easeOut(allIn)}px #25d36688`;
+        S.fade($("whohead"), S.p(t, tCliente - 0.5, tCliente));
+        S.fade($("pw"), S.p(t, 0.1, 0.9), 40);
+
+        // rows: appear staggered; active row shows a spinner, done shows a tick
+        let done = 0;
+        rows.forEach((r, i) => {
+          const p = plan[i];
+          const r0 = Math.min(tIns + 0.15, 2.0) + i * 0.07;
+          S.fade(r, S.p(t, r0, r0 + 0.45), 14);
+          const start = p.q != null ? p.q : p.tick - 0.45;
+          const running = t >= start && t < p.tick;
+          const isDone = t >= p.tick;
+          if (isDone) done++;
+          const ok = r.querySelector(".ok");
+          const sp = r.querySelector(".spin");
+          const x = S.p(t, p.tick, p.tick + 0.3);
+          ok.style.opacity = S.easeOut(Math.min(1, x * 1.6));
+          ok.style.transform = `scale(${0.4 + 0.6 * S.back(x)})`;
+          sp.style.opacity = running ? 1 : 0;
+          sp.style.transform = `rotate(${t * 540}deg)`;
+          r.style.background = running ? "#1f2a24" : "";
+          r.style.borderColor = running ? "#f2b33d66" : "";
+          const feat =
+            i === beerIdx && t >= tCerveza - 0.2 && t < tPedido - 0.5;
+          r.classList.toggle("feat", feat);
+          r.querySelector(".nm").style.color = feat
+            ? ""
+            : isDone
+              ? "var(--text)"
+              : running
+                ? "var(--text)"
+                : "#c9d3cd";
+        });
+        $("count").textContent = `${done}/${N}`;
+        $("count").style.color =
+          done === N && N ? "var(--green)" : "var(--text)";
+
+        // chat: future bubbles sit below the visible area; each one slides in as it arrives
+        let off = 0;
+        bubbles.forEach((b) => {
+          const x = S.p(t, b.t, b.t + 0.35);
+          off += (b.el.offsetHeight + 8) * (1 - S.easeOut(x));
+          b.el.style.opacity = S.easeOut(x);
+        });
+        $("msgs").style.transform = `translateY(${off}px)`;
+        // "escribiendo…" while an answer is pending
+        const typing = checks.some(
+          (c, i) =>
+            c.answer &&
+            plan[i].a != null &&
+            t >= plan[i].q + 0.15 &&
+            t < plan[i].a,
+        );
+        $("status").textContent = typing ? "escribiendo…" : "en línea";
+
+        // dim non-featured bubbles while the cerveza exchange is on
+        const focus =
+          beerIdx >= 0
+            ? S.p(t, tCerveza + 0.8, tCerveza + 1.2) *
+              (1 - S.p(t, tPedido - 0.6, tPedido - 0.3))
+            : 0;
+        bubbles.forEach((b) => {
+          if (
+            !b.el.classList.contains("featq") &&
+            !b.el.classList.contains("feata")
+          )
+            b.el.style.opacity = String(
+              parseFloat(b.el.style.opacity) * (1 - 0.55 * focus),
+            );
+        });
+        // phone zooms a touch toward the refusal
+        const sc = 0.8 * (1 + 0.05 * S.ease(focus));
+        $("pw").style.transform += ` scale(${sc})`;
+
+        // callout
+        const co = $("callout");
+        const ci = S.p(t, tNiega - 0.1, tNiega + 0.35);
+        const cOut = S.p(t, tPedido - 0.6, tPedido - 0.25);
+        co.style.opacity = S.easeOut(ci) * (1 - cOut);
+        co.style.transform = `translateY(${(1 - S.easeOut(ci)) * -16}px) scale(${0.92 + 0.08 * S.back(ci)})`;
+      });
+    </script>
+  </body>
+</html>

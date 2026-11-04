@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .bg {
+        position: absolute;
+        inset: -40px;
+        background: url(../assets/broll_handoff.png) center/cover;
+        transform-origin: 52% 42%;
+      }
+      .shade {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(
+            0deg,
+            #0c110ff2 0%,
+            #0c110fd0 30%,
+            #0c110f55 55%,
+            #0c110f00 72%
+          ),
+          linear-gradient(90deg, #0c110fb0 0%, #0c110f40 45%, #0c110f00 70%);
+      }
+      .lines {
+        left: 120px;
+        top: 500px;
+        width: 1400px;
+      }
+      #l1 {
+        font: 750 64px/1.08 var(--display);
+        letter-spacing: -0.02em;
+        color: var(--text);
+        text-shadow: 0 4px 30px #000a;
+      }
+      #l2 {
+        margin-top: 14px;
+        font: 850 104px/1 var(--display);
+        letter-spacing: -0.035em;
+        color: var(--gold);
+        text-shadow: 0 6px 40px #0009;
+      }
+      .verbs {
+        margin-top: 30px;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+      .verbs .v {
+        display: inline-block;
+        font: 700 44px/1 var(--display);
+        letter-spacing: -0.01em;
+        color: var(--text);
+      }
+      .verbs .sep {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 12px var(--green);
+      }
+      .note {
+        right: 48px;
+        bottom: 172px;
+        opacity: 0.75;
+      }
+      /* End card */
+      #end {
+        position: absolute;
+        inset: 0;
+        background: #070a09;
+        overflow: hidden;
+      }
+      #glow {
+        position: absolute;
+        left: 50%;
+        top: 40%;
+        width: 1400px;
+        height: 900px;
+        margin: -450px 0 0 -700px;
+        background:
+          radial-gradient(closest-side, #f2b33d26, transparent 70%),
+          radial-gradient(closest-side at 70% 60%, #25d36614, transparent 70%);
+      }
+      .ec {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 250px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      #gtitle {
+        font: 850 190px/1 var(--display);
+        letter-spacing: -0.045em;
+        color: var(--text);
+      }
+      #gtitle b {
+        color: var(--gold);
+        font-weight: 850;
+      }
+      #tagline {
+        margin-top: 26px;
+        font: 600 46px/1.15 var(--display);
+        letter-spacing: -0.01em;
+        color: #d9d3c7;
+      }
+      #tagline span {
+        display: inline-block;
+        margin: 0 6px;
+      }
+      #tagline span.hl {
+        color: var(--gold);
+      }
+      .rule {
+        margin-top: 42px;
+        width: 520px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #f2b33d66, transparent);
+      }
+      #models {
+        margin-top: 40px;
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+      }
+      #repo {
+        margin-top: 36px;
+        font: 600 26px/1 var(--mono);
+        color: var(--muted);
+      }
+      #repo b {
+        color: var(--text);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body data-scene="s15">
+    <div class="stage">
+      <div class="bg" id="bg"></div>
+      <div class="shade"></div>
+      <div class="abs lines">
+        <div id="l1">Rosa no aprendió a usar ninguna plataforma.</div>
+        <div id="l2">Habló.</div>
+        <div class="verbs">
+          <span class="v" id="v0">Atiende</span
+          ><span class="sep" id="s1"></span> <span class="v" id="v1">cobra</span
+          ><span class="sep" id="s2"></span>
+          <span class="v" id="v2">avisa</span>
+        </div>
+      </div>
+      <div class="source abs note" id="note">
+        Imagen de ambiente generada con Muse Image
+      </div>
+
+      <div id="end">
+        <div id="glow"></div>
+        <div class="ec">
+          <div id="gtitle">Génesis</div>
+          <div id="tagline"></div>
+          <div class="rule" id="rule"></div>
+          <div id="models">
+            <span class="chip">Muse Voice Transcribe</span>
+            <span class="chip">Muse Spark 1.3</span>
+            <span class="chip">SAM 3.1</span>
+            <span class="chip">Muse Image</span>
+            <span class="chip wa">WhatsApp Cloud API</span>
+          </div>
+          <div id="repo">github.com/<b>juanmanuelcanchala-ai/genesis</b></div>
+        </div>
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      // Tagline words, each revealed when the narration says it.
+      const TAG = [
+        "De",
+        "una",
+        "nota",
+        "de",
+        "voz",
+        "a",
+        "un",
+        "negocio",
+        "vivo",
+      ];
+      const HL = { negocio: 1, vivo: 1 };
+      const tw = TAG.map((w) => {
+        const s = document.createElement("span");
+        s.textContent = w;
+        if (HL[w]) s.className = "hl";
+        $("tagline").appendChild(s);
+        return s;
+      });
+      const chips = [...document.querySelectorAll("#models .chip")];
+
+      scene((t, S) => {
+        // ----- B-roll part -----
+        const k = S.p(t, 0, 7.8);
+        $("bg").style.transform =
+          `scale(${1.03 + 0.1 * S.ease(k)}) translateX(${-24 * k}px)`;
+        S.fade($("l1"), S.p(t, 0.3, 1.0), 24);
+        const h = S.cue("hablo");
+        S.pop($("l2"), S.p(t, h - 0.1, h + 0.35));
+        const vc = [S.cue("atiende"), S.cue("cobra"), S.cue("avisa")];
+        vc.forEach((c, i) => S.pop($("v" + i), S.p(t, c - 0.1, c + 0.3)));
+        S.fade($("s1"), S.p(t, vc[1] - 0.2, vc[1]), 0);
+        S.fade($("s2"), S.p(t, vc[2] - 0.2, vc[2]), 0);
+        S.fade($("note"), S.p(t, 0.5, 1.2), 0);
+
+        // ----- End card -----
+        const g = S.cue("genesis");
+        const e = S.p(t, g - 0.55, g - 0.05);
+        $("end").style.opacity = S.ease(e);
+        $("end").style.display = e > 0 ? "" : "none";
+        const ek = S.p(t, g - 0.5, S.D);
+        $("glow").style.transform =
+          `translate(${40 * Math.sin(ek * 2.2)}px, ${-20 * ek}px) scale(${0.9 + 0.2 * ek})`;
+        const gt = $("gtitle");
+        const gp = S.p(t, g - 0.2, g + 0.45);
+        gt.style.opacity = S.easeOut(gp);
+        gt.style.transform = `scale(${(0.94 + 0.06 * S.easeOut(gp)) * (1 + 0.025 * ek)})`;
+        gt.style.letterSpacing = `${-0.045 + 0.03 * (1 - S.easeOut(gp))}em`;
+
+        // Tagline words follow the narration ("de una nota de voz a un negocio vivo").
+                const occ = {};
+        TAG.forEach((w, i) => {
+          const key = w.toLowerCase();
+          const n = occ[key] || 0;
+          occ[key] = n + 1;
+          // find the n-th occurrence after "Génesis:"
+          let c = 0,
+            seen = 0;
+          for (let j = 0; j < S.words.length; j++) {
+            const ww = S.words[j];
+            if (ww.start < g) continue;
+            const nn = ww.w
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[̀-ͯ]/g, "")
+              .replace(/[^a-z]/g, "");
+            if (nn === w.toLowerCase()) {
+              if (seen === n) {
+                c = ww.start;
+                break;
+              }
+              seen++;
+            }
+          }
+          if (!c) c = g + 1 + i * 0.2;
+          S.fade(tw[i], S.p(t, c - 0.08, c + 0.25), 14);
+        });
+
+        const last = S.cue("vivo");
+        S.fade($("rule"), S.p(t, last, last + 0.5), 0);
+        chips.forEach((ch, i) =>
+          S.pop(ch, S.p(t, last + 0.15 + i * 0.1, last + 0.55 + i * 0.1)),
+        );
+        S.fade($("repo"), S.p(t, last + 0.7, last + 1.2), 12);
+      });
+    </script>
+  </body>
+</html>

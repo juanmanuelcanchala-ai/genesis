@@ -1,0 +1,1744 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .cam {
+        position: absolute;
+        inset: 0;
+        transform-origin: 38% 22%;
+      }
+      .grid-bg {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(#ffffff06 1px, transparent 1px),
+          linear-gradient(90deg, #ffffff06 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: radial-gradient(
+          1100px 700px at 40% 45%,
+          #000,
+          transparent 75%
+        );
+      }
+      /* Header */
+      .hdr {
+        left: 64px;
+        top: 44px;
+      }
+      .hdr .h {
+        font: 760 50px/1.05 var(--display);
+        letter-spacing: -0.02em;
+        margin-top: 12px;
+      }
+      .models {
+        display: flex;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      .models .chip {
+        font-size: 18px;
+        padding: 8px 14px;
+      }
+      /* Timer */
+      .timer {
+        right: 64px;
+        top: 100px;
+        text-align: right;
+      }
+      .timer .tl {
+        font: 650 15px/1 var(--font);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .timer .tv {
+        font: 800 60px/1 var(--display);
+        letter-spacing: -0.02em;
+        margin-top: 6px;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+      }
+      .timer .tv .u {
+        font-size: 34px;
+        color: var(--muted);
+        margin-left: 6px;
+      }
+      .timer .ts {
+        font: 500 16px/1.2 var(--font);
+        color: var(--faint);
+        margin-top: 8px;
+      }
+      .timer .ts b {
+        color: var(--gold);
+        font-family: var(--mono);
+        font-weight: 600;
+      }
+      /* Graph */
+      .graph {
+        left: 64px;
+        top: 214px;
+        width: 1206px;
+        height: 690px;
+      }
+      .lane {
+        position: absolute;
+        left: 0;
+        right: 0;
+        border-radius: 18px;
+        background: #ffffff05;
+        border: 1px solid #ffffff08;
+      }
+      .lane .lh {
+        position: absolute;
+        left: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 128px;
+      }
+      .nf {
+        position: absolute;
+        left: 28px;
+        right: 28px;
+        bottom: 22px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .nf div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font: 500 15px/1 var(--mono);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .nf b {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .nf .cr {
+        padding: 4px 8px;
+        border-radius: 6px;
+        font: 600 12px/1 var(--font);
+        background: var(--surface-2);
+        color: var(--muted);
+      }
+      .nf .sp {
+        flex: 1;
+      }
+      .lane .lh .nm {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font: 650 19px/1 var(--font);
+        color: var(--text);
+      }
+      .lane .lh svg {
+        width: 22px;
+        height: 22px;
+        flex: none;
+        color: var(--muted);
+      }
+      .lane .lh .ct {
+        font: 500 14px/1 var(--mono);
+        color: var(--faint);
+        margin: 8px 0 0 32px;
+      }
+      svg.wires {
+        position: absolute;
+        left: 0;
+        top: 0;
+        overflow: visible;
+      }
+      .node {
+        position: absolute;
+        border-radius: 16px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        padding: 10px 12px 11px 14px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        overflow: visible;
+      }
+      .node .th {
+        flex: none;
+        height: 48px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .node .th img {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        display: block;
+      }
+      .node .th.round {
+        border-radius: 50%;
+      }
+      .node .col {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+      }
+      .node .tt {
+        font: 620 16px/1.17 var(--font);
+        color: var(--text);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+      .node .ft {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        margin-top: 4px;
+      }
+      .node .pill {
+        font-size: 13px;
+        padding: 5px 8px;
+        white-space: nowrap;
+      }
+      .node .ms {
+        font: 600 13px/1 var(--mono);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .node .bar {
+        position: absolute;
+        left: 14px;
+        right: 14px;
+        bottom: 6px;
+        height: 3px;
+        border-radius: 3px;
+        background: #f2b33d22;
+        overflow: hidden;
+      }
+      .node .bar i {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 34%;
+        border-radius: 3px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--gold),
+          transparent
+        );
+      }
+      .node .badges {
+        position: absolute;
+        right: 10px;
+        top: -12px;
+        display: flex;
+        gap: 6px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font: 650 12px/1 var(--mono);
+        white-space: nowrap;
+      }
+      .badge.idem {
+        background: #1c2a3f;
+        border: 1px solid #3d8bff88;
+        color: #cfe0ff;
+      }
+      .badge.rev {
+        background: #3a1f1c;
+        border: 1px solid #ff6b5b88;
+        color: #ffd2cc;
+      }
+      .badge svg {
+        width: 12px;
+        height: 12px;
+      }
+      /* Spotlight */
+      .spot {
+        left: 1300px;
+        top: 214px;
+        width: 556px;
+        height: 690px;
+        border-radius: 26px;
+        background: linear-gradient(180deg, #19241f, #141c18);
+        border: 1px solid var(--line);
+        box-shadow: 0 30px 80px #0007;
+        overflow: hidden;
+      }
+      .sec {
+        position: absolute;
+        inset: 0;
+        padding: 28px 28px 24px;
+      }
+      .sec .k {
+        font: 600 15px/1 var(--mono);
+        color: var(--faint);
+        letter-spacing: 0.04em;
+      }
+      .sec .st {
+        font: 720 32px/1.1 var(--display);
+        letter-spacing: -0.015em;
+        margin-top: 12px;
+      }
+      .sec .sub {
+        font: 450 18px/1.4 var(--font);
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .sec .chip {
+        font-size: 17px;
+        padding: 7px 13px;
+      }
+      .sec .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      /* plan list */
+      .plist {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 172px 1fr;
+        column-gap: 14px;
+        row-gap: 9px;
+        font: 500 15px/1.3 var(--mono);
+      }
+      .plist .id {
+        color: var(--text);
+      }
+      .plist .dp {
+        color: var(--faint);
+      }
+      .plist .dp b {
+        color: var(--gold);
+        font-weight: 600;
+      }
+      /* SAM */
+      .sam {
+        margin-top: 22px;
+        display: flex;
+        gap: 16px;
+      }
+      .sam .ph {
+        position: relative;
+        width: 360px;
+        height: 360px;
+        border-radius: 16px;
+        overflow: hidden;
+        flex: none;
+      }
+      .sam .ph img {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      .sam .ph svg {
+        position: absolute;
+        inset: 0;
+      }
+      .sam .scan {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 80px;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          #3d8bff44 80%,
+          #8fbaff
+        );
+      }
+      .crops {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .crop {
+        width: 124px;
+        height: 113px;
+        border-radius: 12px;
+        background: repeating-conic-gradient(#232f2a 0 25%, #1b2622 0 50%) 0 0 /
+          16px 16px;
+        border: 1px solid #3d8bff55;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .crop img {
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+      }
+      .cap {
+        font: 500 15px/1.35 var(--font);
+        color: var(--muted);
+        max-width: 500px;
+      }
+      /* Muse Image tiles */
+      .tiles {
+        display: flex;
+        gap: 16px;
+        margin-top: 22px;
+      }
+      .tile {
+        width: 242px;
+      }
+      .tile .im {
+        position: relative;
+        width: 242px;
+        height: 242px;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #1f2b26;
+        border: 1px solid var(--line);
+      }
+      .tile .im img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .tile .gen {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font: 600 16px/1 var(--font);
+        color: var(--muted);
+      }
+      .tile .gen .sh {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          110deg,
+          transparent 30%,
+          #3d8bff22 50%,
+          transparent 70%
+        );
+        background-size: 300% 100%;
+      }
+      .tile .gen .el {
+        font: 700 26px/1 var(--mono);
+        color: #cfe0ff;
+      }
+      .tile .lb {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font: 600 17px/1.2 var(--font);
+      }
+      .tile .lb span:last-child {
+        font: 600 14px/1.2 var(--mono);
+        color: var(--muted);
+      }
+      .prompt {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: #0c110f;
+        border: 1px solid var(--line);
+        font: 500 14px/1.45 var(--mono);
+        color: #b9c7bf;
+      }
+      .prompt .pin {
+        /* exactly 5 lines of 14px/1.45; clipping here (not at the padded box) leaves no sliver of a 6th */
+        height: calc(5 * 1.45em);
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 5;
+      }
+      .prompt b {
+        color: var(--faint);
+        font-weight: 500;
+      }
+      /* Flow */
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .stat {
+        padding: 7px 11px;
+        border-radius: 10px;
+        background: var(--surface-2);
+        font: 600 15px/1 var(--mono);
+        color: var(--text);
+      }
+      .stat em {
+        font-style: normal;
+        color: var(--muted);
+      }
+      .flowwrap {
+        display: flex;
+        gap: 18px;
+        margin-top: 18px;
+      }
+      .fscreen {
+        width: 262px;
+        flex: none;
+        border-radius: 18px;
+        background: #fff;
+        color: #111b21;
+        padding: 14px 14px 12px;
+        box-shadow: 0 16px 40px #0008;
+      }
+      .fscreen .bar0 {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font: 650 14px/1 var(--font);
+        color: #54656f;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9edef;
+        margin-bottom: 10px;
+      }
+      .fscreen .hd {
+        font: 750 19px/1.1 var(--font);
+      }
+      .fscreen .bd {
+        font: 450 13px/1.3 var(--font);
+        color: #54656f;
+        margin: 4px 0 8px;
+      }
+      .ff {
+        border: 1px solid #c9d1d6;
+        border-radius: 8px;
+        padding: 6px 10px;
+        margin-top: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+      }
+      .ff .fl {
+        font: 450 11px/1 var(--font);
+        color: #667781;
+      }
+      .ff .fv {
+        font: 500 13px/1.2 var(--font);
+        color: #111b21;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .ff .cv {
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid #667781;
+        border-bottom: 2px solid #667781;
+        transform: rotate(45deg);
+        flex: none;
+        margin-top: -4px;
+      }
+      .fbtn {
+        margin-top: 12px;
+        border-radius: 999px;
+        background: #1fa855;
+        color: #fff;
+        text-align: center;
+        font: 650 14px/1 var(--font);
+        padding: 10px;
+      }
+      .fside {
+        flex: 1;
+        min-width: 0;
+      }
+      .scr {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font: 600 15px/1 var(--mono);
+        color: var(--text);
+        flex-wrap: wrap;
+      }
+      .scr span.s {
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 1px solid #25d36666;
+        background: #25d3661a;
+      }
+      .scr span.a {
+        color: var(--faint);
+      }
+      .checks {
+        margin-top: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .ck {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        font: 500 16px/1.3 var(--font);
+        color: #d9e2dc;
+      }
+      .ck i {
+        flex: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #25d36633;
+        color: var(--green);
+        font: 800 13px/20px var(--font);
+        text-align: center;
+        font-style: normal;
+      }
+      /* Agent */
+      .tools {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 18px;
+      }
+      .tool {
+        padding: 8px 11px;
+        border-radius: 10px;
+        background: #0c110f;
+        border: 1px solid var(--line);
+        font: 600 16px/1 var(--mono);
+        color: var(--gold);
+      }
+      .sysp {
+        margin-top: 18px;
+        padding: 16px 18px;
+        border-radius: 14px;
+        background: #0c110f;
+        border: 1px solid var(--line);
+        font: 500 16px/1.55 var(--mono);
+        color: #b9c7bf;
+      }
+      .sysp .ln {
+        display: block;
+        border-radius: 6px;
+        padding: 2px 6px;
+        margin: 0 -6px;
+      }
+      .sysp .hl {
+        color: var(--text);
+      }
+      .sysp .k2 {
+        font: 600 13px/1 var(--mono);
+        color: var(--faint);
+        margin-bottom: 10px;
+        display: block;
+        letter-spacing: 0.04em;
+      }
+      /* Guarantees */
+      .gblk {
+        margin-top: 24px;
+        padding: 22px 22px;
+        border-radius: 18px;
+        background: #0c110f99;
+        border: 1px solid var(--line);
+      }
+      .gblk .gt {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font: 700 24px/1.2 var(--display);
+      }
+      .gblk .gt svg {
+        width: 22px;
+        height: 22px;
+        flex: none;
+      }
+      .gblk .gd {
+        font: 450 17px/1.45 var(--font);
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .gblk code {
+        display: block;
+        margin-top: 10px;
+        font: 600 15px/1.3 var(--mono);
+        color: #cfe0ff;
+      }
+      .flowline {
+        position: absolute;
+        left: 28px;
+        right: 28px;
+        bottom: 26px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        font: 600 14px/1 var(--mono);
+        color: var(--muted);
+      }
+      .flowline span {
+        padding: 7px 8px;
+        border-radius: 8px;
+        background: var(--surface-2);
+        color: var(--text);
+      }
+      .flowline span.bad {
+        background: #ff6b5b1c;
+        color: #ffd2cc;
+      }
+      .flowline i {
+        font-style: normal;
+        color: var(--faint);
+      }
+      .rl {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      .rl span {
+        padding: 5px 9px;
+        border-radius: 8px;
+        background: #ff6b5b1c;
+        border: 1px solid #ff6b5b55;
+        font: 600 13px/1 var(--font);
+        color: #ffd2cc;
+      }
+    </style>
+  </head>
+  <body data-scene="s08">
+    <div class="stage">
+      <div class="cam" id="cam">
+        <div class="grid-bg"></div>
+        <div class="abs hdr" id="hdr">
+          <div class="kicker" id="kick">Plan → aplicar</div>
+          <div class="h">Un grafo arma el negocio en carriles paralelos</div>
+          <div class="models">
+            <span class="chip" id="mSam">SAM 3.1</span>
+            <span class="chip" id="mImg">Muse Image</span>
+            <span class="chip" id="mSpark">Muse Spark</span>
+          </div>
+        </div>
+        <div class="abs timer" id="timer">
+          <div class="tl">Tiempo real de la corrida</div>
+          <div class="tv">
+            <span id="tval">0,0</span><span class="u">s</span>
+          </div>
+          <div class="ts">
+            desde «listo» · construcción <b id="tbuild">+0,0 s</b>
+          </div>
+        </div>
+        <div class="abs graph" id="graph">
+          <svg class="wires" id="wires" width="1206" height="690"></svg>
+        </div>
+        <div class="abs spot" id="spot">
+          <!-- A: plan -->
+          <div class="sec" id="secA">
+            <div class="k">plan.ready</div>
+            <div class="st">Plan compilado del pedido de Rosa</div>
+            <div class="sub" id="aSub"></div>
+            <div class="plist" id="plist"></div>
+          </div>
+          <!-- B: SAM -->
+          <div class="sec" id="secB">
+            <div class="row">
+              <div class="k">brand.crops</div>
+              <span class="chip">SAM 3.1</span>
+            </div>
+            <div class="st">Recorta la arepa de sus fotos</div>
+            <div class="sam">
+              <div class="ph" id="samPh">
+                <img src="../assets/foto_1.png" />
+                <div class="scan" id="scan"></div>
+                <svg id="samSvg" viewBox="0 0 360 360"></svg>
+              </div>
+              <div class="crops">
+                <div class="crop" id="cr0">
+                  <img src="../assets/crop_1_0.png" />
+                </div>
+                <div class="crop" id="cr1">
+                  <img src="../assets/crop_1_1.png" />
+                </div>
+                <div class="crop" id="cr2">
+                  <img src="../assets/crop_2_0.png" />
+                </div>
+              </div>
+            </div>
+            <div class="cap" id="samCap" style="margin-top: 16px"></div>
+          </div>
+          <!-- C: Muse Image -->
+          <div class="sec" id="secC">
+            <div class="row">
+              <div class="k">brand.hero · brand.logo</div>
+              <span class="chip">Muse Image</span>
+            </div>
+            <div class="st">Una foto limpia y un logo</div>
+            <div class="tiles">
+              <div class="tile">
+                <div class="im">
+                  <div class="gen" id="gHero">
+                    <div class="sh" id="gHeroSh"></div>
+                    <div class="el" id="gHeroEl"></div>
+                    <div>generando</div>
+                  </div>
+                  <img src="../assets/hero.png" id="iHero" />
+                </div>
+                <div class="lb">
+                  <span>Foto de producto</span><span id="lHero"></span>
+                </div>
+              </div>
+              <div class="tile">
+                <div class="im">
+                  <div class="gen" id="gLogo">
+                    <div class="sh" id="gLogoSh"></div>
+                    <div class="el" id="gLogoEl"></div>
+                    <div>generando</div>
+                  </div>
+                  <img src="../assets/logo.png" id="iLogo" />
+                </div>
+                <div class="lb"><span>Logo</span><span id="lLogo"></span></div>
+              </div>
+            </div>
+            <div class="prompt" id="prompt">
+              <div class="pin"><b>prompt del logo ›</b> <span id="promptTx"></span></div>
+            </div>
+          </div>
+          <!-- D: Flow -->
+          <div class="sec" id="secD">
+            <div class="row">
+              <div class="k">menu.flow</div>
+              <span class="chip wa">WhatsApp Flows</span>
+            </div>
+            <div class="st" id="dTitle"></div>
+            <div class="stats" id="dStats"></div>
+            <div class="flowwrap">
+              <div class="fscreen" id="fscreen"></div>
+              <div class="fside">
+                <div class="k" style="margin-bottom: 10px">pantallas</div>
+                <div class="scr" id="dScr"></div>
+                <div class="checks" id="dChecks"></div>
+              </div>
+            </div>
+          </div>
+          <!-- E: Agent -->
+          <div class="sec" id="secE">
+            <div class="row">
+              <div class="k">agent.config</div>
+              <span class="chip">Muse Spark</span>
+            </div>
+            <div class="st" id="eTitle"></div>
+            <div class="sub" id="eSub"></div>
+            <div class="tools" id="eTools"></div>
+            <div class="sysp" id="eSys"></div>
+          </div>
+          <!-- F: guarantees -->
+          <div class="sec" id="secF">
+            <div class="k">plan.py · apply / verify / revert</div>
+            <div class="st">Seguro de repetir, seguro si falla</div>
+            <div class="gblk" id="g1">
+              <div class="gt">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#8fbaff"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="8" cy="15" r="4" />
+                  <path d="m10.8 12.2 8.2-8.2M16 7l3 3M14 9l2 2" />
+                </svg>
+                Cada paso es idempotente
+              </div>
+              <div class="gd">
+                Cada nodo tiene su clave. Si la corrida se repite, lo ya
+                aplicado se reutiliza: nada se duplica.
+              </div>
+              <code>clave = sha256(nodo + número + spec)[:16]</code>
+            </div>
+            <div class="gblk" id="g2">
+              <div class="gt">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#ff8f83"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 12a9 9 0 1 0 3-6.7L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+                Si algo crítico falla, se revierte
+              </div>
+              <div class="gd">
+                Se deshace todo lo aplicado, en orden inverso: nunca sale al
+                aire un negocio a medias.
+              </div>
+              <div class="rl" id="rl"></div>
+            </div>
+            <div class="flowline" id="g3">
+              <span>apply</span><i>→</i><span>verify</span><i>→</i><span>guarda clave</span><i class="late">·</i><span class="bad late">falla</span><i class="late">→</i><span class="bad late">revert ⟲</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tag">
+        <span class="dot"></span>Ensayo real · modelos de Meta en vivo ·
+        WhatsApp simulado
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const S0 = window.__S;
+      const RUN = window.RUN || { events: [], sent: [] };
+      const EV = RUN.events || [];
+      const SENT = RUN.sent || [];
+      const clamp = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
+
+      // ---------- number formatting (Colombian: 5.888 / 26,4) ----------
+      const grp = (n) =>
+        String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      const dec1 = (v) => {
+        const r = Math.round(v * 10) / 10;
+        const i = Math.trunc(r);
+        return grp(i) + "," + Math.round(Math.abs(r - i) * 10);
+      };
+      const fmtMs = (ms) => (ms < 1 ? "<1 ms" : grp(ms) + " ms");
+
+      // ---------- real run data ----------
+      const planEv = EV.find((e) => e.kind === "plan.ready") || {
+        t: 0,
+        data: { nodes: [] },
+      };
+      const NODES = planEv.data.nodes || [];
+      const byId = Object.fromEntries(NODES.map((n) => [n.id, n]));
+      const tStart = {},
+        tDone = {},
+        tFail = {},
+        ms = {},
+        details = {},
+        doneData = {};
+      for (const e of EV) {
+        if (e.kind === "node.started" && tStart[e.node] == null)
+          tStart[e.node] = e.t;
+        if (e.kind === "node.done") {
+          tDone[e.node] = e.t;
+          ms[e.node] = e.data && e.data.ms;
+          doneData[e.node] = (e.data && e.data.outputs) || {};
+        }
+        if (e.kind === "node.failed") tFail[e.node] = e.t;
+        if (e.kind === "node.detail")
+          (details[e.node] = details[e.node] || []).push(e);
+      }
+      const runStart = (EV.find((e) => e.kind === "run.started") || { t: 0 }).t;
+      const tPlan = planEv.t;
+      const doneTimes = Object.values(tDone);
+      const tEnd = doneTimes.length ? Math.max(...doneTimes) : tPlan + 1;
+      const checks = EV.filter((e) => e.kind === "inspect.check");
+
+      // Nodes with a revert() in the code (genesis/lanes/*.py): shown at "revierte".
+      const REVERTS = [
+        "number.profile",
+        "menu.flow",
+        "menu.catalog",
+        "agent.config",
+        "launch.live",
+      ];
+
+      // ---------- time warp: real run seconds -> scene seconds (monotonic, piecewise linear) ----------
+      const cue = (w, n) => S0.cue(w, n);
+      let anchors = [
+        [tPlan, cue("arma") - 0.05],
+        [tDone["brand.crops"], cue("recorta") + 0.35],
+        [tDone["brand.hero"], cue("limpia") - 0.25],
+        [tDone["inspector.run"], cue("negocio", 1) + 0.1],
+        [tEnd, cue("cada") + 0.8],
+      ].filter((a) => a[0] != null && isFinite(a[0]) && a[1] > 0);
+      {
+        const xs = [];
+        for (const x of anchors.map((a) => a[0]).sort((a, b) => a - b))
+          if (!xs.length || x - xs[xs.length - 1] > 0.5) xs.push(x); // drop near-duplicate real times
+        const ys = anchors
+          .map((a) => a[1])
+          .sort((a, b) => a - b)
+          .slice(0, xs.length);
+        anchors = xs.map((x, i) => [x, ys[i]]);
+      }
+      const pw = (pts) => (v) => {
+        if (!pts.length) return v;
+        if (v <= pts[0][0]) return pts[0][1];
+        for (let i = 1; i < pts.length; i++)
+          if (v <= pts[i][0]) {
+            const [x0, y0] = pts[i - 1],
+              [x1, y1] = pts[i];
+            return y0 + ((y1 - y0) * (v - x0)) / (x1 - x0 || 1);
+          }
+        return pts[pts.length - 1][1];
+      };
+      const warp = pw(anchors);
+      const realAt = pw(anchors.map(([x, y]) => [y, x]));
+
+      // Visual start/done per node: real timing, a short stagger for nodes that start in the same
+      // instant, and a minimum visible "corriendo" so near-instant steps are readable.
+      const vS = {},
+        vD = {},
+        vF = {};
+      {
+        const order = NODES.filter((n) => tStart[n.id] != null).sort(
+          (a, b) => tStart[a.id] - tStart[b.id],
+        );
+        let prev = -1e9,
+          k = 0;
+        const off = {};
+        for (const n of order) {
+          k = tStart[n.id] - prev < 0.05 ? k + 1 : 0;
+          off[n.id] = k * 0.14;
+          prev = tStart[n.id];
+        }
+        for (const n of NODES) {
+          if (tStart[n.id] == null) continue;
+          const depD = Math.max(
+            0,
+            ...(n.deps || []).map((d) => (vD[d] != null ? vD[d] : 0)),
+          );
+          vS[n.id] = Math.max(warp(tStart[n.id]) + off[n.id], depD);
+          if (tDone[n.id] != null)
+            vD[n.id] = Math.max(warp(tDone[n.id]), vS[n.id] + 0.4);
+          if (tFail[n.id] != null)
+            vF[n.id] = Math.max(warp(tFail[n.id]), vS[n.id] + 0.4);
+        }
+      }
+
+      // ---------- layout: rows = lanes, columns = dependency depth ----------
+      const LANES = [
+        [
+          "number",
+          "Número",
+          '<path d="M6.5 3h3l1.5 4-2 1.5a11 11 0 0 0 6.5 6.5L17 13l4 1.5v3A2.5 2.5 0 0 1 18.5 20 15.5 15.5 0 0 1 4 5.5 2.5 2.5 0 0 1 6.5 3Z"/>',
+        ],
+        [
+          "brand",
+          "Marca",
+          '<path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.7 1.5-1.5 0-1.2-1-1.5-1-2.5 0-.8.7-1.5 1.5-1.5H16a5 5 0 0 0 5-5c0-4.2-4-7.5-9-7.5Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/>',
+        ],
+        ["menu", "Menú", '<path d="M4 6h16M4 12h16M4 18h10"/>'],
+        [
+          "agent",
+          "Agente",
+          '<path d="M4 5h16v11H9l-5 4V5Z"/><path d="M9 10h.01M15 10h.01"/>',
+        ],
+        [
+          "payments",
+          "Pagos",
+          '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/>',
+        ],
+        [
+          "inspector",
+          "Inspector",
+          '<path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+        ],
+        [
+          "launch",
+          "Lanzamiento",
+          '<path d="M5 19c2-6 6-10 14-14-1 8-5 12-11 14l-3 0Z"/><path d="M9 15l-3 3"/>',
+        ],
+      ];
+      const laneKeys = LANES.map((l) => l[0]).filter((k) =>
+        NODES.some((n) => n.lane === k),
+      );
+      for (const n of NODES)
+        if (!laneKeys.includes(n.lane)) laneKeys.push(n.lane);
+      const col = {},
+        used = {};
+      for (const n of NODES) {
+        let c = Math.max(
+          0,
+          ...(n.deps || []).map((d) => (col[d] != null ? col[d] + 1 : 0)),
+        );
+        const u = (used[n.lane] = used[n.lane] || new Set());
+        while (u.has(c)) c++;
+        u.add(c);
+        col[n.id] = c;
+      }
+      const NC = Math.max(1, ...Object.values(col).map((c) => c + 1));
+      const GW = 1206,
+        GH = 690,
+        LABW = 150,
+        GAP = 32;
+      const RH = GH / laneKeys.length;
+      const CW = (GW - LABW - 14 - (NC - 1) * GAP) / NC;
+      const CH = Math.min(86, RH - 12);
+      const pos = {};
+      const graph = $("graph");
+      const laneEls = {};
+      laneKeys.forEach((k, i) => {
+        const meta = LANES.find((l) => l[0] === k) || [k, k, ""];
+        const d = document.createElement("div");
+        d.className = "lane";
+        d.style.top = i * RH + 4 + "px";
+        d.style.height = RH - 8 + "px";
+        d.innerHTML = `<div class="lh"><div class="nm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${meta[2]}</svg>${meta[1]}</div><div class="ct"></div></div>`;
+        graph.insertBefore(d, $("wires"));
+        laneEls[k] = { el: d, ct: d.querySelector(".ct"), row: i };
+      });
+      const THUMB = {
+        "brand.hero": "hero.png",
+        "brand.logo": "logo.png",
+        "number.photo": "logo.png",
+      };
+      const cropsCount = (doneData["brand.crops"] || {}).count;
+      if (cropsCount > 0) THUMB["brand.crops"] = "crop_1_0.png";
+      const cards = {};
+      for (const n of NODES) {
+        const row = laneEls[n.lane].row;
+        const x = LABW + col[n.id] * (CW + GAP);
+        const y = row * RH + (RH - CH) / 2;
+        pos[n.id] = { x, y };
+        const d = document.createElement("div");
+        d.className = "node";
+        Object.assign(d.style, {
+          left: x + "px",
+          top: y + "px",
+          width: CW + "px",
+          height: CH + "px",
+        });
+        const th = THUMB[n.id]
+          ? `<div class="th${n.id === "number.photo" ? " round" : ""}"><img src="../assets/${THUMB[n.id]}"></div>`
+          : "";
+        d.innerHTML = `${th}<div class="col"><div class="tt"></div><div class="ft"><span class="pill"></span><span class="ms"></span></div></div><div class="bar"><i></i></div><div class="badges"></div>`;
+        d.querySelector(".tt").textContent = n.title;
+        const b = d.querySelector(".badges");
+        b.innerHTML =
+          `<span class="badge idem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M16 7l3 3"/></svg>idem</span>` +
+          (REVERTS.includes(n.id)
+            ? `<span class="badge rev">↺ revert</span>`
+            : "");
+        graph.appendChild(d);
+        cards[n.id] = {
+          el: d,
+          th: d.querySelector(".th"),
+          pill: d.querySelector(".pill"),
+          col: d.querySelector(".col"),
+          ms: d.querySelector(".ms"),
+          bar: d.querySelector(".bar"),
+          bi: d.querySelector(".bar i"),
+          idem: b.querySelector(".idem"),
+          rev: b.querySelector(".rev"),
+        };
+      }
+      // wires
+      const SVGNS = "http://www.w3.org/2000/svg";
+      const wires = [];
+      for (const n of NODES)
+        for (const dId of n.deps || []) {
+          if (!pos[dId]) continue;
+          const a = pos[dId],
+            b = pos[n.id];
+          const x1 = a.x + CW,
+            y1 = a.y + CH / 2,
+            x2 = b.x,
+            y2 = b.y + CH / 2;
+          const dx = Math.max(24, (x2 - x1) * 0.5);
+          const p = document.createElementNS(SVGNS, "path");
+          p.setAttribute(
+            "d",
+            `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`,
+          );
+          p.setAttribute("fill", "none");
+          p.setAttribute("stroke-width", "2");
+          p.setAttribute("stroke-linecap", "round");
+          p.setAttribute("pathLength", "1");
+          p.setAttribute("stroke-dasharray", "1 1");
+          const dot = document.createElementNS(SVGNS, "circle");
+          dot.setAttribute("r", "5");
+          const end = document.createElementNS(SVGNS, "circle");
+          end.setAttribute("r", "4");
+          end.setAttribute("cx", x2);
+          end.setAttribute("cy", y2);
+          $("wires").append(p, end, dot);
+          wires.push({
+            p,
+            dot,
+            end,
+            from: dId,
+            to: n.id,
+            len: p.getTotalLength(),
+            c: col[dId],
+          });
+        }
+
+      // ---------- spotlight content from RUN ----------
+      $("kick").textContent =
+        `Plan → aplicar · ${NODES.length} nodos · ${laneKeys.length} carriles`;
+      $("aSub").textContent =
+        "Cada nodo declara de qué depende; lo independiente corre en paralelo.";
+      const plist = $("plist");
+      const plRows = NODES.map((n) => {
+        const a = document.createElement("div");
+        a.className = "id";
+        const b = document.createElement("div");
+        b.className = "dp";
+        b.innerHTML = (n.deps || []).length
+          ? "← " + n.deps.map((d) => `<b>${d}</b>`).join(", ")
+          : "sin dependencias";
+        plist.append(a, b);
+        return { a, b, id: n.id };
+      });
+
+      // SAM boxes: real SAM 3.1 output for foto_1 (copied from assets/sam.json)
+      const SAM = {
+        size: [1600, 1600],
+        boxes: [
+          { box: [791.0, 647.0, 1346.0, 958.0], score: 0.604938268661499 },
+          { box: [251.0, 775.0, 955.0, 1197.0], score: 0.5936508178710938 },
+        ],
+      };
+      const samBoxes = SAM.boxes.map((b, i) => {
+        const k = 360 / SAM.size[0];
+        const [x0, y0, x1, y1] = b.box.map((v) => v * k);
+        const r = document.createElementNS(SVGNS, "rect");
+        Object.entries({
+          x: x0,
+          y: y0,
+          width: x1 - x0,
+          height: y1 - y0,
+          rx: 6,
+          fill: "#3d8bff1f",
+          stroke: "#8fbaff",
+          "stroke-width": 2.5,
+          pathLength: 1,
+          "stroke-dasharray": "1 1",
+        }).forEach(([k2, v]) => r.setAttribute(k2, v));
+        const g = document.createElementNS(SVGNS, "g");
+        const lb = document.createElementNS(SVGNS, "rect");
+        const txt = `SAM ${dec1(b.score * 100)} %`;
+        const tw = txt.length * 7.6 + 14;
+        Object.entries({
+          x: x0,
+          y: y0 - 24,
+          width: tw,
+          height: 22,
+          rx: 5,
+          fill: "#3d8bff",
+        }).forEach(([k2, v]) => lb.setAttribute(k2, v));
+        const tx = document.createElementNS(SVGNS, "text");
+        Object.entries({
+          x: x0 + 7,
+          y: y0 - 8,
+          fill: "#fff",
+          "font-family": "JetBrainsMono NF, monospace",
+          "font-size": 13,
+          "font-weight": 700,
+        }).forEach(([k2, v]) => tx.setAttribute(k2, v));
+        tx.textContent = txt;
+        g.append(lb, tx);
+        $("samSvg").append(r, g);
+        return { r, g };
+      });
+      $("samCap").textContent =
+        cropsCount > 0
+          ? "Cajas y recortes reales de SAM 3.1 sobre las fotos de Rosa."
+          : "Cajas y recortes reales de SAM 3.1 sobre las fotos de Rosa, de una consulta aparte: en este ensayo SAM devolvió 0 recortes.";
+
+      // Muse Image
+      const logoPrompt = (
+        (details["brand.logo"] || [])
+          .map((e) => e.data && e.data.prompt)
+          .find(Boolean) ||
+        doneData["brand.logo"].prompt ||
+        ""
+      ).replace(/\s+/g, " ");
+
+      // Flow
+      const flowJson = (
+        (SENT.find((s) => s.op === "update_flow_json") || {}).payload || {}
+      ).flow_json || { screens: [] };
+      const flowDet = (details["menu.flow"] || []).map((e) => e.data || {});
+      const flowBytes =
+        (doneData["menu.flow"] || {}).bytes ||
+        (flowDet.find((d) => d.bytes) || {}).bytes;
+      const screens = flowJson.screens || [];
+      const FIELD_T = [
+        "Dropdown",
+        "TextInput",
+        "TextArea",
+        "RadioButtonsGroup",
+        "CheckboxGroup",
+        "DatePicker",
+        "OptIn",
+        "ChipsSelector",
+      ];
+      const fields = [];
+      const walk = (cs) =>
+        (cs || []).forEach((c) => {
+          if (FIELD_T.includes(c.type)) fields.push(c);
+          walk(c.children);
+        });
+      screens.forEach((s) => walk(s.layout && s.layout.children));
+      $("dTitle").textContent =
+        (byId["menu.flow"] || {}).title || "Formulario de pedido (Flow)";
+      const stats = [
+        `<em>JSON</em> v${flowJson.version || "?"}`,
+        `${screens.length} <em>pantallas</em>`,
+        `${fields.length} <em>campos</em>`,
+        flowBytes ? `${grp(flowBytes)} <em>bytes</em>` : null,
+      ].filter(Boolean);
+      $("dStats").innerHTML = stats
+        .map((s) => `<span class="stat">${s}</span>`)
+        .join("");
+      const statEls = [...$("dStats").children];
+      {
+        const s0 = screens[0] || { layout: { children: [] } };
+        let h = `<div class="bar0"><span>✕</span><span>${s0.title || ""}</span><span>⋮</span></div>`;
+        for (const c of s0.layout.children || []) {
+          if (c.type === "TextHeading") h += `<div class="hd ffi"></div>`;
+          else if (c.type === "TextBody") h += `<div class="bd ffi"></div>`;
+          else if (c.type === "Dropdown")
+            h += `<div class="ff ffi"><div style="min-width:0"><div class="fl"></div><div class="fv">${c["init-value"] != null ? c["init-value"] : "Elegir"}</div></div><div class="cv"></div></div>`;
+          else if (c.type === "TextInput" || c.type === "TextArea")
+            h += `<div class="ff ffi"><div style="min-width:0"><div class="fv" style="color:#667781"></div></div></div>`;
+          else if (c.type === "Footer") h += `<div class="fbtn ffi"></div>`;
+        }
+        $("fscreen").innerHTML = h;
+        const items = [...$("fscreen").querySelectorAll(".ffi")];
+        let i = 0;
+        for (const c of s0.layout.children || []) {
+          const el = items[i];
+          if (!el) break;
+          if (c.type === "TextHeading") el.textContent = c.text;
+          else if (c.type === "TextBody")
+            el.textContent = String(c.text || "").split("\n")[0];
+          else if (c.type === "Dropdown")
+            el.querySelector(".fl").textContent = c.label;
+          else if (c.type === "TextInput" || c.type === "TextArea")
+            el.querySelector(".fv").textContent = c.label;
+          else if (c.type === "Footer") el.textContent = c.label;
+          else continue;
+          i++;
+        }
+      }
+      const formItems = [...$("fscreen").querySelectorAll(".ffi")];
+      $("dScr").innerHTML = screens
+        .map((s) => `<span class="s">${s.id}</span>`)
+        .join('<span class="a">→</span>');
+      const flowMsgs = (details["menu.flow"] || []).map((e) => e.message);
+      const lint = (flowDet.find((d) => Array.isArray(d.lint)) || {}).lint;
+      const ckTexts = [
+        flowMsgs[0],
+        lint ? `Revisión local: ${lint.length} avisos` : null,
+        flowMsgs[flowMsgs.length - 1],
+      ].filter(Boolean);
+      $("dChecks").innerHTML = ckTexts
+        .map((t) => `<div class="ck"><i>✓</i><span></span></div>`)
+        .join("");
+      const ckEls = [...$("dChecks").children];
+      ckEls.forEach(
+        (el, i) => (el.querySelector("span").textContent = ckTexts[i]),
+      );
+
+      // Agent
+      const ag = doneData["agent.config"] || {};
+      const agMsg = ((details["agent.config"] || [])[0] || {}).message || "";
+      $("eTitle").textContent =
+        (byId["agent.config"] || {}).title || "Agente del negocio";
+      $("eSub").textContent =
+        agMsg +
+        (ag.prompt_chars
+          ? ` · prompt de ${grp(ag.prompt_chars)} caracteres`
+          : "");
+      $("eTools").innerHTML = (ag.tools || [])
+        .map((t) => `<span class="tool">${t}()</span>`)
+        .join("");
+      const toolEls = [...$("eTools").children];
+      const pv = String(ag.prompt_preview || "");
+      const pLines = pv
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+      const firstLine = pLines[0] || "";
+      const soloRaw = pLines.find((l) => /solo ayudas/i.test(l)) || "";
+      const solo = soloRaw.includes(".")
+        ? soloRaw.slice(0, soloRaw.indexOf(".") + 1)
+        : soloRaw;
+      $("eSys").innerHTML =
+        `<span class="k2">system prompt (real)</span><span class="ln" id="eL1"></span><span class="ln hl" id="eL2" style="margin-top:10px"></span>`;
+
+      // Guarantees
+      $("rl").innerHTML = REVERTS.filter((id) => byId[id])
+        .map((id) => `<span>${byId[id].title}</span>`)
+        .join("");
+      const rlEls = [...$("rl").children];
+
+      // Node status footers in the spotlight (critical flags from genesis/lanes/*.py)
+      const NONCRIT = ["brand.crops", "brand.logo", "brand.hero", "number.photo", "menu.catalog"];
+      const NF = { secB: ["brand.crops"], secC: ["brand.hero", "brand.logo"], secD: ["menu.flow"], secE: ["agent.config"] };
+      const nfRows = [];
+      for (const [sid, ids] of Object.entries(NF)) {
+        const box = document.createElement("div");
+        box.className = "nf";
+        for (const id of ids.filter((i) => byId[i])) {
+          const r = document.createElement("div");
+          r.innerHTML = `<b>${id}</b><span class="cr">${NONCRIT.includes(id) ? "no crítico" : "crítico"}</span><span class="sp"></span><span class="pill"></span><span class="v"></span>`;
+          box.appendChild(r);
+          nfRows.push({ id, pill: r.querySelector(".pill"), v: r.querySelector(".v") });
+        }
+        $(sid).appendChild(box);
+      }
+
+      // real seconds a node has been running at real time r (never more than its real duration)
+      const ran = (id, r) => {
+        const cap = tDone[id] != null ? tDone[id] - tStart[id] : Infinity;
+        return Math.max(0, Math.min(r - tStart[id], cap));
+      };
+
+      // ---------- per-frame ----------
+      const SEC = ["secA", "secB", "secC", "secD", "secE", "secF"].map($);
+      scene((t, S) => {
+        const D = S.D;
+        // camera: slow push + drift
+        const k = S.p(t, 0, D);
+        $("cam").style.transform =
+          `scale(${1 + 0.024 * S.ease(k)}) translate(${-8 * k}px, 0px)`;
+
+        S.fade($("hdr"), S.p(t, 0, 0.6), 18);
+        S.fade($("timer"), S.p(t, 0.3, 0.9), 18);
+        S.fade($("graph"), S.p(t, 0.15, 0.8), 24);
+        S.fade($("spot"), S.p(t, 0.4, 1.1), 24);
+
+        // timer (real seconds of the run, since "listo")
+        const real = realAt(t);
+        $("tval").textContent = dec1(real - runStart);
+        $("tbuild").textContent = "+" + dec1(Math.max(0, real - tPlan)) + " s";
+
+        // sections
+        const bounds = [
+          0,
+          cue("sam") - 0.35,
+          cue("muse") - 0.3,
+          cue("formulario") - 0.6,
+          cue("configura") - 0.3,
+          cue("cada") - 0.3,
+          D + 1,
+        ];
+        SEC.forEach((el, i) => {
+          const a = bounds[i],
+            b = bounds[i + 1];
+          const x = i === 0 ? 1 : S.p(t, a, a + 0.5);
+          const o = 1 - S.p(t, b - 0.3, b);
+          el.style.opacity = S.easeOut(x) * o;
+          el.style.transform = `translateY(${(1 - S.easeOut(x)) * 18}px)`;
+        });
+        let sec = 0;
+        for (let i = 0; i < 6; i++) if (t >= bounds[i]) sec = i;
+        const focus = [
+          [],
+          ["brand.crops"],
+          ["brand.hero", "brand.logo"],
+          ["menu.flow"],
+          ["agent.config"],
+          [],
+        ][sec];
+        const focusLane = [null, "brand", "brand", "menu", "agent", null][sec];
+        const mOn = [null, "mSam", "mImg", null, "mSpark", null][sec];
+        ["mSam", "mImg", "mSpark"].forEach((m, i) => {
+          const el = $(m);
+          const on = m === mOn;
+          el.style.opacity =
+            (0.5 + 0.5 * (on ? 1 : 0)) *
+            S.easeOut(S.p(t, 0.5 + i * 0.15, 1.0 + i * 0.15));
+          el.style.boxShadow = on ? "0 0 24px #3d8bff66" : "none";
+        });
+
+        // lanes
+        for (const kk of laneKeys) {
+          const L = laneEls[kk];
+          const ns = NODES.filter((n) => n.lane === kk);
+          const dn = ns.filter((n) => vD[n.id] != null && t >= vD[n.id]).length;
+          L.ct.textContent = `${dn}/${ns.length} listos`;
+          L.ct.style.color = dn === ns.length ? "var(--green)" : "";
+          const f = kk === focusLane;
+          L.el.style.background = f
+            ? "#3d8bff12"
+            : dn === ns.length
+              ? "#25d3660a"
+              : "#ffffff05";
+          L.el.style.borderColor = f ? "#3d8bff40" : "#ffffff08";
+          L.el.style.opacity = S.easeOut(
+            S.p(t, 0.2 + L.row * 0.07, 0.7 + L.row * 0.07),
+          );
+        }
+
+        // cards
+        const intro = (id) =>
+          S.p(
+            t,
+            0.35 + col[id] * 0.18 + laneEls[byId[id].lane].row * 0.05,
+            0.85 + col[id] * 0.18 + laneEls[byId[id].lane].row * 0.05,
+          );
+        for (const n of NODES) {
+          const c = cards[n.id];
+          const st =
+            vF[n.id] != null && t >= vF[n.id]
+              ? "fail"
+              : vD[n.id] != null && t >= vD[n.id]
+                ? "done"
+                : vS[n.id] != null && t >= vS[n.id]
+                  ? "run"
+                  : "pend";
+          const fin = intro(n.id);
+          const justDone =
+            st === "done" ? 1 - S.p(t, vD[n.id], vD[n.id] + 0.9) : 0;
+          const isF = focus.includes(n.id);
+          const sc =
+            (0.94 + 0.06 * S.easeOut(fin)) *
+            (1 +
+              0.035 * Math.sin(Math.PI * clamp(justDone ? 1 - justDone : 0))) *
+            (isF ? 1.03 : 1);
+          c.el.style.opacity = S.easeOut(fin);
+          c.col.style.opacity = st === "pend" ? 0.5 : 1;
+          c.el.style.transform = `scale(${sc})`;
+          c.el.style.zIndex = isF ? 3 : 1;
+          let border = "var(--line)",
+            shadow = "none",
+            bg = "var(--surface)";
+          if (st === "run") {
+            border = "#f2b33d99";
+            shadow = "0 0 0 1px #f2b33d33, 0 10px 34px #f2b33d1c";
+          }
+          if (st === "done") {
+            border = "#25d36655";
+            bg = "#18251f";
+            shadow = justDone > 0 ? `0 0 ${30 * justDone}px #25d36655` : "none";
+          }
+          if (st === "fail") {
+            border = "#ff6b5b";
+          }
+          if (n.id === "launch.live" && st === "done") {
+            border = "#25d366";
+            bg = "#173326";
+            shadow = "0 0 0 1px #25d36655, 0 0 40px #25d36633";
+          }
+          if (isF) shadow = "0 0 0 3px #3d8bffaa, 0 16px 48px #3d8bff33";
+          c.el.style.borderColor = border;
+          c.el.style.boxShadow = shadow;
+          c.el.style.background = bg;
+          c.pill.className =
+            "pill" +
+            (st === "run"
+              ? " run"
+              : st === "done"
+                ? " done"
+                : st === "fail"
+                  ? " fail"
+                  : "");
+          c.pill.textContent = {
+            pend: "en espera",
+            run: "trabajando",
+            done: "✓ listo",
+            fail: "falló",
+          }[st];
+          if (st === "done") c.ms.textContent = fmtMs(ms[n.id] || 0);
+          else if (st === "run") {
+            if (n.id === "inspector.run" && checks.length) {
+              const nOk = checks.filter((e) => e.t <= real).length;
+              c.ms.textContent = `${nOk}/${checks.length} pruebas`;
+            } else {
+              const el = ran(n.id, real);
+              c.ms.textContent = el >= 0.1 ? dec1(el) + " s" : "";
+            }
+          } else c.ms.textContent = "";
+          c.ms.style.color = st === "run" ? "var(--gold)" : "";
+          c.bar.style.opacity = st === "run" ? 1 : 0;
+          c.bi.style.left = `${-34 + 134 * ((t * 0.9 + col[n.id] * 0.3) % 1)}%`;
+          if (c.th) {
+            const x = st === "done" ? S.p(t, vD[n.id], vD[n.id] + 0.5) : 0;
+            c.th.style.width = 48 * S.easeOut(x) + "px";
+            c.th.style.marginRight = (x > 0 ? 0 : -12) + "px";
+            c.th.style.opacity = S.easeOut(x);
+          }
+          // badges
+          const ci =
+            cue("idempotente") -
+            0.15 +
+            col[n.id] * 0.12 +
+            laneEls[n.lane].row * 0.04;
+          S.pop(c.idem, S.p(t, ci, ci + 0.35));
+          if (c.rev) {
+            const cr = cue("revierte") - 0.25 + REVERTS.indexOf(n.id) * 0.1;
+            S.pop(c.rev, S.p(t, cr, cr + 0.35));
+            c.rev.style.display = t < cr ? "none" : "";
+          }
+        }
+
+        // wires
+        for (const w of wires) {
+          const draw = S.easeOut(S.p(t, 0.6 + w.c * 0.2, 1.4 + w.c * 0.2));
+          w.p.setAttribute("stroke-dashoffset", String(1 - draw));
+          const ts = vS[w.to],
+            td = vD[w.to],
+            fd = vD[w.from];
+          const active = ts != null && t >= ts;
+          const ready = fd != null && t >= fd;
+          let col2 = "#3a4b43",
+            op = 0.9;
+          if (ready && !active) col2 = "#6d7f76";
+          if (active) col2 = td != null && t >= td ? "#25d36688" : "#f2b33d";
+          w.p.setAttribute("stroke", col2);
+          w.p.setAttribute("opacity", op);
+          w.end.setAttribute("fill", col2);
+          w.end.setAttribute("opacity", draw);
+          if (ts != null) {
+            const x = S.p(t, ts - 0.45, ts);
+            const pt = w.p.getPointAtLength(w.len * S.ease(x));
+            w.dot.setAttribute("cx", pt.x);
+            w.dot.setAttribute("cy", pt.y);
+            w.dot.setAttribute("fill", "#ffd27a");
+            w.dot.setAttribute("opacity", x > 0 && x < 1 ? 1 : 0);
+            w.dot.style.filter = "drop-shadow(0 0 6px #f2b33d)";
+          } else w.dot.setAttribute("opacity", 0);
+        }
+
+        // spotlight footers mirror the card state
+        for (const r of nfRows) {
+          const st = vD[r.id] != null && t >= vD[r.id] ? "done" : vS[r.id] != null && t >= vS[r.id] ? "run" : "pend";
+          r.pill.className = "pill" + (st === "run" ? " run" : st === "done" ? " done" : "");
+          r.pill.textContent = { pend: "en espera", run: "trabajando", done: "✓ listo" }[st];
+          r.v.textContent = st === "done" ? fmtMs(ms[r.id] || 0) : st === "run" ? dec1(ran(r.id, real)) + " s" : "";
+          r.v.style.color = st === "run" ? "var(--gold)" : "";
+        }
+
+        // ---- section A: plan list
+        plRows.forEach((r, i) => {
+          const a = 0.9 + i * 0.22;
+          S.type(r.a, r.id, S.p(t, a, a + 0.3));
+          r.b.style.opacity = S.easeOut(S.p(t, a + 0.2, a + 0.5));
+        });
+
+        // ---- section B: SAM
+        const sB = bounds[1];
+        const scanX = S.p(t, sB + 0.3, cue("recorta") + 0.1);
+        $("scan").style.top = `${-80 + 440 * S.ease(scanX)}px`;
+        $("scan").style.opacity = scanX > 0 && scanX < 1 ? 1 : 0;
+        samBoxes.forEach((b, i) => {
+          const a = cue("recorta") - 0.1 + i * 0.3;
+          const x = S.p(t, a, a + 0.6);
+          b.r.setAttribute("stroke-dashoffset", String(1 - S.easeOut(x)));
+          b.r.setAttribute("fill-opacity", S.easeOut(S.p(t, a + 0.4, a + 0.8)));
+          b.g.setAttribute("opacity", S.easeOut(S.p(t, a + 0.4, a + 0.7)));
+        });
+        ["cr0", "cr1", "cr2"].forEach((id, i) => {
+          const a = cue("arepa") - 0.1 + i * 0.28;
+          S.pop($(id), S.p(t, a, a + 0.45));
+        });
+        // the provenance note must be readable while the boxes are on screen
+        S.fade($("samCap"), S.p(t, cue("recorta") - 0.1, cue("recorta") + 0.4), 8);
+
+        // ---- section C: Muse Image tiles
+        const tile = (nid, g, gEl, gSh, img, lbl) => {
+          const s = vS[nid],
+            d = vD[nid];
+          const done = d != null && t >= d;
+          const x = done ? S.p(t, d, d + 0.6) : 0;
+          img.style.opacity = S.easeOut(x);
+          img.style.transform = `scale(${1.06 - 0.06 * S.easeOut(x)})`;
+          img.style.filter = `blur(${(1 - S.easeOut(x)) * 10}px)`;
+          g.style.opacity = 1 - S.easeOut(x);
+          gSh.style.backgroundPosition = `${100 - ((t * 45) % 300)}% 0`;
+          const el = s != null && t >= s ? ran(nid, real) : 0;
+          gEl.textContent = dec1(el) + " s";
+          lbl.textContent = done
+            ? fmtMs(ms[nid] || 0)
+            : s != null && t >= s
+              ? "Muse Image…"
+              : "en espera";
+          lbl.style.color = done ? "var(--green)" : "";
+        };
+        tile(
+          "brand.hero",
+          $("gHero"),
+          $("gHeroEl"),
+          $("gHeroSh"),
+          $("iHero"),
+          $("lHero"),
+        );
+        tile(
+          "brand.logo",
+          $("gLogo"),
+          $("gLogoEl"),
+          $("gLogoSh"),
+          $("iLogo"),
+          $("lLogo"),
+        );
+        S.type(
+          $("promptTx"),
+          logoPrompt,
+          S.p(t, bounds[2] + 0.5, bounds[2] + 3.2),
+        );
+        S.fade($("prompt"), S.p(t, bounds[2] + 0.3, bounds[2] + 0.8), 10);
+
+        // ---- section D: Flow
+        const fD = cue("formulario");
+        statEls.forEach((el, i) =>
+          S.pop(el, S.p(t, fD - 0.2 + i * 0.15, fD + 0.2 + i * 0.15)),
+        );
+        S.fade($("fscreen"), S.p(t, bounds[3] + 0.2, bounds[3] + 0.7), 20);
+        formItems.forEach((el, i) =>
+          S.fade(el, S.p(t, fD + 0.1 + i * 0.1, fD + 0.45 + i * 0.1), 8),
+        );
+        const fW = cue("whatsapp");
+        ckEls.forEach((el, i) =>
+          S.fade(el, S.p(t, fW - 0.4 + i * 0.35, fW + i * 0.35), 10),
+        );
+
+        // ---- section E: agent
+        const aA = cue("agente");
+        toolEls.forEach((el, i) =>
+          S.pop(el, S.p(t, aA - 0.3 + i * 0.12, aA + 0.1 + i * 0.12)),
+        );
+        S.fade($("eSys"), S.p(t, bounds[4] + 0.3, bounds[4] + 0.8), 12);
+        S.type($("eL1"), firstLine, S.p(t, bounds[4] + 0.5, aA + 0.2));
+        S.type($("eL2"), solo, S.p(t, cue("solo") - 0.2, cue("solo") + 0.9));
+        const hl = S.p(t, cue("solo") + 0.2, cue("solo") + 0.7);
+        $("eL2").style.background = `rgba(242,179,61,${0.16 * hl})`;
+        $("eL2").style.boxShadow = `inset 3px 0 0 rgba(242,179,61,${hl})`;
+
+        // ---- section F: guarantees
+        S.fade(
+          $("g1"),
+          S.p(t, cue("cada") + 0.1, cue("idempotente") + 0.1),
+          14,
+        );
+        const gC = cue("critico");
+        S.fade($("g2"), S.p(t, gC - 0.5, gC + 0.1), 14);
+        S.fade($("g3"), S.p(t, cue("idempotente") + 0.5, cue("idempotente") + 1.0), 10);
+        $("g3").querySelectorAll(".late").forEach((el, i) => (el.style.opacity = S.easeOut(S.p(t, cue("revierte") - 0.4 + i * 0.08, cue("revierte") + i * 0.08))));
+        rlEls.forEach((el, i) =>
+          S.pop(
+            el,
+            S.p(
+              t,
+              cue("revierte") - 0.3 + i * 0.1,
+              cue("revierte") + 0.05 + i * 0.1,
+            ),
+          ),
+        );
+      });
+    </script>
+  </body>
+</html>

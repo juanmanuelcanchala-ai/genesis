@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .world {
+        position: absolute;
+        inset: 0;
+        transform-origin: 40% 45%;
+      }
+      .burst {
+        position: absolute;
+        left: 470px;
+        top: 470px;
+        width: 1600px;
+        height: 1600px;
+        margin: -800px 0 0 -800px;
+        border-radius: 50%;
+        background: radial-gradient(
+          closest-side,
+          #25d36626,
+          #25d3660c 55%,
+          transparent 72%
+        );
+      }
+      .ring {
+        position: absolute;
+        left: 470px;
+        top: 470px;
+        width: 400px;
+        height: 400px;
+        margin: -200px 0 0 -200px;
+        border-radius: 50%;
+        border: 2px solid #25d36688;
+      }
+      .left {
+        position: absolute;
+        left: 120px;
+        top: 96px;
+        width: 900px;
+      }
+      .approved {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 22px 12px 14px;
+        border-radius: 999px;
+        background: #25d36622;
+        border: 1px solid #25d36677;
+        color: #c9f5da;
+        font: 700 26px/1 var(--font);
+        transform-origin: 0 50%;
+      }
+      .approved .ck {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: var(--green);
+        color: #06210f;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 900 22px/1 var(--font);
+      }
+      .approved .n {
+        color: var(--muted);
+        font-weight: 550;
+      }
+      .biz {
+        margin-top: 34px;
+        display: flex;
+        align-items: center;
+        gap: 26px;
+      }
+      .biz img {
+        width: 132px;
+        height: 132px;
+        border-radius: 30px;
+        object-fit: cover;
+        box-shadow:
+          0 0 0 3px #f4efe61a,
+          0 20px 50px #0009;
+        flex: none;
+      }
+      .biz .nm {
+        font: 800 46px/1.05 var(--display);
+        letter-spacing: -0.02em;
+      }
+      .biz .sub {
+        margin-top: 8px;
+        font: 500 22px/1.3 var(--font);
+        color: var(--muted);
+      }
+      .headline {
+        margin-top: 30px;
+        font: 850 104px/0.98 var(--display);
+        letter-spacing: -0.035em;
+      }
+      .headline em {
+        font-style: normal;
+        color: var(--green);
+      }
+      /* timer */
+      .timer {
+        position: absolute;
+        left: 120px;
+        top: 640px;
+        display: flex;
+        align-items: center;
+        gap: 30px;
+      }
+      .dial {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        flex: none;
+      }
+      .dial svg {
+        position: absolute;
+        inset: 0;
+        transform: rotate(-90deg);
+      }
+      .dial .lab {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font: 600 18px/1 var(--font);
+        color: var(--faint);
+        letter-spacing: 0.06em;
+      }
+      .tv b {
+        display: block;
+        font: 800 112px/0.95 var(--display);
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
+        color: var(--gold);
+      }
+      .tv .cap {
+        margin-top: 10px;
+        font: 550 26px/1.3 var(--font);
+        color: #e3dccf;
+      }
+      .tv .cap span {
+        color: var(--green);
+        font-weight: 700;
+      }
+      /* right column: notification + QR */
+      .notif {
+        position: absolute;
+        left: 1210px;
+        top: 146px;
+        width: 590px;
+        padding: 18px 22px;
+        border-radius: 26px;
+        background: #f4efe6f5;
+        color: #111b21;
+        box-shadow: 0 24px 70px #000a;
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      .notif .ic {
+        width: 48px;
+        height: 48px;
+        border-radius: 13px;
+        background: var(--green);
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font: 800 26px/1 var(--display);
+      }
+      .notif .top {
+        display: flex;
+        justify-content: space-between;
+        font: 600 15px/1 var(--font);
+        color: #667781;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .notif .who {
+        font: 700 21px/1.2 var(--font);
+      }
+      .notif .msg {
+        margin-top: 2px;
+        font: 450 19px/1.38 var(--font);
+        color: #3b4a54;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+      }
+      .notif .msg b {
+        color: #111b21;
+      }
+      .forrosa {
+        position: absolute;
+        left: 1232px;
+        top: 114px;
+        font: 600 17px/1 var(--font);
+        color: var(--faint);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .qrcard {
+        position: absolute;
+        left: 1300px;
+        top: 344px;
+        width: 420px;
+        padding: 26px 26px 22px;
+        border-radius: 30px;
+        background: #fff;
+        box-shadow:
+          0 30px 90px #000b,
+          0 0 0 6px #25d36622;
+        text-align: center;
+      }
+      .qrcard .qr svg {
+        display: block;
+        width: 368px;
+        height: 368px;
+      }
+      .qrcard .cap {
+        margin-top: 14px;
+        font: 700 22px/1.2 var(--font);
+        color: #111b21;
+      }
+      .qrcard .link {
+        margin-top: 6px;
+        font: 500 18px/1.2 var(--mono);
+        color: #128c4b;
+      }
+      .scan {
+        position: absolute;
+        left: 26px;
+        right: 26px;
+        height: 3px;
+        border-radius: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--green),
+          transparent
+        );
+        box-shadow: 0 0 16px var(--green);
+      }
+    </style>
+  </head>
+  <body data-scene="s10">
+    <div class="stage">
+      <div class="world" id="world">
+        <div class="burst" id="burst"></div>
+        <div class="ring" id="ring"></div>
+        <div class="left">
+          <div class="approved" id="approved">
+            <span class="ck">✓</span><span>Aprobado por el Inspector</span
+            ><span class="n" id="checks">9/9 pruebas</span>
+          </div>
+          <div class="biz" id="biz">
+            <img src="../assets/logo.png" alt="" />
+            <div>
+              <div class="nm" id="bizname">Arepas Rosa</div>
+              <div class="sub" id="bizsub">Ya atiende por WhatsApp</div>
+            </div>
+          </div>
+          <div class="headline" id="headline"></div>
+        </div>
+        <div class="timer" id="timer">
+          <div class="dial">
+            <svg viewBox="0 0 200 200" width="200" height="200">
+              <circle
+                cx="100"
+                cy="100"
+                r="86"
+                fill="none"
+                stroke="#2b3a33"
+                stroke-width="14"
+              />
+              <circle
+                id="arc"
+                cx="100"
+                cy="100"
+                r="86"
+                fill="none"
+                stroke="#f2b33d"
+                stroke-width="14"
+                stroke-linecap="round"
+              />
+            </svg>
+            <div class="lab">de 60 s</div>
+          </div>
+          <div class="tv">
+            <b id="tval">0,0 s</b>
+            <div class="cap">
+              de nota de voz a negocio vivo ·
+              <span id="under">menos de un minuto</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="forrosa" id="forrosa">En el celular de Rosa</div>
+        <div class="notif" id="notif">
+          <div class="ic">✓</div>
+          <div style="flex: 1; min-width: 0">
+            <div class="top"><span>WhatsApp</span><span>ahora</span></div>
+            <div class="who" id="nwho">Génesis</div>
+            <div class="msg" id="nmsg"></div>
+          </div>
+        </div>
+        <div class="qrcard" id="qrcard">
+          <div class="qr" id="qr"></div>
+          <div class="scan" id="scan"></div>
+          <div class="cap">Escanea y pide</div>
+          <div class="link" id="qlink"></div>
+        </div>
+      </div>
+      <div class="tag">
+        <span class="dot"></span>Ensayo real · modelos de Meta en vivo ·
+        WhatsApp simulado
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      /* QR-BEGIN: minimal QR encoder (byte mode, ECC level M, versions 1-40), after Nayuki's QR Code
+   generator algorithm. Verified with zbarimg in tests/test_server.py. */
+      const QR = (() => {
+        const ECC_M = [
+          -1, 10, 16, 26, 18, 24, 16, 18, 22, 22, 26, 30, 22, 22, 24, 24, 28,
+          28, 26, 26, 26, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+          28, 28, 28, 28, 28, 28, 28,
+        ];
+        const BLK_M = [
+          -1, 1, 1, 1, 2, 2, 4, 4, 4, 5, 5, 5, 8, 9, 9, 10, 10, 11, 13, 14, 16,
+          17, 17, 18, 20, 21, 23, 25, 26, 28, 29, 31, 33, 35, 37, 38, 40, 43,
+          45, 47, 49,
+        ];
+        const bit = (x, i) => ((x >>> i) & 1) !== 0;
+        const rawModules = (v) => {
+          let r = (16 * v + 128) * v + 64;
+          if (v >= 2) {
+            const n = Math.floor(v / 7) + 2;
+            r -= (25 * n - 10) * n - 55;
+            if (v >= 7) r -= 36;
+          }
+          return r;
+        };
+        const dataCodewords = (v) =>
+          Math.floor(rawModules(v) / 8) - ECC_M[v] * BLK_M[v];
+        const gfMul = (x, y) => {
+          let z = 0;
+          for (let i = 7; i >= 0; i--) {
+            z = (z << 1) ^ ((z >>> 7) * 0x11d);
+            z ^= ((y >>> i) & 1) * x;
+          }
+          return z & 0xff;
+        };
+        const rsDivisor = (deg) => {
+          const r = new Array(deg).fill(0);
+          r[deg - 1] = 1;
+          let root = 1;
+          for (let i = 0; i < deg; i++) {
+            for (let j = 0; j < r.length; j++) {
+              r[j] = gfMul(r[j], root);
+              if (j + 1 < r.length) r[j] ^= r[j + 1];
+            }
+            root = gfMul(root, 2);
+          }
+          return r;
+        };
+        const rsRemainder = (data, div) => {
+          const r = div.map(() => 0);
+          for (const b of data) {
+            const f = b ^ r.shift();
+            r.push(0);
+            div.forEach((c, i) => {
+              r[i] ^= gfMul(c, f);
+            });
+          }
+          return r;
+        };
+        function encode(text) {
+          const bytes = Array.from(new TextEncoder().encode(text));
+          let v = 1;
+          for (; v <= 40; v++)
+            if (
+              4 + (v <= 9 ? 8 : 16) + bytes.length * 8 <=
+              dataCodewords(v) * 8
+            )
+              break;
+          if (v > 40) throw new Error("text too long for QR");
+          const bits = [];
+          const push = (val, len) => {
+            for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1);
+          };
+          push(4, 4);
+          push(bytes.length, v <= 9 ? 8 : 16);
+          bytes.forEach((b) => push(b, 8));
+          const cap = dataCodewords(v) * 8;
+          push(0, Math.min(4, cap - bits.length));
+          push(0, (8 - (bits.length % 8)) % 8);
+          for (let p = 0xec; bits.length < cap; p ^= 0xec ^ 0x11) push(p, 8);
+          const data = [];
+          for (let i = 0; i < bits.length; i += 8) {
+            let b = 0;
+            for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j];
+            data.push(b);
+          }
+          const nBlocks = BLK_M[v],
+            eccLen = ECC_M[v],
+            raw = Math.floor(rawModules(v) / 8);
+          const nShort = nBlocks - (raw % nBlocks),
+            shortLen = Math.floor(raw / nBlocks);
+          const div = rsDivisor(eccLen),
+            blocks = [];
+          for (let i = 0, k = 0; i < nBlocks; i++) {
+            const dat = data.slice(
+              k,
+              k + shortLen - eccLen + (i < nShort ? 0 : 1),
+            );
+            k += dat.length;
+            const ecc = rsRemainder(dat, div);
+            if (i < nShort) dat.push(0);
+            blocks.push(dat.concat(ecc));
+          }
+          const all = [];
+          for (let i = 0; i < blocks[0].length; i++)
+            blocks.forEach((b, j) => {
+              if (i !== shortLen - eccLen || j >= nShort) all.push(b[i]);
+            });
+          const size = v * 4 + 17;
+          const m = Array.from({ length: size }, () =>
+            new Array(size).fill(false),
+          );
+          const fn = Array.from({ length: size }, () =>
+            new Array(size).fill(false),
+          );
+          const set = (x, y, d) => {
+            m[y][x] = d;
+            fn[y][x] = true;
+          };
+          for (let i = 0; i < size; i++) {
+            set(6, i, i % 2 === 0);
+            set(i, 6, i % 2 === 0);
+          }
+          for (const [cx, cy] of [
+            [3, 3],
+            [size - 4, 3],
+            [3, size - 4],
+          ]) {
+            for (let dy = -4; dy <= 4; dy++)
+              for (let dx = -4; dx <= 4; dx++) {
+                const d = Math.max(Math.abs(dx), Math.abs(dy)),
+                  x = cx + dx,
+                  y = cy + dy;
+                if (x >= 0 && x < size && y >= 0 && y < size)
+                  set(x, y, d !== 2 && d !== 4);
+              }
+          }
+          const align = [];
+          if (v > 1) {
+            const n = Math.floor(v / 7) + 2,
+              step = Math.floor((v * 8 + n * 3 + 5) / (n * 4 - 4)) * 2;
+            align.push(6);
+            for (let p = size - 7; align.length < n; p -= step)
+              align.splice(1, 0, p);
+          }
+          align.forEach((ax, i) =>
+            align.forEach((ay, j) => {
+              if (
+                (i === 0 && j === 0) ||
+                (i === 0 && j === align.length - 1) ||
+                (i === align.length - 1 && j === 0)
+              )
+                return;
+              for (let dy = -2; dy <= 2; dy++)
+                for (let dx = -2; dx <= 2; dx++)
+                  set(
+                    ax + dx,
+                    ay + dy,
+                    Math.max(Math.abs(dx), Math.abs(dy)) !== 1,
+                  );
+            }),
+          );
+          const drawFormat = (mask) => {
+            const d = mask; // ECC level M = 0b00
+            let r = d;
+            for (let i = 0; i < 10; i++) r = (r << 1) ^ ((r >>> 9) * 0x537);
+            const b = ((d << 10) | r) ^ 0x5412;
+            for (let i = 0; i <= 5; i++) set(8, i, bit(b, i));
+            set(8, 7, bit(b, 6));
+            set(8, 8, bit(b, 7));
+            set(7, 8, bit(b, 8));
+            for (let i = 9; i < 15; i++) set(14 - i, 8, bit(b, i));
+            for (let i = 0; i < 8; i++) set(size - 1 - i, 8, bit(b, i));
+            for (let i = 8; i < 15; i++) set(8, size - 15 + i, bit(b, i));
+            set(8, size - 8, true);
+          };
+          drawFormat(0);
+          if (v >= 7) {
+            let r = v;
+            for (let i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11) * 0x1f25);
+            const b = (v << 12) | r;
+            for (let i = 0; i < 18; i++) {
+              const a = size - 11 + (i % 3),
+                c = Math.floor(i / 3);
+              set(a, c, bit(b, i));
+              set(c, a, bit(b, i));
+            }
+          }
+          let i = 0;
+          for (let right = size - 1; right >= 1; right -= 2) {
+            if (right === 6) right = 5;
+            for (let vert = 0; vert < size; vert++)
+              for (let j = 0; j < 2; j++) {
+                const x = right - j,
+                  up = ((right + 1) & 2) === 0,
+                  y = up ? size - 1 - vert : vert;
+                if (!fn[y][x] && i < all.length * 8) {
+                  m[y][x] = bit(all[i >>> 3], 7 - (i & 7));
+                  i++;
+                }
+              }
+          }
+          const maskFn = [
+            (x, y) => (x + y) % 2 === 0,
+            (x, y) => y % 2 === 0,
+            (x) => x % 3 === 0,
+            (x, y) => (x + y) % 3 === 0,
+            (x, y) => (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0,
+            (x, y) => ((x * y) % 2) + ((x * y) % 3) === 0,
+            (x, y) => (((x * y) % 2) + ((x * y) % 3)) % 2 === 0,
+            (x, y) => (((x + y) % 2) + ((x * y) % 3)) % 2 === 0,
+          ];
+          const applyMask = (k) => {
+            for (let y = 0; y < size; y++)
+              for (let x = 0; x < size; x++)
+                if (!fn[y][x] && maskFn[k](x, y)) m[y][x] = !m[y][x];
+          };
+          const penalty = () => {
+            let p = 0,
+              dark = 0;
+            for (let y = 0; y < size; y++) {
+              for (let pass = 0; pass < 2; pass++) {
+                let run = 1;
+                for (let x = 1; x < size; x++) {
+                  const a = pass ? m[x][y] : m[y][x],
+                    b = pass ? m[x - 1][y] : m[y][x - 1];
+                  if (a === b) {
+                    run++;
+                    if (run === 5) p += 3;
+                    else if (run > 5) p++;
+                  } else run = 1;
+                }
+              }
+              for (let x = 0; x < size; x++) {
+                if (m[y][x]) dark++;
+                if (
+                  x < size - 1 &&
+                  y < size - 1 &&
+                  m[y][x] === m[y][x + 1] &&
+                  m[y][x] === m[y + 1][x] &&
+                  m[y][x] === m[y + 1][x + 1]
+                )
+                  p += 3;
+              }
+            }
+            return (
+              p +
+              Math.floor(
+                Math.abs(dark * 20 - size * size * 10) / (size * size),
+              ) *
+                10
+            );
+          };
+          let best = 0,
+            bestP = Infinity;
+          for (let k = 0; k < 8; k++) {
+            applyMask(k);
+            drawFormat(k);
+            const p = penalty();
+            if (p < bestP) {
+              bestP = p;
+              best = k;
+            }
+            applyMask(k);
+          }
+          applyMask(best);
+          drawFormat(best);
+          return m;
+        }
+        function svg(text, { dark = "#000", light = "#fff", border = 4 } = {}) {
+          const m = encode(text),
+            n = m.length + border * 2;
+          let d = "";
+          m.forEach((row, y) =>
+            row.forEach((on, x) => {
+              if (on) d += `M${x + border},${y + border}h1v1h-1z`;
+            }),
+          );
+          return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges"><rect width="${n}" height="${n}" fill="${light}"/><path d="${d}" fill="${dark}"/></svg>`;
+        }
+        return { encode, svg };
+      })();
+      /* QR-END */
+    </script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const S0 = window.__S;
+      const R = S0.run || {};
+      const evs = R.events || [];
+      const live = evs.find((e) => e.kind === "run.live");
+      const LD = (live && live.data) || {};
+      const wa = LD.wa_me || R.wa_me || "";
+      const name = LD.business_name || "Arepas Rosa";
+      const elapsed =
+        LD.elapsed_s != null
+          ? LD.elapsed_s
+          : R.elapsed_ms
+            ? R.elapsed_ms / 1000
+            : 0;
+      const ins = LD.inspector || {};
+      const nOk =
+        ins.ok != null ? ins.ok : (ins.checks || []).filter((c) => c.ok).length;
+      const nTot = ins.total != null ? ins.total : (ins.checks || []).length;
+      const md = (s) =>
+        (s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/\*([^*]+)\*/g, "<b>$1</b>");
+
+      // Rosa's notification: the real "vivo" message Génesis sent her.
+      const line = (R.lines || []).find(
+        (l) =>
+          /Rosa/.test(l.who) && /^Génesis/.test(l.who) && /vivo/i.test(l.text),
+      );
+      const paras = line
+        ? line.text.split(/\n\s*\n/)
+        : ["¡Tu negocio está vivo!"];
+      const head = paras[0].trim();
+      $("headline").innerHTML = md(head).replace(/(viv[oa])/i, "<em>$1</em>");
+      $("nmsg").innerHTML = `<b>${md(head)}</b> ${md(paras[1] || "")}`;
+      $("bizname").textContent = name;
+      $("checks").textContent = nTot ? `${nOk}/${nTot} pruebas` : "";
+      $("qlink").textContent = wa
+        .replace(/^https?:\/\//, "")
+        .replace(/\?.*$/, "");
+      try {
+        $("qr").innerHTML = QR.svg(wa, { dark: "#06080c", border: 0 });
+      } catch (e) {
+        $("qr").textContent = "";
+      }
+      const arc = $("arc");
+      const C = 2 * Math.PI * 86;
+      arc.style.strokeDasharray = `${C} ${C}`;
+
+      scene((t, S) => {
+        const D = S.D;
+        const k = S.p(t, 0, D);
+        $("world").style.transform = `scale(${1.0 + 0.035 * S.ease(k)})`;
+
+        const tA = S.cue("aprobado") || 0.4;
+        const tVoz = S.cue("nota") || 1.5;
+        const tVivo = S.cue("vivo") || 2.56;
+        const tMenos = S.cue("menos") || 3.06;
+
+        // approval burst
+        S.pop($("approved"), S.p(t, Math.max(0, tA - 0.3), tA + 0.1));
+        const b = S.p(t, 0, 1.5);
+        $("ring").style.opacity = (1 - b) * 0.9;
+        $("ring").style.transform = `scale(${0.4 + 3.2 * S.easeOut(b)})`;
+        $("burst").style.opacity =
+          0.35 + 0.65 * S.easeOut(S.p(t, 0, 0.8));
+
+        // notification drops in on Rosa's phone right after the approval
+        const nIn = S.p(t, tA - 0.05, tA + 0.4);
+        $("notif").style.opacity = S.easeOut(nIn);
+        $("notif").style.transform = `translateY(${(1 - S.back(nIn)) * -40}px)`;
+        S.fade($("forrosa"), S.p(t, tA + 0.1, tA + 0.6), 0);
+
+        S.fade($("biz"), S.p(t, 0.1, 0.5), 20);
+        S.fade($("headline"), S.p(t, 0.2, 0.7), 26);
+
+        // stopwatch runs from the voice note to "vivo", then stops on the real elapsed time
+        S.fade($("timer"), S.p(t, tVoz - 0.45, tVoz - 0.1), 20);
+        const run = S.easeOut(S.p(t, tVoz - 0.1, tVivo + 0.15));
+        $("tval").textContent = S.num(run, 0, elapsed, 1) + " s";
+        arc.style.strokeDashoffset =
+          C * (1 - Math.min(1, (elapsed * run) / 60));
+        const stopped = S.p(t, tVivo + 0.15, tVivo + 0.45);
+        $("tval").style.color = stopped >= 1 ? "var(--green)" : "var(--gold)";
+        arc.style.stroke = stopped >= 1 ? "#25d366" : "#f2b33d";
+        $("tval").style.transform =
+          `scale(${1 + 0.06 * Math.sin(Math.PI * stopped)})`;
+        $("tval").style.transformOrigin = "0 60%";
+        const u = S.p(t, tMenos - 0.05, tMenos + 0.35);
+        $("under").style.textShadow = `0 0 ${18 * u}px #25d366aa`;
+        $("under").style.opacity = 0.55 + 0.45 * u;
+
+        // QR card
+        const q = S.p(t, tA + 0.75, tA + 1.25);
+        S.pop($("qrcard"), q);
+        const sy = S.p(t, tVivo + 0.2, D);
+        $("scan").style.top = `${26 + 368 * ((sy * 1.6) % 1)}px`;
+        $("scan").style.opacity = sy > 0 && sy < 1 ? 0.8 : 0;
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .bg {
+        position: absolute;
+        inset: -40px;
+        background: url(../assets/broll_stand.png) center/cover;
+        transform-origin: 40% 60%;
+      }
+      .shade {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, #0c110fe6 0%, #0c110f88 38%, #0c110f00 65%),
+          linear-gradient(0deg, #0c110fcc 0%, #0c110f00 35%);
+      }
+      .place {
+        left: 120px;
+        top: 120px;
+      }
+      .title {
+        left: 120px;
+        top: 330px;
+        width: 860px;
+      }
+      .notif {
+        width: 470px;
+        padding: 16px 20px;
+        border-radius: 22px;
+        background: #f4efe6f2;
+        color: #111b21;
+        box-shadow: 0 20px 60px #0008;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+      }
+      .notif .ic {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--green);
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font: 800 24px/1 var(--display);
+      }
+      .notif .who {
+        font: 700 19px/1.2 var(--font);
+      }
+      .notif .msg {
+        font: 450 19px/1.35 var(--font);
+        color: #3b4a54;
+      }
+      .nocomp {
+        left: 120px;
+        top: 640px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .nocomp .x {
+        font: 800 44px/1 var(--display);
+        color: var(--red);
+      }
+    </style>
+  </head>
+  <body data-scene="s01">
+    <div class="stage">
+      <div class="bg" id="bg"></div>
+      <div class="shade"></div>
+      <div class="abs place kicker" id="place">Cali, Colombia · 6:10 a. m.</div>
+      <div class="abs title" id="title">
+        <div class="h1">Rosa vende arepas.</div>
+        <div
+          class="body"
+          style="margin-top: 22px; font-size: 32px; color: #d9d3c7"
+        >
+          Sus clientes ya le escriben por WhatsApp.
+        </div>
+      </div>
+      <div class="abs notif" id="n1" style="right: 160px; top: 200px">
+        <div class="ic">✓</div>
+        <div>
+          <div class="who">Andrés</div>
+          <div class="msg">Doña Rosa, ¿hay arepas de choclo hoy?</div>
+        </div>
+      </div>
+      <div class="abs notif" id="n2" style="right: 120px; top: 330px">
+        <div class="ic">✓</div>
+        <div>
+          <div class="who">Marcela</div>
+          <div class="msg">¿Me guarda 3 para las 7? 🙏</div>
+        </div>
+      </div>
+      <div class="abs notif" id="n3" style="right: 190px; top: 460px">
+        <div class="ic">✓</div>
+        <div>
+          <div class="who">+57 315 •••</div>
+          <div class="msg">¿Cuánto vale la de carne?</div>
+        </div>
+      </div>
+      <div class="abs nocomp" id="nocomp">
+        <span class="x">✕</span
+        ><span class="h3">Pero no tiene computador.</span>
+      </div>
+      <div class="source abs" style="right: 48px; bottom: 150px; opacity: 0.7">
+        Imagen de ambiente generada con Muse Image
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      scene((t, S) => {
+        const k = S.p(t, 0, S.D);
+        $("bg").style.transform =
+          `scale(${1.04 + 0.08 * k}) translateX(${-30 * k}px)`;
+        S.fade($("place"), S.p(t, 0.1, 0.8));
+        S.fade($("title"), S.p(t, 0.4, 1.2), 24);
+        const w = S.cue("whatsapp");
+        ["n1", "n2", "n3"].forEach((n, i) =>
+          S.pop($(n), S.p(t, w - 0.3 + i * 0.35, w + 0.15 + i * 0.35)),
+        );
+        S.fade($("nocomp"), S.p(t, S.cue("pero"), S.cue("pero") + 0.5), 20);
+      });
+    </script>
+  </body>
+</html>

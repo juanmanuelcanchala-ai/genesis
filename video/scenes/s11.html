@@ -1,0 +1,1112 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .bg {
+        position: absolute;
+        inset: -60px;
+        background: url(../assets/broll_stand.png) center/cover;
+        transform-origin: 70% 55%;
+      }
+      .bgblur {
+        position: absolute;
+        inset: -60px;
+        background: url(../assets/broll_stand.png) center/cover;
+        filter: blur(18px) brightness(0.45) saturate(0.8);
+        transform-origin: 70% 55%;
+      }
+      .shade {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, #0c110fd8 0%, #0c110f88 40%, #0c110f30 75%),
+          linear-gradient(0deg, #0c110fdd 0%, #0c110f00 30%);
+      }
+      .shade2 {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(1100px 700px at 78% 30%, #f2b33d12, transparent 60%),
+          linear-gradient(90deg, #0c110f 0%, #0c110fcc 45%, #0c110f99 100%);
+      }
+      /* phone */
+      #phone {
+        left: 250px;
+        top: 52px;
+        transform-origin: 50% 0;
+      }
+      .layer {
+        position: absolute;
+        inset: 0;
+      }
+      .chat {
+        display: flex;
+        flex-direction: column;
+      }
+      .msgs {
+        gap: 0;
+      }
+      .mrow {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        flex: none;
+      }
+      .mrow > .bubble {
+        margin-top: 8px;
+        margin-bottom: 2px;
+        transform-origin: 0 100%;
+      }
+      .mrow > .bubble.out {
+        transform-origin: 100% 100%;
+      }
+      .bubble .btns div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .bubble .btns svg {
+        width: 18px;
+        height: 18px;
+      }
+      .bubble.flowb {
+        min-width: 270px;
+        padding-bottom: 0;
+      }
+      .flowb .fbody {
+        position: relative;
+        padding-bottom: 16px;
+      }
+      .flowb .fbody .time {
+        right: -2px;
+        bottom: 2px;
+      }
+      .flowb .btns {
+        margin-bottom: 0;
+      }
+      .typing {
+        display: flex;
+        gap: 5px;
+        padding: 14px 16px 14px !important;
+      }
+      .typing i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #8696a0;
+      }
+      .wa-head .back {
+        font: 400 30px/1 var(--font);
+        margin-right: -4px;
+        opacity: 0.9;
+      }
+      .wa-head .avatar {
+        background: #fff;
+      }
+      .tick {
+        color: #53bdeb;
+        margin-left: 3px;
+        letter-spacing: -3px;
+      }
+      .tap {
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        margin: -32px 0 0 -32px;
+        border-radius: 50%;
+        background: #ffffff55;
+        border: 2px solid #ffffffcc;
+        box-shadow: 0 4px 20px #0005;
+        pointer-events: none;
+        opacity: 0;
+        z-index: 20;
+      }
+      /* camera */
+      .cam {
+        background: #000;
+        overflow: hidden;
+      }
+      .cam .feed {
+        position: absolute;
+        inset: -40px;
+        background: url(../assets/broll_stand.png) 62% 50% / cover;
+        filter: blur(3px) brightness(0.7);
+      }
+      .cam .qrprop {
+        position: absolute;
+        left: 50%;
+        top: 46%;
+        width: 250px;
+        margin-left: -125px;
+        margin-top: -170px;
+        transform-origin: 50% 50%;
+      }
+      .cam .corners {
+        position: absolute;
+        left: 50%;
+        top: 46%;
+        width: 260px;
+        height: 260px;
+        margin: -130px 0 0 -130px;
+      }
+      .corners i {
+        position: absolute;
+        width: 46px;
+        height: 46px;
+        border: 0 solid #fff;
+      }
+      .corners i:nth-child(1) {
+        left: 0;
+        top: 0;
+        border-width: 5px 0 0 5px;
+        border-top-left-radius: 14px;
+      }
+      .corners i:nth-child(2) {
+        right: 0;
+        top: 0;
+        border-width: 5px 5px 0 0;
+        border-top-right-radius: 14px;
+      }
+      .corners i:nth-child(3) {
+        left: 0;
+        bottom: 0;
+        border-width: 0 0 5px 5px;
+        border-bottom-left-radius: 14px;
+      }
+      .corners i:nth-child(4) {
+        right: 0;
+        bottom: 0;
+        border-width: 0 5px 5px 0;
+        border-bottom-right-radius: 14px;
+      }
+      .cam .camtop {
+        position: absolute;
+        top: 64px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font: 600 17px/1 var(--font);
+        color: #fff;
+        letter-spacing: 0.04em;
+        text-shadow: 0 1px 6px #000a;
+      }
+      .cam .linkpill {
+        position: absolute;
+        left: 24px;
+        right: 24px;
+        bottom: 120px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: #fffffff0;
+        color: #111b21;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        box-shadow: 0 10px 30px #0008;
+      }
+      .linkpill .lg {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex: none;
+      }
+      .linkpill .lg img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .linkpill .t1 {
+        font: 700 17px/1.2 var(--font);
+      }
+      .linkpill .t2 {
+        font: 500 14px/1.25 var(--font);
+        color: #54656f;
+      }
+      .shutter {
+        position: absolute;
+        bottom: 34px;
+        left: 50%;
+        width: 66px;
+        height: 66px;
+        margin-left: -33px;
+        border-radius: 50%;
+        border: 5px solid #fff;
+      }
+      /* printed QR card (prop) */
+      .qrcard {
+        width: 100%;
+        background: #fbf7ef;
+        border-radius: 18px;
+        padding: 22px 22px 18px;
+        box-shadow: 0 30px 80px #000c;
+        text-align: center;
+        color: #1b1a17;
+      }
+      .qrcard .top {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .qrcard .top img {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+      }
+      .qrcard .bn {
+        font: 800 30px/1 var(--display);
+        letter-spacing: -0.02em;
+      }
+      .qrcard svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        background: #fff;
+        border-radius: 8px;
+      }
+      .qrcard .cta {
+        margin-top: 14px;
+        font: 700 20px/1.2 var(--font);
+      }
+      .qrcard .num {
+        margin-top: 6px;
+        font: 500 16px/1 var(--mono);
+        color: #6b655a;
+      }
+      #bigcard {
+        left: 1170px;
+        top: 150px;
+        width: 400px;
+        transform-origin: 50% 100%;
+      }
+      /* right column */
+      .col {
+        left: 860px;
+        width: 940px;
+      }
+      #kick {
+        top: 150px;
+      }
+      .heads {
+        top: 196px;
+        height: 150px;
+      }
+      .heads .h2 {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 940px;
+      }
+      .feats {
+        top: 378px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .feat {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        padding: 22px 26px;
+        width: 860px;
+      }
+      .feat .ck {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #25d36622;
+        color: var(--green);
+        font: 800 22px/40px var(--display);
+        text-align: center;
+        flex: none;
+      }
+      .feat .ft {
+        font: 700 30px/1.2 var(--display);
+        letter-spacing: -0.01em;
+      }
+      .feat .fd {
+        margin-top: 6px;
+        font: 450 21px/1.4 var(--font);
+        color: var(--muted);
+      }
+      .feat .fd q {
+        color: #e8e1d4;
+        font-style: italic;
+      }
+      .chips {
+        top: 298px;
+        display: flex;
+        gap: 14px;
+      }
+      /* flow sheet */
+      .dim {
+        position: absolute;
+        inset: 0;
+        background: #000;
+        opacity: 0;
+        z-index: 8;
+      }
+      .sheet {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 58px;
+        bottom: 0;
+        background: #fff;
+        border-radius: 22px 22px 0 0;
+        z-index: 9;
+        overflow: hidden;
+        color: #111b21;
+        transform: translateY(105%);
+      }
+      .sheet .grab {
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        width: 40px;
+        height: 5px;
+        margin-left: -20px;
+        border-radius: 3px;
+        background: #d1d7db;
+      }
+      .scr {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+      }
+      .shead {
+        flex: none;
+        height: 66px;
+        padding: 18px 18px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1px solid #e9edef;
+      }
+      .shead .x {
+        font: 400 26px/1 var(--font);
+        color: #54656f;
+        width: 26px;
+      }
+      .shead .st {
+        flex: 1;
+        text-align: center;
+        font: 650 19px/1 var(--font);
+      }
+      .shead .dots {
+        width: 26px;
+        text-align: right;
+        font: 700 22px/1 var(--font);
+        color: #54656f;
+      }
+      .sbody {
+        flex: 1;
+        padding: 16px 20px 0;
+        overflow: hidden;
+      }
+      .sbody .th {
+        font: 750 25px/1.15 var(--display);
+        letter-spacing: -0.01em;
+      }
+      .sbody .tb {
+        margin-top: 6px;
+        font: 450 16px/1.4 var(--font);
+        color: #54656f;
+      }
+      .prow {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 0;
+        border-bottom: 1px solid #eef1f2;
+      }
+      .prow:first-of-type {
+        margin-top: 8px;
+      }
+      .prow .pn {
+        flex: 1;
+        min-width: 0;
+      }
+      .prow .pn b {
+        display: block;
+        font: 650 17px/1.25 var(--font);
+      }
+      .prow .pn span {
+        font: 500 15px/1.3 var(--font);
+        color: #667781;
+      }
+      .dd {
+        flex: none;
+        width: 78px;
+        height: 44px;
+        border: 1.5px solid #c4ccd0;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px 0 14px;
+        font: 650 19px/1 var(--font);
+        font-variant-numeric: tabular-nums;
+      }
+      .dd .chev {
+        width: 9px;
+        height: 9px;
+        border-right: 2px solid #54656f;
+        border-bottom: 2px solid #54656f;
+        transform: rotate(45deg) translateY(-3px);
+      }
+      .dd.on,
+      .field.on {
+        border-color: #008069;
+        box-shadow: 0 0 0 1px #008069;
+      }
+      .field {
+        position: relative;
+        margin-top: 26px;
+        height: 52px;
+        border: 1.5px solid #c4ccd0;
+        border-radius: 10px;
+        padding: 0 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font: 500 18px/1 var(--font);
+      }
+      .field .lab {
+        position: absolute;
+        left: 10px;
+        top: -9px;
+        padding: 0 5px;
+        background: #fff;
+        font: 500 13px/1 var(--font);
+        color: #667781;
+      }
+      .field.on .lab {
+        color: #008069;
+      }
+      .field .ph {
+        color: #8696a0;
+      }
+      .caret {
+        display: inline-block;
+        width: 2px;
+        height: 20px;
+        background: #008069;
+        margin-left: 1px;
+        vertical-align: -3px;
+      }
+      .sfoot {
+        flex: none;
+        padding: 12px 20px 26px;
+        border-top: 1px solid #e9edef;
+      }
+      .sfoot .go {
+        height: 50px;
+        border-radius: 25px;
+        background: #008069;
+        color: #fff;
+        font: 650 18px/50px var(--font);
+        text-align: center;
+      }
+      .sfoot .mg {
+        margin-top: 10px;
+        text-align: center;
+        font: 450 13px/1.2 var(--font);
+        color: #8696a0;
+      }
+      .conf .big {
+        margin-top: 18px;
+        font: 750 34px/1 var(--display);
+        font-variant-numeric: tabular-nums;
+      }
+      .conf .sub {
+        margin-top: 22px;
+        font: 650 16px/1 var(--font);
+        color: #54656f;
+      }
+      .conf .tb2 {
+        margin-top: 22px;
+        font: 450 16px/1.45 var(--font);
+        color: #54656f;
+      }
+      .sent {
+        position: absolute;
+        left: 50%;
+        top: 56%;
+        width: 230px;
+        margin-left: -115px;
+        padding: 22px 18px;
+        border-radius: 22px;
+        background: #111b21ee;
+        color: #fff;
+        text-align: center;
+        font: 650 19px/1.3 var(--font);
+        z-index: 12;
+        opacity: 0;
+      }
+      .sent .okc {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 10px;
+        border-radius: 50%;
+        background: var(--green);
+        color: #05210f;
+        font: 800 30px/54px var(--display);
+      }
+    </style>
+  </head>
+  <body data-scene="s11">
+    <svg width="0" height="0" style="position: absolute">
+      <defs>
+        <symbol id="qr" viewBox="-2 -2 45 45">
+          <path d="M0 0h7v1h-7zM9 0h1v1h-1zM12 0h1v1h-1zM16 0h4v1h-4zM21 0h1v1h-1zM23 0h3v1h-3zM28 0h1v1h-1zM31 0h2v1h-2zM34 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h1v1h-1zM17 1h1v1h-1zM21 1h1v1h-1zM24 1h4v1h-4zM30 1h1v1h-1zM32 1h1v1h-1zM34 1h1v1h-1zM40 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h1v1h-1zM10 2h1v1h-1zM12 2h2v1h-2zM15 2h1v1h-1zM17 2h9v1h-9zM27 2h1v1h-1zM32 2h1v1h-1zM34 2h1v1h-1zM36 2h3v1h-3zM40 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h4v1h-4zM14 3h1v1h-1zM16 3h1v1h-1zM19 3h3v1h-3zM24 3h1v1h-1zM26 3h3v1h-3zM30 3h1v1h-1zM34 3h1v1h-1zM36 3h3v1h-3zM40 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h4v1h-4zM18 4h8v1h-8zM28 4h1v1h-1zM31 4h2v1h-2zM34 4h1v1h-1zM36 4h3v1h-3zM40 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h3v1h-3zM12 5h1v1h-1zM18 5h1v1h-1zM20 5h2v1h-2zM25 5h5v1h-5zM34 5h1v1h-1zM40 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h7v1h-7zM8 7h3v1h-3zM12 7h1v1h-1zM14 7h1v1h-1zM16 7h1v1h-1zM18 7h4v1h-4zM23 7h2v1h-2zM26 7h2v1h-2zM32 7h1v1h-1zM0 8h1v1h-1zM2 8h5v1h-5zM11 8h3v1h-3zM15 8h6v1h-6zM25 8h1v1h-1zM27 8h1v1h-1zM29 8h1v1h-1zM31 8h2v1h-2zM34 8h5v1h-5zM0 9h4v1h-4zM7 9h1v1h-1zM9 9h6v1h-6zM16 9h1v1h-1zM19 9h1v1h-1zM21 9h4v1h-4zM26 9h1v1h-1zM30 9h3v1h-3zM34 9h3v1h-3zM38 9h3v1h-3zM1 10h8v1h-8zM10 10h1v1h-1zM12 10h2v1h-2zM15 10h1v1h-1zM17 10h2v1h-2zM21 10h2v1h-2zM24 10h2v1h-2zM27 10h2v1h-2zM30 10h1v1h-1zM32 10h1v1h-1zM36 10h1v1h-1zM0 11h1v1h-1zM2 11h2v1h-2zM5 11h1v1h-1zM7 11h1v1h-1zM9 11h1v1h-1zM11 11h1v1h-1zM15 11h1v1h-1zM21 11h2v1h-2zM24 11h1v1h-1zM27 11h2v1h-2zM31 11h3v1h-3zM36 11h2v1h-2zM39 11h1v1h-1zM0 12h1v1h-1zM4 12h3v1h-3zM8 12h1v1h-1zM10 12h1v1h-1zM12 12h2v1h-2zM17 12h1v1h-1zM20 12h1v1h-1zM24 12h8v1h-8zM35 12h1v1h-1zM37 12h3v1h-3zM0 13h3v1h-3zM4 13h1v1h-1zM7 13h1v1h-1zM12 13h4v1h-4zM18 13h1v1h-1zM21 13h2v1h-2zM25 13h1v1h-1zM27 13h1v1h-1zM30 13h1v1h-1zM32 13h3v1h-3zM36 13h2v1h-2zM39 13h1v1h-1zM2 14h2v1h-2zM6 14h2v1h-2zM10 14h4v1h-4zM15 14h1v1h-1zM20 14h5v1h-5zM27 14h5v1h-5zM33 14h1v1h-1zM36 14h1v1h-1zM1 15h5v1h-5zM7 15h1v1h-1zM11 15h1v1h-1zM13 15h1v1h-1zM21 15h3v1h-3zM27 15h1v1h-1zM30 15h3v1h-3zM34 15h4v1h-4zM39 15h2v1h-2zM1 16h1v1h-1zM3 16h1v1h-1zM5 16h3v1h-3zM9 16h4v1h-4zM17 16h2v1h-2zM23 16h1v1h-1zM25 16h5v1h-5zM31 16h1v1h-1zM33 16h1v1h-1zM35 16h1v1h-1zM38 16h2v1h-2zM4 17h2v1h-2zM7 17h1v1h-1zM10 17h3v1h-3zM14 17h1v1h-1zM19 17h2v1h-2zM22 17h2v1h-2zM29 17h4v1h-4zM34 17h3v1h-3zM40 17h1v1h-1zM5 18h4v1h-4zM10 18h4v1h-4zM15 18h1v1h-1zM18 18h1v1h-1zM20 18h1v1h-1zM22 18h1v1h-1zM27 18h1v1h-1zM29 18h1v1h-1zM32 18h1v1h-1zM34 18h1v1h-1zM36 18h3v1h-3zM1 19h5v1h-5zM7 19h2v1h-2zM10 19h6v1h-6zM20 19h1v1h-1zM26 19h1v1h-1zM29 19h2v1h-2zM36 19h1v1h-1zM40 19h1v1h-1zM1 20h4v1h-4zM6 20h1v1h-1zM8 20h3v1h-3zM13 20h1v1h-1zM18 20h1v1h-1zM21 20h2v1h-2zM27 20h1v1h-1zM31 20h1v1h-1zM38 20h1v1h-1zM40 20h1v1h-1zM2 21h2v1h-2zM8 21h2v1h-2zM11 21h2v1h-2zM14 21h1v1h-1zM19 21h3v1h-3zM23 21h1v1h-1zM26 21h3v1h-3zM30 21h4v1h-4zM35 21h3v1h-3zM39 21h2v1h-2zM0 22h1v1h-1zM2 22h1v1h-1zM4 22h1v1h-1zM6 22h2v1h-2zM10 22h1v1h-1zM14 22h1v1h-1zM16 22h1v1h-1zM18 22h1v1h-1zM21 22h1v1h-1zM26 22h2v1h-2zM30 22h1v1h-1zM32 22h2v1h-2zM35 22h3v1h-3zM0 23h1v1h-1zM4 23h1v1h-1zM7 23h2v1h-2zM10 23h4v1h-4zM15 23h1v1h-1zM18 23h2v1h-2zM21 23h1v1h-1zM24 23h1v1h-1zM26 23h2v1h-2zM31 23h2v1h-2zM37 23h1v1h-1zM39 23h2v1h-2zM1 24h1v1h-1zM3 24h4v1h-4zM9 24h1v1h-1zM12 24h2v1h-2zM17 24h2v1h-2zM20 24h1v1h-1zM25 24h1v1h-1zM27 24h1v1h-1zM29 24h3v1h-3zM35 24h1v1h-1zM38 24h1v1h-1zM0 25h1v1h-1zM2 25h2v1h-2zM5 25h1v1h-1zM8 25h2v1h-2zM12 25h1v1h-1zM14 25h1v1h-1zM19 25h1v1h-1zM21 25h4v1h-4zM26 25h1v1h-1zM28 25h1v1h-1zM30 25h2v1h-2zM34 25h1v1h-1zM36 25h2v1h-2zM40 25h1v1h-1zM0 26h1v1h-1zM3 26h2v1h-2zM6 26h4v1h-4zM11 26h1v1h-1zM14 26h1v1h-1zM16 26h1v1h-1zM18 26h1v1h-1zM26 26h3v1h-3zM32 26h1v1h-1zM34 26h1v1h-1zM1 27h4v1h-4zM10 27h1v1h-1zM12 27h2v1h-2zM15 27h1v1h-1zM21 27h1v1h-1zM23 27h2v1h-2zM26 27h3v1h-3zM31 27h2v1h-2zM34 27h1v1h-1zM36 27h2v1h-2zM39 27h1v1h-1zM0 28h1v1h-1zM2 28h1v1h-1zM4 28h5v1h-5zM12 28h2v1h-2zM15 28h1v1h-1zM17 28h2v1h-2zM25 28h2v1h-2zM29 28h3v1h-3zM33 28h1v1h-1zM35 28h1v1h-1zM37 28h3v1h-3zM0 29h1v1h-1zM2 29h1v1h-1zM9 29h2v1h-2zM12 29h5v1h-5zM18 29h1v1h-1zM20 29h3v1h-3zM24 29h1v1h-1zM26 29h4v1h-4zM33 29h1v1h-1zM35 29h3v1h-3zM40 29h1v1h-1zM0 30h1v1h-1zM6 30h2v1h-2zM11 30h1v1h-1zM14 30h1v1h-1zM16 30h4v1h-4zM29 30h1v1h-1zM33 30h2v1h-2zM36 30h2v1h-2zM39 30h1v1h-1zM0 31h1v1h-1zM2 31h2v1h-2zM5 31h1v1h-1zM9 31h1v1h-1zM12 31h5v1h-5zM18 31h4v1h-4zM24 31h1v1h-1zM26 31h1v1h-1zM28 31h1v1h-1zM33 31h2v1h-2zM37 31h1v1h-1zM0 32h1v1h-1zM2 32h1v1h-1zM4 32h4v1h-4zM9 32h1v1h-1zM12 32h1v1h-1zM17 32h4v1h-4zM24 32h3v1h-3zM28 32h3v1h-3zM32 32h7v1h-7zM8 33h5v1h-5zM14 33h1v1h-1zM16 33h2v1h-2zM19 33h5v1h-5zM25 33h1v1h-1zM30 33h1v1h-1zM32 33h1v1h-1zM36 33h2v1h-2zM40 33h1v1h-1zM0 34h7v1h-7zM9 34h2v1h-2zM12 34h2v1h-2zM16 34h2v1h-2zM21 34h1v1h-1zM25 34h4v1h-4zM30 34h3v1h-3zM34 34h1v1h-1zM36 34h2v1h-2zM39 34h1v1h-1zM0 35h1v1h-1zM6 35h1v1h-1zM8 35h1v1h-1zM10 35h2v1h-2zM14 35h2v1h-2zM17 35h2v1h-2zM21 35h5v1h-5zM27 35h2v1h-2zM31 35h2v1h-2zM36 35h1v1h-1zM0 36h1v1h-1zM2 36h3v1h-3zM6 36h1v1h-1zM8 36h4v1h-4zM15 36h2v1h-2zM20 36h2v1h-2zM24 36h1v1h-1zM26 36h3v1h-3zM30 36h1v1h-1zM32 36h8v1h-8zM0 37h1v1h-1zM2 37h3v1h-3zM6 37h1v1h-1zM8 37h1v1h-1zM11 37h1v1h-1zM13 37h1v1h-1zM15 37h1v1h-1zM18 37h1v1h-1zM20 37h4v1h-4zM29 37h1v1h-1zM31 37h1v1h-1zM33 37h1v1h-1zM35 37h1v1h-1zM37 37h1v1h-1zM0 38h1v1h-1zM2 38h3v1h-3zM6 38h1v1h-1zM8 38h1v1h-1zM11 38h1v1h-1zM13 38h1v1h-1zM15 38h1v1h-1zM17 38h2v1h-2zM21 38h1v1h-1zM24 38h4v1h-4zM29 38h1v1h-1zM31 38h1v1h-1zM33 38h4v1h-4zM0 39h1v1h-1zM6 39h1v1h-1zM11 39h1v1h-1zM13 39h3v1h-3zM17 39h2v1h-2zM21 39h1v1h-1zM24 39h1v1h-1zM26 39h1v1h-1zM30 39h1v1h-1zM32 39h3v1h-3zM36 39h2v1h-2zM39 39h1v1h-1zM0 40h7v1h-7zM8 40h1v1h-1zM11 40h1v1h-1zM14 40h2v1h-2zM18 40h1v1h-1zM20 40h1v1h-1zM25 40h1v1h-1zM27 40h1v1h-1zM29 40h1v1h-1zM31 40h1v1h-1zM33 40h1v1h-1zM35 40h2v1h-2zM38 40h1v1h-1z" fill="#111" shape-rendering="crispEdges" />
+        </symbol>
+      </defs>
+    </svg>
+    <div class="stage">
+      <div class="bg" id="bg"></div>
+      <div class="shade" id="shade"></div>
+      <div class="bgblur" id="bgblur"></div>
+      <div class="shade2" id="shade2"></div>
+
+      <!-- printed QR card at the stand -->
+      <div class="abs" id="bigcard">
+        <div class="qrcard">
+          <div class="top">
+            <img src="../assets/logo.png" alt="" />
+            <div class="bn js-bname">Arepas Rosa</div>
+          </div>
+          <svg viewBox="0 0 10 10"><use href="#qr" /></svg>
+          <div class="cta">Escanea y pide por WhatsApp</div>
+          <div class="num js-num"></div>
+        </div>
+      </div>
+
+      <!-- right column -->
+      <div class="abs col kicker" id="kick">Andrés · cliente</div>
+      <div class="abs col heads">
+        <div class="h2" id="hA">Le contesta el asistente de Rosa.</div>
+        <div class="h2" id="hB">Y pide sin salir del chat.</div>
+      </div>
+      <div class="abs col feats">
+        <div class="card feat" id="f1">
+          <div class="ck">✓</div>
+          <div>
+            <div class="ft">Dice que es una IA</div>
+            <div class="fd"><q id="f1q"></q></div>
+          </div>
+        </div>
+        <div class="card feat" id="f2">
+          <div class="ck">✓</div>
+          <div>
+            <div class="ft">Solo habla de su negocio</div>
+            <div class="fd" id="f2d"></div>
+          </div>
+        </div>
+        <div class="card feat" id="f3">
+          <div class="ck">✓</div>
+          <div>
+            <div class="ft">Formulario nativo de WhatsApp</div>
+            <div class="fd" id="f3d"></div>
+          </div>
+        </div>
+      </div>
+      <div class="abs col chips">
+        <span class="chip" id="c1">Muse Spark 1.3 atiende</span>
+        <span class="chip wa" id="c2">WhatsApp Flows</span>
+      </div>
+
+      <!-- Andrés's phone -->
+      <div class="phone" id="phone">
+        <div class="notch"></div>
+        <div class="screen">
+          <div class="layer chat" id="chat">
+            <div class="wa-head">
+              <div class="back">‹</div>
+              <div class="avatar"><img src="../assets/logo.png" alt="" /></div>
+              <div>
+                <div class="name js-bname">Arepas Rosa</div>
+                <div class="status">en línea</div>
+              </div>
+            </div>
+            <div class="wa-body"><div class="msgs" id="msgs"></div></div>
+            <div class="wa-input">
+              <div class="field">Mensaje</div>
+              <div class="send"></div>
+            </div>
+            <div class="dim" id="dim"></div>
+            <div class="sheet" id="sheet">
+              <div class="scr" id="scrA">
+                <div class="grab"></div>
+                <div class="shead">
+                  <div class="x">✕</div>
+                  <div class="st" id="aTitle"></div>
+                  <div class="dots">⋮</div>
+                </div>
+                <div class="sbody">
+                  <div class="th" id="aHead"></div>
+                  <div class="tb" id="aBody"></div>
+                  <div id="rows"></div>
+                  <div class="field" id="fTime">
+                    <span class="lab" id="lTime"></span
+                    ><span id="vTime" class="ph"></span
+                    ><span
+                      class="chev"
+                      style="
+                        width: 9px;
+                        height: 9px;
+                        border-right: 2px solid #54656f;
+                        border-bottom: 2px solid #54656f;
+                        transform: rotate(45deg) translateY(-3px);
+                      "
+                    ></span>
+                  </div>
+                  <div class="field" id="fName">
+                    <span class="lab" id="lName"></span><span id="vName"></span>
+                  </div>
+                  <div
+                    class="field"
+                    id="fNote"
+                    style="
+                      height: 64px;
+                      align-items: flex-start;
+                      padding-top: 16px;
+                    "
+                  >
+                    <span class="lab" id="lNote"></span
+                    ><span id="vNote" class="ph"></span>
+                  </div>
+                </div>
+                <div class="sfoot">
+                  <div class="go" id="aGo"></div>
+                  <div class="mg">
+                    Formulario de <span class="js-bname">Arepas Rosa</span> ·
+                    WhatsApp Flows
+                  </div>
+                </div>
+              </div>
+              <div class="scr conf" id="scrB">
+                <div class="grab"></div>
+                <div class="shead">
+                  <div class="x">‹</div>
+                  <div class="st" id="bTitle"></div>
+                  <div class="dots">⋮</div>
+                </div>
+                <div class="sbody">
+                  <div class="th" id="bHead"></div>
+                  <div class="sub" id="bSub"></div>
+                  <div class="big" id="bTime"></div>
+                  <div class="tb2" id="bBody"></div>
+                </div>
+                <div class="sfoot">
+                  <div class="go" id="bGo"></div>
+                  <div class="mg">
+                    Formulario de <span class="js-bname">Arepas Rosa</span> ·
+                    WhatsApp Flows
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sent" id="sent">
+              <div class="okc">✓</div>
+              <span id="sentT">Pedido enviado</span>
+            </div>
+          </div>
+          <div class="layer cam" id="cam">
+            <div class="feed" id="feed"></div>
+            <div class="qrprop" id="qrprop">
+              <div
+                class="qrcard"
+                style="padding: 14px 14px 12px; border-radius: 12px"
+              >
+                <div class="top" style="margin-bottom: 8px; gap: 8px">
+                  <img
+                    src="../assets/logo.png"
+                    alt=""
+                    style="width: 32px; height: 32px"
+                  />
+                  <div class="bn js-bname" style="font-size: 19px">
+                    Arepas Rosa
+                  </div>
+                </div>
+                <svg viewBox="0 0 10 10"><use href="#qr" /></svg>
+                <div class="cta" style="font-size: 13px; margin-top: 8px">
+                  Escanea y pide por WhatsApp
+                </div>
+              </div>
+            </div>
+            <div class="corners" id="corners"><i></i><i></i><i></i><i></i></div>
+            <div class="camtop">CÁMARA · CÓDIGO QR</div>
+            <div class="linkpill" id="linkpill">
+              <div class="lg"><img src="../assets/logo.png" alt="" /></div>
+              <div>
+                <div class="t1">
+                  Abrir chat con <span class="js-bname">Arepas Rosa</span>
+                </div>
+                <div class="t2 js-wame"></div>
+              </div>
+            </div>
+            <div class="shutter"></div>
+          </div>
+          <div class="tap" id="tap"></div>
+        </div>
+      </div>
+
+      <div class="tag">
+        <span class="dot"></span>Ensayo real · modelos de Meta en vivo ·
+        WhatsApp simulado
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const R = window.RUN || {};
+      const esc = (s) =>
+        String(s).replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+        );
+      const md = (s) => esc(s).replace(/\*([^*\n]+)\*/g, "<b>$1</b>");
+      const lines = R.lines || [];
+      const sent = R.sent || [];
+      const events = R.events || [];
+      const order = R.order || {};
+
+      // --- data from the real rehearsal ---
+      const live = (events.find((e) => e.kind === "run.live") || {}).data || {};
+      const bname = live.business_name || "Arepas Rosa";
+      document
+        .querySelectorAll(".js-bname")
+        .forEach((e) => (e.textContent = bname));
+      const dn = String(live.display_number || "");
+      document.querySelector(".js-num").textContent =
+        dn.length === 12
+          ? `+${dn.slice(0, 2)} ${dn.slice(2, 5)} ${dn.slice(5, 8)} ${dn.slice(8)}`
+          : dn
+            ? "+" + dn
+            : "";
+      document.querySelector(".js-wame").textContent = (
+        R.wa_me ||
+        live.wa_me ||
+        ""
+      )
+        .replace(/^https?:\/\//, "")
+        .split("?")[0];
+
+      const tz = (ts) => {
+        // America/Bogota (UTC-5, no DST), pure arithmetic on the run's timestamp
+        const sec = (((Math.floor(ts || 0) - 5 * 3600) % 86400) + 86400) % 86400;
+        const hh = Math.floor(sec / 3600),
+          mm = Math.floor((sec % 3600) / 60);
+        return String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0");
+      };
+      const clock = tz(order.created_at);
+
+      // customer conversation up to (and incl.) the Flow message
+      const conv = [];
+      for (const l of lines) {
+        if (l.who === "Andrés → negocio" || l.who === "Negocio → cliente") {
+          if (l.kind === "wa.in" && /^📝/.test(l.text)) break;
+          conv.push(l);
+        }
+      }
+      const flowMsg = (sent.find((s) => s.op === "flow") || {}).payload;
+      const flowI = (flowMsg && flowMsg.interactive) || {};
+      const flowCta =
+        ((flowI.action || {}).parameters || {}).flow_cta || "Hacer pedido";
+      const flowBody = (flowI.body || {}).text || "";
+
+      const listIcon =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="#027eb5" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1.2" fill="#027eb5"/><circle cx="4" cy="12" r="1.2" fill="#027eb5"/><circle cx="4" cy="18" r="1.2" fill="#027eb5"/></svg>';
+
+      const msgs = $("msgs");
+      const rows = []; // {row, bubble, at, kind}
+      function addRow(html, cls, at) {
+        const row = document.createElement("div");
+        row.className = "mrow";
+        const b = document.createElement("div");
+        b.className = "bubble " + cls;
+        b.innerHTML = html;
+        row.appendChild(b);
+        msgs.appendChild(row);
+        rows.push({ row, b, at });
+        return rows[rows.length - 1];
+      }
+      const T = (o) =>
+        `<span class="time">${clock}${o ? '<span class="tick">✓✓</span>' : ""}</span>`;
+      // slot times synced to the narration
+      const slots = [2.55, 3.2, 4.15, 4.9, 6.3, 6.85, 7.3];
+      const n = conv.length;
+      const slotAt = (i) =>
+        n === slots.length
+          ? slots[i]
+          : 2.55 + (i * (7.3 - 2.55)) / Math.max(1, n - 1);
+      let flowRow = null;
+      const typers = [];
+      conv.forEach((l, i) => {
+        const out = l.who === "Andrés → negocio";
+        const at = slotAt(i);
+        if (!out && (i === 0 || conv[i - 1].who === "Andrés → negocio")) {
+          const ty = addRow("<i></i><i></i><i></i>", "in typing", at - 0.42);
+          ty.until = at;
+          typers.push(ty);
+        }
+        if (l.kind === "wa.flow") {
+          const body = flowBody || l.text.replace(/\s*\[Flow:.*\]$/, "");
+          flowRow = addRow(
+            `<div class="fbody">${md(body)}${T(false)}</div><div class="btns"><div>${listIcon}${esc(flowCta)}</div></div>`,
+            "in flowb",
+            at,
+          );
+        } else {
+          addRow(md(l.text) + T(out), out ? "out" : "in", at);
+        }
+      });
+
+      // right column copy from RUN
+      const greet =
+        (conv.find((l) => l.who === "Negocio → cliente") || {}).text || "";
+      $("f1q").textContent =
+        (greet.split(/(?<=\.)\s/)[0] || greet).replace(/\*/g, "");
+      const insp = live.inspector || {};
+      const ia = (insp.checks || []).find((c) => /IA/.test(c.name)) || {};
+      $("f2d").textContent = ia.detail ? `Inspector: ${ia.detail}.` : "";
+
+      // Flow JSON as generated in the run
+      const fj = (
+        (sent.find((s) => s.op === "update_flow_json") || {}).payload || {}
+      ).flow_json || { screens: [] };
+      const scrA = fj.screens[0] || { children: [] };
+      const scrB = fj.screens[1] || { children: [] };
+      const ch = (s, type) => s.children || (s.layout || {}).children || [];
+      const kids = (s) => (s.layout ? s.layout.children : s.children) || [];
+      const A = kids(scrA),
+        B = kids(scrB);
+      const first = (arr, type) => arr.find((c) => c.type === type) || {};
+      const byName = (arr, nm) => arr.find((c) => c.name === nm) || {};
+      $("aTitle").textContent = scrA.title || "";
+      $("aHead").textContent = first(A, "TextHeading").text || bname;
+      $("aBody").textContent = (first(A, "TextBody").text || "").split("\n")[0];
+      $("aGo").textContent = first(A, "Footer").label || "Continuar";
+      $("lTime").textContent =
+        byName(A, "pickup_time").label || "Hora de recogida";
+      $("lName").textContent = byName(A, "customer_name").label || "Tu nombre";
+      $("lNote").textContent = byName(A, "note").label || "Nota (opcional)";
+      $("bTitle").textContent = scrB.title || "";
+      $("bHead").textContent = first(B, "TextHeading").text || "";
+      $("bSub").textContent = first(B, "TextSubheading").text || "";
+      $("bBody").textContent =
+        B.filter((c) => c.type === "TextBody" && !/\$\{/.test(c.text)).map(
+          (c) => c.text,
+        )[0] || "";
+      $("bGo").textContent = first(B, "Footer").label || "Confirmar pedido";
+      $("bTime").textContent = order.pickup_time || "";
+      $("f3d").textContent =
+        `${A.filter((c) => /^qty_/.test(c.name || "")).length ? "Cantidades, " : ""}${($("lTime").textContent || "").toLowerCase()} y nombre · se envía como datos, no como texto libre.`;
+
+      // product rows: last spec's products, quantities from the real order
+      const specs = events.filter((e) => e.kind === "spec.ready");
+      const prods =
+        ((specs[specs.length - 1] || {}).data || {}).spec?.products || [];
+      const qtyOf = (id) =>
+        ((order.items || []).find((it) => it.product_id === id) || {}).qty || 0;
+      const peso = (v) => "$" + Number(v || 0).toLocaleString("es-CO");
+      const qtyEls = [];
+      prods.forEach((p) => {
+        const r = document.createElement("div");
+        r.className = "prow";
+        r.innerHTML = `<div class="pn"><b></b><span>${peso(p.price_cop)}</span></div><div class="dd"><span class="q">0</span><span class="chev"></span></div>`;
+        r.querySelector("b").textContent = p.name;
+        $("rows").appendChild(r);
+        qtyEls.push({
+          dd: r.querySelector(".dd"),
+          q: r.querySelector(".q"),
+          qty: qtyOf(p.id),
+        });
+      });
+      // keep the sheet compact when the menu is long
+      if (prods.length > 3)
+        document
+          .querySelectorAll(".prow")
+          .forEach((r) => (r.style.padding = "6px 0"));
+
+      scene((t, S) => {
+        const k = S.p(t, 0, S.D);
+        // --- background: stand b-roll, then blurred backdrop ---
+        $("bg").style.transform = `scale(${1.06 + 0.06 * k})`;
+        $("bgblur").style.transform = `scale(${1.06 + 0.06 * k})`;
+        const toChat = S.ease(S.p(t, 2.0, 2.8));
+        $("bgblur").style.opacity = toChat;
+        $("shade2").style.opacity = toChat;
+
+        // --- phone: slow push ---
+        $("phone").style.transform =
+          `translateY(${-6 * k}px) scale(${0.95 + 0.015 * k})`;
+
+        // --- QR beat ---
+        const big = $("bigcard");
+        const bIn = S.easeOut(S.p(t, 0.05, 0.7));
+        big.style.opacity = bIn * (1 - S.p(t, 2.0, 2.5));
+        big.style.transform = `translateY(${(1 - bIn) * 30 + 40 * S.easeIn(S.p(t, 2.0, 2.5))}px) rotate(${3 - 1.2 * k}deg) scale(${0.98 + 0.03 * S.p(t, 0, 2.4)})`;
+
+        const camK = S.p(t, 0, 1.8);
+        $("feed").style.transform =
+          `translate(${-10 * camK}px, ${6 * camK}px) scale(${1.05 + 0.04 * camK})`;
+        $("qrprop").style.transform =
+          `perspective(700px) rotateY(${S.lerp(-14, -3, S.ease(camK))}deg) rotate(${S.lerp(4, 1, S.ease(camK))}deg) scale(${S.lerp(0.82, 1, S.ease(camK))}) translateX(${S.lerp(26, 0, S.ease(camK))}px)`;
+        const lock = S.ease(S.p(t, 0.9, 1.5));
+        const cs = S.lerp(1.3, 1, lock);
+        $("corners").style.transform = `translateY(-22px) scale(${cs * 1.06})`;
+        $("corners")
+          .querySelectorAll("i")
+          .forEach(
+            (i) => (i.style.borderColor = lock >= 1 ? "#f2b33d" : "#fff"),
+          );
+        S.fade($("linkpill"), S.p(t, 1.45, 1.85), 24);
+        $("cam").style.opacity = 1 - S.p(t, 2.15, 2.45);
+
+        // tap on the link pill, then on the Flow button
+        const tap = $("tap");
+        // "y listo": Continuar → Confirmar → toast land on the word
+        const L = S.cue("listo") || 12.3;
+        const tapA = S.p(t, 1.9, 2.25),
+          tapB = S.p(t, 7.7, 8.05),
+          tapC = S.p(t, L - 0.55, L - 0.3),
+          tapD = S.p(t, L - 0.1, L + 0.15);
+        const showTap = (x, y, p) => {
+          tap.style.left = x + "px";
+          tap.style.top = y + "px";
+          tap.style.opacity = Math.sin(Math.PI * p) * 0.95;
+          tap.style.transform = `scale(${0.7 + 0.4 * p})`;
+        };
+        tap.style.opacity = 0;
+        if (tapA > 0 && tapA < 1) showTap(220, 700, tapA);
+        if (flowRow && tapB > 0 && tapB < 1) {
+          const bt = flowRow.b.querySelector(".btns div");
+          const sr = tap.parentElement.getBoundingClientRect(),
+            br = bt.getBoundingClientRect(),
+            sc = sr.width / tap.parentElement.offsetWidth;
+          showTap(
+            (br.left + br.width / 2 - sr.left) / sc,
+            (br.top + br.height / 2 - sr.top) / sc,
+            tapB,
+          );
+        }
+        if (tapC > 0 && tapC < 1) showTap(201, 822, tapC);
+        if (tapD > 0 && tapD < 1) showTap(201, 822, tapD);
+
+        // --- chat messages: rows grow from zero height so the chat scrolls naturally ---
+        for (const r of rows) {
+          const end = r.until;
+          let x = S.p(t, r.at, r.at + 0.32);
+          if (end !== undefined && t >= end) x = 0;
+          const h = r.b.offsetHeight + 10;
+          r.row.style.height = S.easeOut(x) * h + "px";
+          r.b.style.opacity = S.easeOut(Math.min(1, x * 1.5));
+          r.b.style.transform = `scale(${0.9 + 0.1 * S.back(x)})`;
+          if (end !== undefined) {
+            r.b
+              .querySelectorAll("i")
+              .forEach(
+                (d, j) =>
+                  (d.style.opacity =
+                    0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * 9 - j * 1.1))),
+              );
+          }
+        }
+        // Flow button glows when tapped
+        if (flowRow)
+          flowRow.b.querySelector(".btns div").style.background =
+            tapB > 0.2 && t < 8.6 ? "#e7f3f8" : "transparent";
+
+        // --- Flow sheet ---
+        const up = S.easeOut(S.p(t, 8.0, 8.55));
+        $("sheet").style.transform = `translateY(${(1 - up) * 105}%)`;
+        $("dim").style.opacity = 0.45 * up;
+        const ct = S.cue("cantidades") || 9.92;
+        qtyEls.forEach((e, i) => {
+          const a = ct - 0.25 + i * 0.4;
+          const cur = e.qty
+            ? Math.min(
+                e.qty,
+                Math.floor(
+                  S.p(t, a, a + 0.45 * e.qty) * e.qty + (t >= a ? 1 : 0),
+                ),
+              )
+            : 0;
+          e.q.textContent = Math.max(0, Math.min(e.qty, cur));
+          e.dd.classList.toggle(
+            "on",
+            e.qty > 0 && t >= a && t < a + 0.6 + 0.3 * e.qty,
+          );
+        });
+        const ht = S.cue("hora") || 10.95;
+        const timeOn = t >= ht - 0.1;
+        $("vTime").textContent = timeOn
+          ? order.pickup_time || ""
+          : "Elige una hora";
+        $("vTime").className = timeOn ? "" : "ph";
+        $("fTime").classList.toggle("on", t >= ht - 0.3 && t < ht + 0.45);
+        const nm = order.customer_name || "";
+        const nx = S.p(t, ht + 0.35, ht + 0.75);
+        $("fName").classList.toggle("on", t >= ht + 0.25 && t < L - 0.45);
+        $("vName").innerHTML =
+          nx > 0
+            ? esc(nm.slice(0, Math.round(nx * nm.length))) +
+              (t < L - 0.45 && Math.floor(t * 3) % 2 === 0
+                ? '<span class="caret"></span>'
+                : "")
+            : '<span class="ph">Escribe tu nombre</span>';
+        $("vNote").textContent = order.note || "Opcional";
+        $("aGo").style.filter =
+          tapC > 0.2 && tapC < 1 ? "brightness(0.85)" : "none";
+        const sw = S.ease(S.p(t, L - 0.4, L - 0.1));
+        $("scrA").style.transform = `translateX(${-30 * sw}%)`;
+        $("scrA").style.visibility = sw >= 1 ? "hidden" : "visible";
+        $("scrB").style.transform = `translateX(${(1 - sw) * 100}%)`;
+        $("scrB").style.boxShadow =
+          sw > 0 && sw < 1 ? "-10px 0 30px #0002" : "none";
+        $("bGo").style.filter = tapD > 0.2 ? "brightness(0.85)" : "none";
+        S.pop($("sent"), S.p(t, L + 0.1, L + 0.4));
+
+        // --- right column ---
+        S.fade($("kick"), S.p(t, 2.3, 2.8));
+        const hb = S.cue("pide") || 7.47;
+        S.fade($("hA"), S.p(t, 2.4, 3.0), 20);
+        if (t > hb - 0.3) $("hA").style.opacity = 1 - S.p(t, hb - 0.3, hb);
+        S.fade($("hB"), S.p(t, hb - 0.05, hb + 0.4), 20);
+        S.fade(
+          $("f1"),
+          S.p(t, (S.cue("ia") || 5.28) - 0.15, (S.cue("ia") || 5.28) + 0.35),
+          24,
+        );
+        S.fade(
+          $("f2"),
+          S.p(t, (S.cue("solo") || 5.8) - 0.1, (S.cue("solo") || 5.8) + 0.4),
+          24,
+        );
+        const fc = S.cue("formulario") || 8.01;
+        S.fade($("f3"), S.p(t, fc - 0.1, fc + 0.4), 24);
+        S.pop(
+          $("c1"),
+          S.p(
+            t,
+            (S.cue("asistente") || 3.13) - 0.1,
+            (S.cue("asistente") || 3.13) + 0.35,
+          ),
+        );
+        S.pop($("c2"), S.p(t, fc + 0.4, fc + 0.8));
+        $("f3").classList.toggle("lit", t > fc && t < L + 0.3);
+      });
+    </script>
+  </body>
+</html>

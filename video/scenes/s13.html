@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .rig {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 45%;
+      }
+      .grid {
+        position: absolute;
+        inset: -60px;
+        background-image:
+          linear-gradient(#ffffff07 1px, transparent 1px),
+          linear-gradient(90deg, #ffffff07 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: radial-gradient(
+          1100px 700px at 50% 45%,
+          #000 30%,
+          transparent 75%
+        );
+      }
+      .hdr {
+        left: 120px;
+        top: 84px;
+      }
+      .hdr .h2 {
+        margin-top: 14px;
+        font-size: 56px;
+      }
+      svg.wires {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: visible;
+      }
+      .wires path {
+        fill: none;
+      }
+      .wire-main {
+        stroke: #f2b33d77;
+        stroke-width: 3;
+      }
+      .wire-model {
+        stroke: var(--meta);
+        stroke-width: 2.5;
+        stroke-dasharray: 2000;
+      }
+      .side {
+        position: absolute;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 20px 22px;
+      }
+      .side .lbl {
+        font: 650 15px/1 var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+      #voice {
+        left: 120px;
+        top: 292px;
+        width: 290px;
+        height: 196px;
+      }
+      #voice .vbub {
+        margin-top: 16px;
+        background: var(--wa-out);
+        border-radius: 14px;
+        border-top-right-radius: 4px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      #voice .vbub .play {
+        width: 0;
+        height: 0;
+        border-left: 14px solid #54656f;
+        border-top: 9px solid transparent;
+        border-bottom: 9px solid transparent;
+      }
+      #voice .wave {
+        flex: 1;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+      #voice .wave i {
+        flex: 1;
+        border-radius: 2px;
+        background: #b5c2bb;
+      }
+      #voice .wave i.on {
+        background: #1fa855;
+      }
+      #voice .dur {
+        font: 500 13px/1 var(--font);
+        color: var(--wa-meta);
+      }
+      #voice .extra {
+        margin-top: 14px;
+        font: 500 18px/1.3 var(--font);
+        color: var(--muted);
+      }
+      #gen {
+        position: absolute;
+        left: 470px;
+        top: 248px;
+        width: 980px;
+        height: 284px;
+        border-radius: 28px;
+        background: linear-gradient(180deg, #1a2520, #141d19);
+        border: 1px solid #f2b33d55;
+        box-shadow:
+          0 0 0 1px #f2b33d22,
+          0 30px 80px #0007;
+      }
+      #gen .gtitle {
+        position: absolute;
+        left: 30px;
+        top: 22px;
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+      }
+      #gen .gtitle b {
+        font: 800 30px/1 var(--display);
+        letter-spacing: -0.01em;
+        color: var(--gold);
+      }
+      #gen .gtitle span {
+        font: 500 18px/1 var(--font);
+        color: var(--faint);
+      }
+      .node {
+        position: absolute;
+        top: 74px;
+        width: 212px;
+        height: 182px;
+        border-radius: 18px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        padding: 16px 16px;
+      }
+      .node .n {
+        font: 600 15px/1 var(--mono);
+        color: var(--faint);
+      }
+      .node .t {
+        margin-top: 10px;
+        font: 700 26px/1.1 var(--display);
+        color: var(--text);
+      }
+      .node .s {
+        margin-top: 8px;
+        font: 500 17px/1.3 var(--font);
+        color: var(--muted);
+      }
+      .node .s.mono {
+        font: 500 16px/1.3 var(--mono);
+        color: var(--gold);
+      }
+      .lanes {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .lanes span {
+        padding: 6px 9px;
+        border-radius: 999px;
+        background: #0c110f;
+        border: 1px solid var(--line);
+        font: 600 14px/1 var(--font);
+        color: var(--muted);
+      }
+      .dag {
+        margin-top: 12px;
+        width: 180px;
+        height: 70px;
+      }
+      #live {
+        left: 1510px;
+        top: 280px;
+        width: 290px;
+        height: 220px;
+        border-color: #25d36666;
+      }
+      #live .biz {
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      #live .biz img {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: #fff;
+      }
+      #live .biz b {
+        display: block;
+        font: 700 23px/1.15 var(--display);
+      }
+      #live .biz span {
+        font: 500 15px/1.2 var(--font);
+        color: var(--green);
+      }
+      #live .acts {
+        margin-top: 16px;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      #live .acts span {
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: #25d3661c;
+        color: #c9f5da;
+        font: 600 15px/1 var(--font);
+      }
+      #live .el {
+        margin-top: 14px;
+        font: 500 16px/1.2 var(--font);
+        color: var(--faint);
+      }
+      #live .el b {
+        color: var(--text);
+        font-weight: 700;
+      }
+      .model {
+        position: absolute;
+        top: 606px;
+        width: 360px;
+        height: 132px;
+        border-radius: 20px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        padding: 20px 22px;
+      }
+      .model .chip {
+        font-size: 20px;
+        padding: 9px 16px;
+      }
+      .model .job {
+        margin-top: 16px;
+        font: 650 27px/1.15 var(--display);
+        color: var(--text);
+        min-height: 31px;
+      }
+      #band {
+        position: absolute;
+        left: 180px;
+        top: 784px;
+        width: 1560px;
+        height: 96px;
+        border-radius: 22px;
+        background: linear-gradient(90deg, #25d36612, #25d3660a);
+        border: 1px solid #25d36644;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        padding: 0 28px;
+      }
+      #band .bl {
+        font: 650 16px/1.2 var(--font);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #7fd9a2;
+        margin-right: 14px;
+        white-space: nowrap;
+      }
+      #band .chip {
+        font-size: 25px;
+        padding: 12px 22px;
+      }
+      .pulse {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        margin: -7px 0 0 -7px;
+        border-radius: 50%;
+        background: var(--gold);
+        box-shadow:
+          0 0 14px var(--gold),
+          0 0 30px #f2b33d88;
+      }
+    </style>
+  </head>
+  <body data-scene="s13">
+    <div class="stage">
+      <div class="rig" id="rig">
+        <div class="grid"></div>
+        <div class="abs hdr" id="hdr">
+          <div class="kicker">Arquitectura</div>
+          <div class="h2">Cada modelo de Meta, un trabajo visible</div>
+        </div>
+
+        <svg class="wires" id="wires" viewBox="0 0 1920 1080">
+          <path id="w-in" class="wire-main" d="M410 390 L470 390" />
+          <path id="w-out" class="wire-main" d="M1450 390 L1510 390" />
+          <path id="w-a" class="wire-main" d="M712 413 L736 413" />
+          <path id="w-b" class="wire-main" d="M948 413 L972 413" />
+          <path id="w-c" class="wire-main" d="M1184 413 L1208 413" />
+          <path
+            id="m0"
+            class="wire-model"
+            d="M360 606 C360 560 606 560 606 504"
+          />
+          <path
+            id="m1a"
+            class="wire-model"
+            d="M760 606 C760 560 842 560 842 504"
+          />
+          <path
+            id="m1b"
+            class="wire-model"
+            d="M760 606 C760 566 1290 572 1290 504"
+          />
+          <path
+            id="m2"
+            class="wire-model"
+            d="M1160 606 C1160 560 1310 560 1310 504"
+          />
+          <path
+            id="m3"
+            class="wire-model"
+            d="M1560 606 C1560 560 1340 560 1340 504"
+          />
+        </svg>
+
+        <div class="side" id="voice">
+          <div class="lbl">WhatsApp · nota de voz</div>
+          <div class="vbub">
+            <div class="play"></div>
+            <div class="wave" id="wave"></div>
+            <div class="dur" id="vdur">0:20</div>
+          </div>
+          <div class="extra">+ 2 fotos del producto</div>
+        </div>
+
+        <div id="gen">
+          <div class="gtitle">
+            <b>Génesis</b><span>de la voz al negocio</span>
+          </div>
+          <div class="node" id="n0" style="left: 30px">
+            <div class="n">01</div>
+            <div class="t">Entrada</div>
+            <div class="s">nota de voz, fotos y una pregunta</div>
+          </div>
+          <div class="node" id="n1" style="left: 266px">
+            <div class="n">02</div>
+            <div class="t">Compilador</div>
+            <div class="s mono">→ BusinessSpec</div>
+            <div class="s">qué vende, a cuánto, dónde</div>
+          </div>
+          <div class="node" id="n2" style="left: 502px">
+            <div class="n">03</div>
+            <div class="t">Plan / apply</div>
+            <div class="s" id="dagLbl">grafo de nodos</div>
+            <svg class="dag" id="dag" viewBox="0 0 180 70"></svg>
+          </div>
+          <div class="node" id="n3" style="left: 738px">
+            <div class="n">04</div>
+            <div class="t">Carriles</div>
+            <div class="lanes" id="lanes"></div>
+          </div>
+        </div>
+
+        <div class="side" id="live">
+          <div class="lbl">Negocio vivo</div>
+          <div class="biz">
+            <img src="../assets/logo.png" />
+            <div><b id="bizName">Arepas Rosa</b><span>● en línea</span></div>
+          </div>
+          <div class="acts">
+            <span>atiende</span><span>cobra</span><span>avisa</span>
+          </div>
+          <div class="el" id="elapsed"></div>
+        </div>
+
+        <div class="model" id="c0" style="left: 180px">
+          <span class="chip">Muse Voice Transcribe</span>
+          <div class="job" id="j0"></div>
+        </div>
+        <div class="model" id="c1" style="left: 580px">
+          <span class="chip">Muse Spark 1.3</span>
+          <div class="job" id="j1"></div>
+        </div>
+        <div class="model" id="c2" style="left: 980px">
+          <span class="chip">SAM 3.1</span>
+          <div class="job" id="j2"></div>
+        </div>
+        <div class="model" id="c3" style="left: 1380px">
+          <span class="chip">Muse Image</span>
+          <div class="job" id="j3"></div>
+        </div>
+
+        <div id="band">
+          <span class="bl" id="bandLbl">Capa de WhatsApp</span>
+          <span class="chip wa" id="w0">Cloud API</span>
+          <span class="chip wa" id="w1">Flows</span>
+          <span class="chip wa" id="w2">Perfil del negocio</span>
+          <span class="chip wa" id="w3">Catálogo</span>
+        </div>
+
+        <div class="pulse" id="pulse"></div>
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const RUN = window.RUN || {};
+      const EV = RUN.events || [];
+
+      // Real data from the rehearsal.
+      const plan = (EV.find((e) => e.kind === "plan.ready") || {}).data || {};
+      const nodes = plan.nodes || [];
+      const live = (EV.find((e) => e.kind === "run.live") || {}).data || {};
+      if (nodes.length)
+        $("dagLbl").textContent = `grafo de ${nodes.length} nodos`;
+      if (live.business_name) $("bizName").textContent = live.business_name;
+      if (live.elapsed_s != null)
+        $("elapsed").innerHTML =
+          `en vivo en <b>${Number(live.elapsed_s).toLocaleString("es-CO", { maximumFractionDigits: 1 })} s</b> · ensayo real`;
+      const spec = (EV.find((e) => e.kind === "spec.ready") || {}).data || {};
+      const segs = (spec.transcript || {}).segments || [];
+      if (segs.length) {
+        const dur = Math.round(segs[segs.length - 1].end || 20);
+        $("vdur").textContent = `0:${String(dur).padStart(2, "0")}`;
+      }
+
+      // Lanes (same names as the product panel).
+      const LANES = [
+        ["number", "Número"],
+        ["brand", "Marca"],
+        ["menu", "Menú"],
+        ["agent", "Agente"],
+        ["payments", "Pagos"],
+        ["inspector", "Inspector"],
+      ];
+      LANES.forEach(([k, l]) => {
+        const s = document.createElement("span");
+        s.id = "lane-" + k;
+        s.textContent = l;
+        $("lanes").appendChild(s);
+      });
+
+      // Mini DAG of the real plan: column = depth in the dependency graph.
+      const depth = {};
+      const dOf = (n) => {
+        if (depth[n.id] != null) return depth[n.id];
+        const ds = (n.deps || [])
+          .map((d) => nodes.find((x) => x.id === d))
+          .filter(Boolean);
+        return (depth[n.id] = ds.length ? 1 + Math.max(...ds.map(dOf)) : 0);
+      };
+      nodes.forEach(dOf);
+      const maxD = Math.max(0, ...Object.values(depth));
+      const cols = {};
+      nodes.forEach(
+        (n) => (cols[depth[n.id]] = (cols[depth[n.id]] || []).concat(n)),
+      );
+      const pos = {};
+      Object.entries(cols).forEach(([d, list]) =>
+        list.forEach((n, i) => {
+          pos[n.id] = {
+            x: 10 + (maxD ? (160 * d) / maxD : 80),
+            y: list.length === 1 ? 35 : 8 + (54 * i) / (list.length - 1),
+          };
+        }),
+      );
+      const NS = "http://www.w3.org/2000/svg";
+      nodes.forEach((n) =>
+        (n.deps || []).forEach((d) => {
+          if (!pos[d]) return;
+          const l = document.createElementNS(NS, "line");
+          l.setAttribute("x1", pos[d].x);
+          l.setAttribute("y1", pos[d].y);
+          l.setAttribute("x2", pos[n.id].x);
+          l.setAttribute("y2", pos[n.id].y);
+          l.setAttribute("stroke", "#3a4c43");
+          l.setAttribute("stroke-width", "1.5");
+          $("dag").appendChild(l);
+        }),
+      );
+      const dots = nodes.map((n) => {
+        const c = document.createElementNS(NS, "circle");
+        c.setAttribute("cx", pos[n.id].x);
+        c.setAttribute("cy", pos[n.id].y);
+        c.setAttribute("r", 5);
+        $("dag").appendChild(c);
+        return { c, d: depth[n.id] };
+      });
+
+      // Voice waveform (deterministic bar heights).
+      const bars = [];
+      for (let i = 0; i < 34; i++) {
+        const b = document.createElement("i");
+        b.style.height =
+          6 +
+          Math.round(22 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.43))) +
+          "px";
+        $("wave").appendChild(b);
+        bars.push(b);
+      }
+
+      const wires = ["m0", "m1a", "m1b", "m2", "m3"].map((id) => {
+        const el = $(id);
+        const L = el.getTotalLength();
+        el.style.strokeDasharray = L;
+        return { el, L };
+      });
+      const mainPath = [
+        [410, 390],
+        [470, 390],
+        [1450, 390],
+        [1510, 390],
+      ];
+      const pulse = $("pulse");
+
+      const glow = (el, k, rgb = "61,139,255") => {
+        el.style.borderColor =
+          k > 0.02 ? `rgba(${rgb},${0.35 + 0.55 * k})` : "";
+        el.style.boxShadow =
+          k > 0.02
+            ? `0 0 0 1px rgba(${rgb},${0.25 * k}), 0 0 ${40 * k}px rgba(${rgb},${0.35 * k})`
+            : "";
+      };
+
+      scene((t, S) => {
+        const k = S.p(t, 0, S.D);
+        $("rig").style.transform =
+          `scale(${1 + 0.035 * S.ease(k)}) translateY(${-6 * k}px)`;
+
+        // Build the diagram.
+        S.fade($("hdr"), S.p(t, 0, 0.6), 20);
+        S.pop($("voice"), S.p(t, 0.15, 0.7));
+        S.pop($("gen"), S.p(t, 0.45, 1.1));
+        ["n0", "n1", "n2", "n3"].forEach((n, i) =>
+          S.fade($(n), S.p(t, 0.75 + i * 0.22, 1.25 + i * 0.22), 14),
+        );
+        S.pop($("live"), S.p(t, 1.8, 2.4));
+        ["w-in", "w-a", "w-b", "w-c", "w-out"].forEach((id, i) => {
+          $(id).style.opacity = S.p(t, 0.45 + i * 0.32, 0.85 + i * 0.32);
+        });
+
+        // Voice note "plays" in a loop.
+        const vp = ((t * 0.18) % 1) * bars.length;
+        bars.forEach((b, i) => b.classList.toggle("on", i < vp));
+
+        // DAG dots light column by column, looping.
+        const ph = (t * 1.6) % (maxD + 3);
+        dots.forEach(({ c, d }) => {
+          const on = ph >= d && ph < maxD + 2;
+          c.setAttribute("fill", on ? "#f2b33d" : "#2f3f37");
+        });
+
+        // Pulse travels along the main flow every 3.2 s once built.
+        if (t > 2.6) {
+          const q = ((t - 2.6) % 3.2) / 3.2;
+          const x = S.lerp(410, 1510, S.ease(q));
+          pulse.style.left = x + "px";
+          pulse.style.top = (x > 470 && x < 1450 ? 236 : 390) + "px";
+          pulse.style.opacity =
+            x > 470 && x < 1450 ? 0 : Math.min(1, Math.sin(q * Math.PI) * 3);
+        } else pulse.style.opacity = 0;
+
+        // Meta models, synced to the narration.
+        const cues = [
+          S.cue("transcribir"),
+          S.cue("entender"),
+          S.cue("recortar"),
+          S.cue("crear"),
+        ];
+        const jobs = [
+          "transcribir con tiempos",
+          "entender y atender",
+          "recortar el producto",
+          "crear la marca",
+        ];
+        const tEnc = S.cue("encima");
+        const inten = cues.map((c, i) => {
+          if (t < c) return 0;
+          const next = i < 3 ? cues[i + 1] : tEnc;
+          const on = S.p(t, c, c + 0.35);
+          const off = t > next ? 1 - 0.65 * S.p(t, next, next + 0.5) : 1;
+          return on * off;
+        });
+        cues.forEach((c, i) => {
+          const card = $("c" + i);
+          const ghost = S.p(t, 2.3 + i * 0.15, 2.9 + i * 0.15);
+          const act = S.p(t, c - 0.15, c + 0.25);
+          card.style.opacity = 0.35 * S.easeOut(ghost) + 0.65 * S.easeOut(act);
+          card.style.transform = `translateY(${(1 - S.easeOut(ghost)) * 16 - 6 * inten[i] * (t < (i < 3 ? cues[i + 1] : tEnc) ? 1 : 0)}px)`;
+          glow(card, inten[i]);
+          S.type($("j" + i), jobs[i], S.p(t, c, c + 0.6));
+        });
+        const wireOf = [0, 1, 1, 2, 3];
+        wires.forEach(({ el, L }, j) => {
+          const i = wireOf[j];
+          const d = S.p(t, cues[i], cues[i] + 0.6);
+          el.style.strokeDashoffset = L * (1 - S.easeOut(d));
+          el.style.opacity = d > 0 ? 0.35 + 0.65 * inten[i] : 0;
+        });
+        glow($("n0"), inten[0]);
+        glow($("n1"), inten[1]);
+        glow($("n3"), Math.max(inten[1], inten[2], inten[3]));
+        const laneLit = {
+          agent: inten[1],
+          brand: Math.max(inten[2], inten[3]),
+        };
+        LANES.forEach(([key]) => {
+          const el = $("lane-" + key);
+          const v = laneLit[key] || 0;
+          el.style.background = v > 0.02 ? `rgba(61,139,255,${0.35 * v})` : "";
+          el.style.color = v > 0.3 ? "#e3edff" : "";
+          el.style.borderColor = v > 0.02 ? `rgba(61,139,255,${0.8 * v})` : "";
+        });
+
+        // WhatsApp layer.
+        const band = $("band");
+        S.fade(band, S.p(t, tEnc - 0.2, tEnc + 0.4), 20);
+        $("bandLbl").style.opacity = S.p(t, tEnc, tEnc + 0.5);
+        const wc = [
+          S.cue("api"),
+          S.cue("flows"),
+          S.cue("perfil"),
+          S.cue("catalogo"),
+        ];
+        wc.forEach((c, i) => S.pop($("w" + i), S.p(t, c - 0.2, c + 0.25)));
+        const wl = S.p(t, tEnc, tEnc + 0.6);
+        glow(
+          $("live"),
+          wl * (0.6 + 0.4 * Math.sin(t * 2.4) ** 2),
+          "37,211,102",
+        );
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .cam {
+        position: absolute;
+        inset: 0;
+        transform-origin: 38% 48%;
+      }
+      .bg {
+        position: absolute;
+        inset: -40px;
+        background: url(../assets/broll_stand.png) center/cover;
+        opacity: 0.2;
+        filter: saturate(0.8);
+      }
+      .shade {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(900px 700px at 25% 45%, #0c110f55, #0c110fee 75%),
+          linear-gradient(90deg, #0c110fcc 0%, #0c110f99 45%, #0c110fee 70%);
+      }
+      .phonewrap {
+        position: absolute;
+        left: 230px;
+        top: 52px;
+        width: 430px;
+        height: 900px;
+        transform-origin: 50% 0;
+      }
+      .phonewrap .phone {
+        left: 0;
+        top: 0;
+      }
+      .wa-head .avatar.g {
+        background: linear-gradient(140deg, #f2b33d, #e0892a);
+        color: #1b1206;
+      }
+      .daypill {
+        align-self: center;
+        margin: 4px 0 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: #ffffffd9;
+        font: 600 13px/1 var(--font);
+        color: #54656f;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .msgs {
+        gap: 0;
+      }
+      .m {
+        display: flex;
+        flex-direction: column;
+        flex: none;
+      }
+      .m > .bubble {
+        margin-top: 8px;
+      }
+      .bubble.in {
+        transform-origin: 0 100%;
+      }
+      .bubble.out {
+        transform-origin: 100% 100%;
+      }
+      .bubble .tick {
+        color: #53bdeb;
+        letter-spacing: -3px;
+        margin-left: 3px;
+      }
+      .bubble.photo img {
+        width: 220px;
+        height: 220px;
+      }
+      .bubble.photo .time {
+        color: #667781;
+      }
+      .bubble.vn {
+        padding: 10px 12px 24px 10px;
+      }
+      .vn .voice {
+        width: 296px;
+        gap: 10px;
+      }
+      .vn .vav {
+        position: relative;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        flex: none;
+        background: linear-gradient(140deg, #d98a5f, #a8563a);
+        color: #fff;
+        font: 800 20px/46px var(--display);
+        text-align: center;
+      }
+      .vn .vav .mic {
+        position: absolute;
+        right: -4px;
+        bottom: -2px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #1fa855;
+        border: 2px solid var(--wa-out);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .vn .vav .mic::before {
+        content: "";
+        width: 5px;
+        height: 9px;
+        border-radius: 3px;
+        background: #fff;
+      }
+      .vn .pp {
+        position: relative;
+        width: 18px;
+        height: 20px;
+        flex: none;
+      }
+      .vn .pp .tri {
+        position: absolute;
+        left: 2px;
+        top: 0;
+        width: 0;
+        height: 0;
+        border-left: 16px solid #54656f;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+      }
+      .vn .pp .bars {
+        position: absolute;
+        inset: 0 1px;
+        display: flex;
+        gap: 5px;
+      }
+      .vn .pp .bars i {
+        width: 5px;
+        height: 20px;
+        border-radius: 1px;
+        background: #54656f;
+      }
+      .vn .wave {
+        position: relative;
+        height: 34px;
+      }
+      .vn .wave i {
+        background: #a9b8b0;
+      }
+      .vn .wave i.on {
+        background: #1fa855;
+      }
+      .vn .wave .head {
+        position: absolute;
+        top: 50%;
+        width: 13px;
+        height: 13px;
+        margin: -6.5px 0 0 -6.5px;
+        border-radius: 50%;
+        background: #1fa855;
+      }
+      .vn .vmeta {
+        position: absolute;
+        left: 78px;
+        bottom: 6px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font: 500 13px/1 var(--font);
+        color: var(--wa-meta);
+      }
+      .x2 {
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: #54656f;
+        color: #fff;
+        font: 700 11px/1.2 var(--font);
+      }
+      /* recording state in the input bar */
+      .rec {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 18px;
+        color: #54656f;
+        font: 500 17px/1 var(--font);
+      }
+      .rec .rdot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #f15c6d;
+      }
+      .rec .rt {
+        font-variant-numeric: tabular-nums;
+        color: #111b21;
+      }
+      .wa-input .field {
+        position: relative;
+      }
+      .wa-input .send {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .wa-input .send::before {
+        content: "";
+        width: 9px;
+        height: 16px;
+        border-radius: 5px;
+        background: #fff;
+      }
+
+      /* right column */
+      .right {
+        left: 800px;
+        top: 150px;
+        width: 1000px;
+      }
+      .items {
+        display: flex;
+        gap: 16px;
+        margin-top: 30px;
+      }
+      .item {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 20px 10px 10px;
+        border-radius: 999px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        font: 600 24px/1 var(--font);
+        color: var(--text);
+      }
+      .item .ic {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #25d36622;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+      }
+      .item .thumbs {
+        display: flex;
+      }
+      .item .thumbs img {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        object-fit: cover;
+        border: 2px solid var(--surface);
+      }
+      .item .thumbs img + img {
+        margin-left: -14px;
+      }
+      .item .sub {
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .cap {
+        position: absolute;
+        left: 0;
+        top: 240px;
+        width: 1000px;
+        padding: 26px 34px 24px;
+        border-radius: 26px;
+        background: linear-gradient(180deg, #17211df2, #121a17f2);
+        border: 1px solid var(--line);
+        box-shadow: 0 30px 90px #0008;
+      }
+      .cap .top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        font: 650 22px/1 var(--font);
+      }
+      .cap .live {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--red);
+      }
+      .cap .who {
+        color: var(--text);
+      }
+      .cap .who span {
+        color: var(--muted);
+        font-weight: 500;
+      }
+      .cap .sp {
+        flex: 1;
+      }
+      .cap .speed {
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: var(--gold-soft);
+        color: var(--gold);
+        font: 750 18px/1 var(--font);
+      }
+      .cap .clock {
+        font: 600 22px/1 var(--mono);
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+      .cap .bigwave {
+        height: 70px;
+        margin: 22px 0 18px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        position: relative;
+      }
+      .cap .bigwave i {
+        flex: 1;
+        border-radius: 3px;
+        background: #3a4a42;
+      }
+      .cap .bigwave i.on {
+        background: var(--gold);
+      }
+      .cap .view {
+        position: relative;
+        height: 236px;
+        overflow: hidden;
+      }
+      .cap .txt {
+        font: 650 44px/59px var(--display);
+        letter-spacing: -0.01em;
+        color: var(--text);
+      }
+      .cap .txt span {
+        opacity: 0.14;
+      }
+      .cap .foot {
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .cap .foot .chip {
+        font-size: 18px;
+        padding: 8px 14px;
+      }
+    </style>
+  </head>
+  <body data-scene="s05">
+    <div class="stage">
+      <div class="cam" id="cam">
+        <div class="bg" id="bg"></div>
+        <div class="shade"></div>
+
+        <div class="phonewrap" id="phw">
+          <div class="phone">
+            <div class="screen">
+              <div class="notch"></div>
+              <div class="wa-head">
+                <div class="avatar g">G</div>
+                <div>
+                  <div class="name">Génesis</div>
+                  <div class="status" id="status">en línea</div>
+                </div>
+              </div>
+              <div class="wa-body">
+                <div class="msgs" id="msgs">
+                  <div class="daypill" id="day">Hoy</div>
+                </div>
+              </div>
+              <div class="wa-input">
+                <div class="field">
+                  <span id="ph">Mensaje</span>
+                  <div class="rec" id="rec">
+                    <div class="rdot" id="rdot"></div>
+                    <span class="rt" id="rt">0:00</span>
+                    <span>Grabando…</span>
+                  </div>
+                </div>
+                <div class="send"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="abs right">
+          <div class="kicker" id="kick">Lo que Rosa ya sabe hacer</div>
+          <div class="h2" id="head" style="margin-top: 18px">
+            Una nota de voz y dos fotos.
+          </div>
+          <div class="items">
+            <div class="item" id="it1">
+              <div class="ic">🎤</div>
+              Nota de voz <span class="sub" id="it1d">· 0:20</span>
+            </div>
+            <div class="item" id="it2">
+              <div class="thumbs">
+                <img src="../assets/foto_1.png" /><img
+                  src="../assets/foto_2.png"
+                />
+              </div>
+              2 fotos
+            </div>
+          </div>
+
+          <div class="cap" id="cap">
+            <div class="top">
+              <div class="live" id="live"></div>
+              <div class="who">
+                Rosa <span>· escuchando su nota de voz</span>
+              </div>
+              <div class="sp"></div>
+              <div class="speed">x2</div>
+              <div class="clock" id="clock">0:00 / 0:20</div>
+            </div>
+            <div class="bigwave" id="bigwave"></div>
+            <div class="view" id="view"><div class="txt" id="txt"></div></div>
+            <div class="foot">
+              <span class="chip">Muse Voice Transcribe</span>
+              <span class="small">Transcripción real de su audio</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tag">
+        <span class="dot"></span>Ensayo real · modelos de Meta en vivo ·
+        WhatsApp simulado
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const S0 = window.__S || null;
+      const TL = window.TIMELINE.scenes.s05;
+      const RUN = window.RUN || { lines: [], events: [] };
+      const ROSA = TL.rosa || {
+        start: 5.9,
+        duration: 10,
+        speed: 2,
+        source_duration: 20,
+      };
+      const SPEED = ROSA.speed || 2;
+      const SRC_DUR = ROSA.source_duration || ROSA.duration * SPEED;
+      const toScene = (src) => ROSA.start + src / SPEED;
+      const mmss = (s) => {
+        s = Math.max(0, Math.round(s));
+        return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+      };
+      const esc = (s) =>
+        s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const md = (s) => esc(s).replace(/\*([^*\n]+)\*/g, "<b>$1</b>");
+
+      // Real loudness envelope of rosa_voz.mp3 (ffmpeg RMS, 36 and 90 bins).
+      const ENV36 = [
+        1.0, 0.65, 0.7, 0.38, 0.55, 0.58, 0.23, 0.72, 0.4, 0.67, 0.65, 0.48,
+        0.44, 0.12, 0.78, 0.79, 0.6, 0.6, 0.68, 0.75, 0.55, 0.55, 0.59, 0.52,
+        0.72, 0.68, 0.77, 0.52, 0.7, 0.2, 0.12, 0.9, 0.6, 0.63, 0.71, 0.22,
+      ];
+      const ENV90 = [
+        1.0, 0.6, 0.56, 0.56, 0.4, 0.67, 0.44, 0.4, 0.29, 0.32, 0.42, 0.45,
+        0.39, 0.33, 0.59, 0.16, 0.12, 0.37, 0.69, 0.48, 0.34, 0.27, 0.31, 0.57,
+        0.58, 0.5, 0.49, 0.51, 0.46, 0.29, 0.48, 0.12, 0.12, 0.12, 0.12, 0.37,
+        0.48, 0.82, 0.75, 0.43, 0.46, 0.37, 0.5, 0.12, 0.66, 0.65, 0.45, 0.38,
+        0.59, 0.68, 0.49, 0.12, 0.5, 0.49, 0.39, 0.54, 0.38, 0.49, 0.35, 0.38,
+        0.69, 0.46, 0.37, 0.32, 0.71, 0.76, 0.53, 0.19, 0.49, 0.37, 0.4, 0.68,
+        0.4, 0.12, 0.12, 0.12, 0.12, 0.12, 0.92, 0.53, 0.56, 0.42, 0.44, 0.49,
+        0.53, 0.52, 0.66, 0.35, 0.12, 0.12,
+      ];
+
+      // ---- Chat built from the real rehearsal (RUN.lines), up to the first panel event after "listo".
+      const chatLines = [];
+      // Intake chat = Rosa/Génesis lines before the first spec.ready.
+      for (const l of RUN.lines) {
+        if (/^spec/.test(l.kind)) break;
+        if (l.who === "Rosa → Génesis" || l.who === "Génesis → Rosa")
+          chatLines.push(l);
+      }
+      // Stop after Génesis' first reply following "listo".
+      const iListo = chatLines.findIndex(
+        (c) => c.who.startsWith("Rosa") && /^listo$/i.test(c.text.trim()),
+      );
+      if (iListo >= 0) {
+        const iAfter = chatLines.findIndex(
+          (c, i) => i > iListo && c.who.startsWith("Génesis"),
+        );
+        if (iAfter >= 0) chatLines.length = iAfter + 1;
+      }
+
+      const msgs = $("msgs");
+      const M = [];
+      let photoN = 0;
+      chatLines.forEach((l) => {
+        const out = l.who.startsWith("Rosa");
+        const w = document.createElement("div");
+        w.className = "m";
+        const b = document.createElement("div");
+        const tm = `<span class="time">6:12${out ? '<span class="tick">✓✓</span>' : ""}</span>`;
+        let kind = "text";
+        if (out && /^🎤/.test(l.text)) {
+          kind = "voice";
+          b.className = "bubble out vn";
+          b.innerHTML =
+            `<div class="voice"><div class="vav">R<div class="mic"></div></div>` +
+            `<div class="pp"><div class="tri"></div><div class="bars"><i></i><i></i></div></div>` +
+            `<div class="wave">${ENV36.map((a) => `<i style="height:${Math.round(a * 100)}%"></i>`).join("")}<div class="head"></div></div></div>` +
+            `<div class="vmeta"><span class="vdur">${mmss(SRC_DUR)}</span><span class="x2">x2</span></div>` +
+            tm;
+        } else if (out && /^📷/.test(l.text)) {
+          kind = "photo";
+          const n = (l.text.match(/\d+/) || [++photoN])[0];
+          b.className = "bubble out photo";
+          b.innerHTML = `<img src="../assets/foto_${n}.png" />` + tm;
+        } else {
+          b.className = "bubble " + (out ? "out" : "in");
+          b.innerHTML = md(l.text) + tm;
+        }
+        w.appendChild(b);
+        msgs.appendChild(w);
+        M.push({ w, b, out, kind, l });
+      });
+
+      // ---- Live caption: real transcript segments, words spread inside each segment by length.
+      const spec = RUN.events.find((e) => e.kind === "spec.ready");
+      const segs =
+        (spec && spec.data.transcript && spec.data.transcript.segments) || [];
+      const W = [];
+      const txt = $("txt");
+      segs.forEach((sg) => {
+        const toks = sg.text.trim().split(/\s+/);
+        const wt = toks.map(
+          (k) => k.length + 1 + (/[,.;:!?]$/.test(k) ? 3 : 0),
+        );
+        const tot = wt.reduce((a, b) => a + b, 0);
+        let acc = 0;
+        toks.forEach((k, i) => {
+          const s0 = sg.start + (acc / tot) * (sg.end - sg.start);
+          acc += wt[i];
+          const s1 = sg.start + (acc / tot) * (sg.end - sg.start);
+          const sp = document.createElement("span");
+          sp.textContent = k;
+          txt.appendChild(sp);
+          txt.appendChild(document.createTextNode(" "));
+          W.push({ el: sp, a: toScene(s0), b: toScene(s1) });
+        });
+      });
+      $("bigwave").innerHTML = ENV90.map(
+        (a) => `<i style="height:${Math.round(a * 100)}%"></i>`,
+      ).join("");
+      const bigBars = [...$("bigwave").children];
+
+      scene((t, S) => {
+        const k = S.p(t, 0, S.D);
+        $("cam").style.transform = `scale(${1 + 0.035 * S.ease(k)})`;
+        $("bg").style.transform = `scale(1.06) translateX(${-24 * k}px)`;
+
+        // phone in
+        const pin = S.p(t, 0, 0.7);
+        $("phw").style.opacity = S.easeOut(pin);
+        $("phw").style.transform =
+          `translateY(${(1 - S.easeOut(pin)) * 40}px) scale(0.94)`;
+
+        // Message schedule (scene-local). Voice note on "nota"; the rest during the playback.
+        const tVoice = S.cue("nota") - 0.15;
+        const base = [
+          tVoice,
+          tVoice + 0.75,
+          ROSA.start + 1.6,
+          ROSA.start + 2.2,
+          ROSA.start + 3.6,
+          ROSA.start + 4.2,
+          ROSA.start + 6.4,
+          ROSA.start + 7.2,
+        ];
+        let typing = false;
+        M.forEach((m, i) => {
+          const tm =
+            i < base.length
+              ? base[i]
+              : base[base.length - 1] + 0.7 * (i - base.length + 1);
+          const x = S.p(t, tm, tm + 0.45);
+          m.w.style.height =
+            (S.easeOut(x) * (m.b.offsetHeight + 8)).toFixed(2) + "px";
+          S.pop(m.b, S.p(t, tm + 0.08, tm + 0.5));
+          if (!m.out && t > tm - 0.6 && t < tm) typing = true;
+        });
+        $("status").textContent = typing ? "escribiendo…" : "en línea";
+
+        // recording in the input bar before the voice note is sent
+        const r0 = S.cue("hace"),
+          r1 = tVoice;
+        const rec = t >= r0 && t < r1;
+        $("rec").style.opacity = rec ? 1 : 0;
+        $("ph").style.opacity = rec ? 0 : 1;
+        $("rt").textContent = mmss(SRC_DUR * S.p(t, r0, r1) - 0.49);
+        $("rdot").style.opacity = 0.55 + 0.45 * Math.cos(t * 7);
+
+        // voice note playback (in the bubble)
+        const pr = S.p(t, ROSA.start, ROSA.start + ROSA.duration);
+        const playing = t >= ROSA.start && t < ROSA.start + ROSA.duration;
+        const vm = M.find((m) => m.kind === "voice");
+        if (vm) {
+          const bars = vm.b.querySelectorAll(".wave i");
+          bars.forEach((el, i) =>
+            el.classList.toggle("on", (i + 0.5) / bars.length <= pr),
+          );
+          vm.b.querySelector(".wave .head").style.left =
+            (pr * 100).toFixed(2) + "%";
+          vm.b.querySelector(".tri").style.opacity = playing ? 0 : 1;
+          vm.b.querySelector(".bars").style.opacity = playing ? 1 : 0;
+          vm.b.querySelector(".vdur").textContent = playing
+            ? mmss(pr * SRC_DUR)
+            : mmss(SRC_DUR);
+        }
+
+        // right column
+        S.fade($("kick"), S.p(t, 0.3, 1.0));
+        // headline lands with "le manda a Génesis…", not before the narration says it
+        S.fade(
+          $("head"),
+          S.p(t, S.cue("manda") - 0.15, S.cue("manda") + 0.55),
+          24,
+        );
+        S.pop($("it1"), S.p(t, S.cue("nota") - 0.1, S.cue("nota") + 0.4));
+        S.pop($("it2"), S.p(t, S.cue("fotos") - 0.15, S.cue("fotos") + 0.35));
+
+        // caption panel
+        S.fade($("cap"), S.p(t, ROSA.start - 0.7, ROSA.start - 0.1), 30);
+        $("clock").textContent = `${mmss(pr * SRC_DUR)} / ${mmss(SRC_DUR)}`;
+        $("live").style.opacity = playing ? 0.65 + 0.35 * Math.cos(t * 6) : 0.35;
+        bigBars.forEach((el, i) =>
+          el.classList.toggle("on", (i + 0.5) / bigBars.length <= pr),
+        );
+        let cur = -1;
+        W.forEach((w, i) => {
+          const a = S.p(t, w.a - 0.04, w.a + 0.12);
+          w.el.style.opacity = (0.14 + 0.86 * a).toFixed(3);
+          if (t >= w.a) cur = i;
+        });
+        W.forEach(
+          (w, i) =>
+            (w.el.style.color = i === cur && playing ? "var(--gold)" : ""),
+        );
+        // smooth line-by-line scroll: keep the current line on row 3 of 4
+        if (W.length) {
+          let y = 0,
+            prevTop = W[0].el.offsetTop;
+          const L = 59;
+          W.forEach((w) => {
+            const top = w.el.offsetTop;
+            if (top > prevTop) {
+              y += (top - prevTop) * S.ease(S.p(t, w.a - 0.35, w.a + 0.05));
+              prevTop = top;
+            }
+          });
+          const sc = Math.max(0, y - 2 * L);
+          $("txt").style.transform = `translateY(${-sc.toFixed(2)}px)`;
+          // top fade only once lines have scrolled away (no half-clipped ghost line under the waveform)
+          const f = Math.min(1, sc / (0.3 * L));
+          $("view").style.webkitMaskImage =
+            `linear-gradient(180deg, rgba(0,0,0,${(1 - f).toFixed(3)}) 0%, rgba(0,0,0,${(1 - f).toFixed(3)}) ${(7 * f).toFixed(1)}%, #000 ${(4 + 26 * f).toFixed(1)}%, #000 82%, rgba(0,0,0,0) 100%)`;
+        }
+      });
+    </script>
+  </body>
+</html>

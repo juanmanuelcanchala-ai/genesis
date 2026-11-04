@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../lib/stage.css" />
+    <style>
+      .world {
+        position: absolute;
+        inset: 0;
+        transform-origin: 55% 45%;
+      }
+      .head {
+        left: 120px;
+        top: 112px;
+      }
+      .head .h3 {
+        margin-top: 14px;
+        font-size: 40px;
+      }
+      .item {
+        position: absolute;
+        left: 120px;
+        width: 700px;
+        height: 96px;
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        padding: 0 26px 0 20px;
+        border-radius: 20px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        transform-origin: 0 0;
+        box-shadow: 0 14px 40px #0006;
+      }
+      .item .ic {
+        width: 58px;
+        height: 58px;
+        border-radius: 15px;
+        flex: none;
+        background: var(--gold-soft);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .item .ic svg {
+        width: 32px;
+        height: 32px;
+      }
+      .item .tx {
+        flex: 1;
+        min-width: 0;
+      }
+      .item .t {
+        font: 650 30px/1.1 var(--display);
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      }
+      .item .d {
+        margin-top: 6px;
+        font: 450 20px/1.2 var(--font);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .item .box {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        border: 2px solid #4a5d54;
+        flex: none;
+      }
+      /* laptop */
+      .laptop {
+        left: 870px;
+        top: 250px;
+        width: 560px;
+      }
+      .laptop .lid {
+        width: 560px;
+        height: 370px;
+        border-radius: 22px 22px 6px 6px;
+        background: #0a0e0c;
+        border: 3px solid #3a4a42;
+        padding: 16px;
+      }
+      .laptop .scr {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        background: linear-gradient(180deg, #16201c, #111915);
+        position: relative;
+        overflow: hidden;
+      }
+      .laptop .scr .bar {
+        height: 26px;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        padding: 0 10px;
+        background: #1c2722;
+      }
+      .laptop .scr .bar i {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #3a4a42;
+      }
+      .laptop .base {
+        margin: 0 -50px;
+        height: 22px;
+        border-radius: 0 0 18px 18px;
+        background: linear-gradient(180deg, #4a5a52, #2a3631);
+        position: relative;
+      }
+      .laptop .base::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 120px;
+        margin-left: -60px;
+        height: 8px;
+        border-radius: 0 0 8px 8px;
+        background: #26302c;
+      }
+      .req {
+        left: 870px;
+        width: 560px;
+        top: 686px;
+        display: flex;
+        justify-content: center;
+      }
+      .req span {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 26px;
+        border-radius: 999px;
+        background: #ff6b5b1f;
+        border: 1px solid #ff6b5b88;
+        color: #ffb3aa;
+        font: 700 30px/1 var(--display);
+        white-space: nowrap;
+      }
+      .req b {
+        color: var(--red);
+        font-size: 30px;
+      }
+      /* Rosa's phone */
+      .phonewrap {
+        left: 1500px;
+        top: 172px;
+        width: 310px;
+        height: 648px;
+      }
+      .phonewrap .phone {
+        left: 0;
+        top: 0;
+        transform: scale(0.72);
+        transform-origin: 0 0;
+      }
+      .phonewrap .bubble {
+        font-size: 23px;
+        max-width: 90%;
+      }
+      .phonewrap .bubble .time {
+        font-size: 14px;
+      }
+      .phonewrap .daychip {
+        position: absolute;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 7px 14px;
+        border-radius: 9px;
+        background: #ffffffd9;
+        font: 600 16px/1 var(--font);
+        letter-spacing: 0.04em;
+        color: var(--wa-meta);
+        box-shadow: 0 1px 1px #0000001a;
+      }
+      .plabel {
+        left: 1468px;
+        width: 374px;
+        top: 132px;
+        text-align: center;
+        font: 600 22px/1 var(--font);
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .pnote {
+        left: 1442px;
+        width: 426px;
+        top: 838px;
+        display: flex;
+        justify-content: center;
+      }
+      .pnote span {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 22px;
+        border-radius: 999px;
+        background: var(--gold-soft);
+        border: 1px solid #f2b33d66;
+        color: var(--gold);
+        font: 700 24px/1 var(--display);
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body data-scene="s04">
+    <div class="stage">
+      <div class="abs head" id="head">
+          <div class="kicker">Vender en serio por WhatsApp</div>
+          <div class="h3" id="h3">hace falta todo esto:</div>
+        </div>
+      <div class="world" id="world">
+
+
+        <div class="abs laptop" id="laptop">
+          <div class="lid">
+            <div class="scr" id="scr">
+              <div class="bar"><i></i><i></i><i></i></div>
+            </div>
+          </div>
+          <div class="base"></div>
+        </div>
+        <div class="abs req" id="req">
+          <span><b>✕</b> Requiere computador</span>
+        </div>
+
+        <div class="abs plabel" id="plabel">El celular de Rosa</div>
+        <div class="abs phonewrap" id="phonewrap">
+          <div class="phone">
+            <div class="notch"></div>
+            <div class="screen">
+              <div class="wa-head">
+                <div class="avatar">A</div>
+                <div>
+                  <div class="name">Andrés</div>
+                  <div class="status">en línea</div>
+                </div>
+              </div>
+              <div class="wa-body">
+                <div class="daychip">HOY</div>
+                <div class="msgs">
+                  <div class="bubble in" id="m1"></div>
+                  <div class="bubble in" id="m2"></div>
+                  <div class="bubble in" id="m3"></div>
+                </div>
+              </div>
+              <div class="wa-input">
+                <div class="field">Mensaje</div>
+                <div class="send"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="abs pnote" id="pnote"><span>📱 Solo tiene esto</span></div>
+
+        <div id="items"></div>
+      </div>
+    </div>
+    <script src="../build/timeline.js"></script>
+    <script src="../build/run.js"></script>
+    <script src="../lib/stage.js"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const G =
+        'fill="none" stroke="#f2b33d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+      const ITEMS = [
+        {
+          cue: "perfil",
+          t: "Perfil de empresa",
+          d: "Nombre, foto, descripción, horario",
+          svg: `<svg viewBox="0 0 24 24" ${G}><circle cx="12" cy="9" r="3.5"/><path d="M5 20c1.2-3.6 4-5.5 7-5.5s5.8 1.9 7 5.5"/></svg>`,
+        },
+        {
+          cue: "catalogo",
+          t: "Catálogo",
+          d: "Productos, fotos y precios",
+          svg: `<svg viewBox="0 0 24 24" ${G}><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>`,
+        },
+        {
+          cue: "formulario",
+          t: "Formulario de pedidos",
+          d: "Qué, cuántos y para qué hora",
+          svg: `<svg viewBox="0 0 24 24" ${G}><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4"/></svg>`,
+        },
+        {
+          cue: "cobros",
+          t: "Cobros",
+          d: "Enlace de pago y confirmación",
+          svg: `<svg viewBox="0 0 24 24" ${G}><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10.5h18M7 15h4"/></svg>`,
+        },
+        {
+          cue: "alguien",
+          t: "Alguien que conteste",
+          d: "A las 6:00 a. m., todos los días",
+          svg: `<svg viewBox="0 0 24 24" ${G}><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>`,
+        },
+      ];
+      const TOP0 = 250,
+        STEP = 112;
+      const els = ITEMS.map((it, i) => {
+        const el = document.createElement("div");
+        el.className = "item";
+        el.style.top = `${TOP0 + i * STEP}px`;
+        el.innerHTML = `<div class="ic">${it.svg}</div><div class="tx"><div class="t">${it.t}</div><div class="d">${it.d}</div></div><div class="box"></div>`;
+        $("items").appendChild(el);
+        return el;
+      });
+      // landing slots inside the laptop screen (stage coords)
+      const SC = 0.56;
+      const SLOT_X = 870 + 19 + (522 - 700 * SC) / 2;
+      const SLOT_Y0 = 250 + 19 + 26 + 12;
+      const SLOT_STEP = 58;
+
+      // Andrés's opening line is s01's; the next two are his real questions from the rehearsal (RUN)
+      const AND = ((window.RUN || {}).lines || [])
+        .filter((l) => l.who === "Andrés → negocio" && l.kind === "wa.in")
+        .map((l) => l.text)
+        .filter((x) => x !== "Hola" && !/^📝/.test(x));
+      const MSGS = [
+        ["Doña Rosa, ¿hay arepas de choclo hoy?", "6:10"],
+        [AND[0] || "¿A cómo la arepa de choclo con queso?", "6:11"],
+        [AND[1] || "Quiero hacer un pedido", "6:12"],
+      ];
+      MSGS.forEach(([txt, hh], i) => {
+        const b = $("m" + (i + 1));
+        b.textContent = txt;
+        const tm = document.createElement("span");
+        tm.className = "time";
+        tm.textContent = hh;
+        b.appendChild(tm);
+      });
+      scene((t, S) => {
+        const k = S.p(t, 0, S.D);
+        const allT = S.cue("todo");
+        const pan = S.ease(S.p(t, allT - 0.2, allT + 0.9));
+        $("world").style.transform =
+          `translateX(${-300 * pan}px) scale(${1 + 0.03 * S.ease(k)})`;
+        S.fade($("head"), S.p(t, 0.1, 0.8), 18);
+        S.fade($("h3"), S.p(t, S.cue("hacen") - 0.2, S.cue("hacen") + 0.4), 12);
+
+        // Rosa's phone is there from the start
+        S.fade($("plabel"), S.p(t, 0.3, 0.9), 8);
+        S.fade($("phonewrap"), S.p(t, 0.2, 1.0), 30);
+        S.pop($("m1"), S.p(t, 0.8, 1.2));
+        S.pop($("m2"), S.p(t, S.cue("conteste") - 0.1, S.cue("conteste") + 0.3));
+        S.pop($("m3"), S.p(t, S.cue("seis") + 0.1, S.cue("seis") + 0.5));
+        ["m1", "m2", "m3"].forEach((m) => {
+          $(m).style.display = Number($(m).style.opacity) > 0 ? "" : "none";
+        });
+        // the phone waits next to the checklist, then the camera pans and the laptop takes its place
+        const ph = -340 * (1 - S.ease(S.p(t, allT - 0.45, allT + 0.35)));
+        ["plabel", "phonewrap"].forEach((n) => {
+          $(n).style.transform = `translateX(${ph}px) ` + $(n).style.transform;
+        });
+
+        // requirement cards appear on their words
+        const all = S.cue("todo");
+        els.forEach((el, i) => {
+          const c = S.cue(ITEMS[i].cue);
+          const a = S.p(t, c - 0.25, c + 0.2);
+          // fly into the laptop screen on "Todo eso"
+          const f = S.ease(
+            S.p(t, all - 0.25 + i * 0.05, all + 0.45 + i * 0.05),
+          );
+          const x0 = 120,
+            y0 = TOP0 + i * STEP;
+          const x1 = SLOT_X,
+            y1 = SLOT_Y0 + i * SLOT_STEP;
+          const s = S.lerp(1, SC, f);
+          const dx = (x1 - x0) * f,
+            dy = (y1 - y0) * f;
+          const e = S.easeOut(Math.min(1, a * 1.6));
+          const pop = 0.92 + 0.08 * S.back(a);
+          el.style.opacity = e;
+          el.style.transform = `translate(${dx + (1 - e) * -24}px, ${dy}px) scale(${s * pop})`;
+          el.style.boxShadow = f > 0.5 ? "none" : "0 14px 40px #0006";
+          // highlight the card that is being spoken
+          const lit =
+            a >= 1 &&
+            f === 0 &&
+            t < (i < 4 ? S.cue(ITEMS[i + 1].cue) - 0.25 : all - 0.1);
+          el.style.borderColor = lit ? "#f2b33d99" : "var(--line)";
+        });
+
+        // laptop rises just before "Todo eso"
+        const L = S.p(t, all - 0.4, all + 0.25);
+        S.fade($("laptop"), L, 40);
+        $("laptop").style.transform += ` scale(${0.9 + 0.1 * S.easeOut(L)})`;
+        // phone steps back a bit while the laptop takes over, then is contrasted
+        const comp = S.cue("computador");
+        S.pop($("req"), S.p(t, comp - 0.1, comp + 0.35));
+        S.pop($("pnote"), S.p(t, comp + 0.25, comp + 0.7));
+      });
+    </script>
+  </body>
+</html>
