@@ -14,6 +14,8 @@ Official references used for the payloads:
 
 from __future__ import annotations
 
+from collections import deque
+
 import hashlib
 import hmac
 import json
@@ -38,6 +40,8 @@ log = logging.getLogger("genesis.whatsapp")
 SENT: list[dict[str, Any]] = []
 # media_id -> (bytes, mime). upload_media in dry-run stores here; tests/demo can pre-load inbound media.
 DRY_MEDIA: dict[str, tuple[bytes, str]] = {}
+# Live sends (op, payload, time) so a real run can be exported for the video: GET /api/runs/{id}/export.
+LIVE_LOG: deque[dict[str, Any]] = deque(maxlen=5000)
 # phone_id -> profile dict, so get/update/revert behave consistently in dry-run.
 DRY_PROFILES: dict[str, dict[str, Any]] = {}
 # flow_id -> status (DRAFT | PUBLISHED | DEPRECATED | DELETED)
@@ -174,7 +178,10 @@ def _send(phone_id: str, to: str, msg_type: str, body: dict[str, Any], op: str) 
     if not _live():
         return _record(op, {"phone_id": phone_id, **payload}, prefix="wamid.dry")
     res = _request("POST", f"{phone_id}/messages", json=payload)
-    return res["messages"][0]["id"]
+    mid = res["messages"][0]["id"]
+    with _lock:
+        LIVE_LOG.append({"t": time.time(), "op": op, "payload": {"phone_id": phone_id, **payload}, "id": mid})
+    return mid
 
 
 def send_text(phone_id: str, to: str, body: str) -> str:

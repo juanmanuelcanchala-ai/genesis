@@ -168,8 +168,14 @@ def _to_agent(inbound: Any) -> str:
     return "agent"
 
 
+INBOUND_LOG: list[dict[str, Any]] = []  # every inbound message (time + fields) for /api/runs/{id}/export
+
+
 def route_inbound(inbound: Any) -> str:
     """intake number -> onboarding; cradle number -> that business's agent. Returns the route taken."""
+    INBOUND_LOG.append({"t": time.time(), **{k: getattr(inbound, k) for k in (
+        "phone_id", "wa_id", "name", "message_id", "type", "text", "button_id", "flow_response")}})
+    del INBOUND_LOG[:-5000]
     intake = settings.intake_phone_id
     if intake and inbound.phone_id == intake:
         if _single_number_customer(inbound):  # one number for both: customers of the live business
@@ -406,6 +412,60 @@ def run_events(run_id: str, close: int = 0, plain: int = 0) -> StreamingResponse
     """SSE with backlog. ``?close=1`` ends the stream after run.live / run.failed; ``?plain=1`` sends
     unnamed messages (the event kind is inside the JSON) so a browser gets every kind via onmessage."""
     return _sse(run_id, bool(close), bool(plain))
+
+
+@app.get("/api/runs/{run_id}/export", dependencies=ADMIN)
+def export_run(run_id: str) -> dict:
+    """A live run in the same shape as media/rehearsal/run.json (scripts/rehearse_real.py), for the video."""
+    from dataclasses import asdict
+
+    from .demo import _sent_text
+
+    events = bus.log(run_id)
+    if not events:
+        raise HTTPException(404, "unknown run")
+    t0 = events[0].ts
+    t1 = max(e.ts for e in events) + 120
+    info = onboarding.get_run(run_id) or {}
+    owner = getattr(onboarding.RUNS.get(run_id), "owner_wa_id", "") or settings.demo_owner_wa_id
+    cradle = info.get("cradle_phone_id", "")
+    ours = {settings.intake_phone_id, cradle}
+    owner_name = os.getenv("DEMO_OWNER_LABEL", "Rosa")
+    customer = os.getenv("DEMO_CUSTOMER_LABEL", "Andrés")
+    lines: list[dict] = []
+    for m in INBOUND_LOG:
+        if not (t0 - 5 <= m["t"] <= t1) or m["phone_id"] not in ours:
+            continue
+        if m["flow_response"] is not None:
+            text = "📝 envía el formulario"
+        else:
+            text = m["text"] or {"audio": "🎤 nota de voz", "image": "📷 foto"}.get(m["type"], m["type"])
+        who = f"{owner_name} → Génesis" if m["wa_id"] == owner else f"{customer} → negocio"
+        lines.append({"t": round(m["t"] - t0, 3), "who": who, "text": text, "kind": "wa.in"})
+    wa = _mod("whatsapp")
+    sent = [s for s in list(wa.LIVE_LOG) if t0 - 5 <= s["t"] <= t1 and s["payload"].get("phone_id") in ours]
+    for s in sent:
+        to = s["payload"].get("to")
+        who = f"Génesis → {owner_name}" if to == owner else "Negocio → cliente"
+        try:
+            text = _sent_text(s["op"], s["payload"])
+        except Exception:  # noqa: BLE001
+            text = s["op"]
+        lines.append({"t": round(s["t"] - t0, 3), "who": who, "text": text, "kind": "wa." + s["op"]})
+    for e in events:
+        lines.append({"t": round(e.ts - t0, 3), "who": "panel", "text": f"{e.kind}: {e.message}", "kind": e.kind})
+    lines.sort(key=lambda x: x["t"])
+    live = next((e for e in events if e.kind == "run.live"), None)
+    orders = [o for o in _mod("store").list_orders(cradle) if not o.get("test")] if cradle else []
+    asking = next((e for e in events if e.kind == "intake.asking"), None)
+    return {
+        "run_id": run_id, "live_whatsapp": True, "question": asking.message if asking else "", "cradle": cradle,
+        "wa_me": (live.data or {}).get("wa_me", "") if live else "",
+        "elapsed_ms": int((t1 - 120 - t0) * 1000), "order": orders[-1] if orders else {},
+        "lines": lines,
+        "events": [{**asdict(e), "t": round(e.ts - t0, 3)} for e in events],
+        "sent": [{"t": round(s["t"] - t0, 3), "op": s["op"], "payload": s["payload"]} for s in sent],
+    }
 
 
 @app.get("/api/stream", dependencies=ADMIN)
