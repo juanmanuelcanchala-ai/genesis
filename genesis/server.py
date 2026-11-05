@@ -149,17 +149,35 @@ def _is_cradle(phone_id: str) -> bool:
         return False
 
 
+def _single_number_customer(inbound: Any) -> bool:
+    """Single-number mode (WA_CRADLE_PHONE_IDS = WA_INTAKE_PHONE_ID, e.g. one Meta test number): once a business
+    is live on that number, everyone except its owner is a customer of the business; the owner keeps talking to Génesis."""
+    if inbound.phone_id not in settings.cradle_phone_ids:
+        return False
+    try:
+        biz = _mod("store").get_business(inbound.phone_id)
+    except Exception:  # noqa: BLE001
+        return False
+    return bool(biz and biz.get("live") and inbound.wa_id != biz.get("owner_wa_id"))
+
+
+def _to_agent(inbound: Any) -> str:
+    if onboarding._first_time("panel:" + (inbound.message_id or "")):  # Meta redelivers webhooks
+        _customer_event(inbound)
+    _mod("agent").handle(inbound.phone_id, inbound)
+    return "agent"
+
+
 def route_inbound(inbound: Any) -> str:
     """intake number -> onboarding; cradle number -> that business's agent. Returns the route taken."""
     intake = settings.intake_phone_id
     if intake and inbound.phone_id == intake:
+        if _single_number_customer(inbound):  # one number for both: customers of the live business
+            return _to_agent(inbound)
         onboarding.handle_intake(inbound)
         return "intake"
     if _is_cradle(inbound.phone_id):
-        if onboarding._first_time("panel:" + (inbound.message_id or "")):  # Meta redelivers webhooks
-            _customer_event(inbound)
-        _mod("agent").handle(inbound.phone_id, inbound)
-        return "agent"
+        return _to_agent(inbound)
     if not intake:  # not configured: everything that is not a cradle is the intake number
         onboarding.handle_intake(inbound)
         return "intake"
