@@ -136,6 +136,10 @@ def webhook(request: Request, body: bytes = Depends(raw_body)) -> dict:
 
 
 def _process_webhook(payload: dict) -> None:
+    try:  # last raw webhook, local only, to debug payload shapes on a live number
+        (Path(__file__).resolve().parent.parent / ".run" / "last_webhook.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1))
+    except Exception:  # noqa: BLE001
+        pass
     for inbound in _mod("whatsapp").parse_webhook(payload):
         _bg(route_inbound, inbound)
 
@@ -445,7 +449,7 @@ def export_run(run_id: str) -> dict:
     wa = _mod("whatsapp")
     sent = [s for s in list(wa.LIVE_LOG) if t0 - 5 <= s["t"] <= t1 and s["payload"].get("phone_id") in ours]
     for s in sent:
-        to = s["payload"].get("to")
+        to = s["payload"].get("to") or s["payload"].get("recipient")
         who = f"Génesis → {owner_name}" if to == owner else "Negocio → cliente"
         try:
             text = _sent_text(s["op"], s["payload"])

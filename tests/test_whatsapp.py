@@ -357,3 +357,21 @@ def test_live_media_and_catalog(live):
     batch = live.post(f"{GRAPH}/CAT/items_batch").mock(return_value=httpx.Response(200, json={"handles": ["h"]}))
     wa.delete_product("CAT", "r1")
     assert b"PRODUCT_ITEM" in batch.calls.last.request.content
+
+
+def test_bsuid_sender_and_recipient():
+    """Users with a WhatsApp username arrive with from_user_id only, and are answered in "recipient"."""
+    from genesis import whatsapp as wa
+
+    payload = {"entry": [{"changes": [{"value": {
+        "metadata": {"phone_number_id": "111"},
+        "contacts": [{"profile": {"name": "Juan", "username": "JuanMa"}, "user_id": "CO.1780587866578965"}],
+        "messages": [{"from_user_id": "CO.1780587866578965", "id": "wamid.x", "timestamp": "1", "type": "text",
+                      "text": {"body": "hola"}}]}, "field": "messages"}]}]}
+    inb = wa.parse_webhook(payload)[0]
+    assert inb.wa_id == "CO.1780587866578965" and inb.name == "Juan"
+    assert wa.is_bsuid(inb.wa_id) and not wa.is_bsuid("573001112233")
+    wa.reset()
+    wa.send_text("111", inb.wa_id, "hola")
+    p = wa.SENT[-1]["payload"]
+    assert p["recipient"] == "CO.1780587866578965" and "to" not in p

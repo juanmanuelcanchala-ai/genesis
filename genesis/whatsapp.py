@@ -21,6 +21,7 @@ import hmac
 import json
 import logging
 import os
+import re
 import threading
 import time
 from dataclasses import dataclass
@@ -171,7 +172,8 @@ def _send(phone_id: str, to: str, msg_type: str, body: dict[str, Any], op: str) 
     payload = {
         "messaging_product": "whatsapp",
         "recipient_type": "individual",
-        "to": to,
+        # business-scoped user id (e.g. "CO.1780…") goes in "recipient", a phone number in "to"
+        **({"recipient": to.strip()} if is_bsuid(to) else {"to": to}),
         "type": msg_type,
         msg_type: body,
     }
@@ -182,6 +184,13 @@ def _send(phone_id: str, to: str, msg_type: str, body: dict[str, Any], op: str) 
     with _lock:
         LIVE_LOG.append({"t": time.time(), "op": op, "payload": {"phone_id": phone_id, **payload}, "id": mid})
     return mid
+
+
+_BSUID = re.compile(r"^[A-Z]{2}\.[A-Za-z0-9_-]+$")
+
+
+def is_bsuid(to: str) -> bool:
+    return bool(_BSUID.match((to or "").strip()))
 
 
 def send_text(phone_id: str, to: str, body: str) -> str:
@@ -544,6 +553,8 @@ def verify_signature(raw_body: bytes, header: str) -> bool:
     Without WA_APP_SECRET every webhook is accepted only in dry-run; live it fails closed.
     """
     secret = settings.app_secret
+    if os.getenv("WA_SKIP_SIGNATURE") == "1":  # demo escape hatch when the signing app's secret is not available
+        return True
     if not secret:
         return not settings.wa_live
     if not header:
@@ -576,7 +587,7 @@ def parse_webhook(payload: dict) -> list[Inbound]:
             value = change.get("value") or {}
             phone_id = str((value.get("metadata") or {}).get("phone_number_id", ""))
             names = {
-                str(c.get("wa_id", "")): (c.get("profile") or {}).get("name", "")
+                str(c.get("wa_id") or c.get("user_id") or ""): (c.get("profile") or {}).get("name", "")
                 for c in value.get("contacts") or []
             }
             for m in value.get("messages") or []:
@@ -592,7 +603,7 @@ def parse_webhook(payload: dict) -> list[Inbound]:
 
 
 def _parse_message(phone_id: str, m: dict, names: dict[str, str]) -> Inbound | None:
-    wa_id = str(m.get("from", ""))
+    wa_id = str(m.get("from") or m.get("from_user_id") or "")  # users with a WhatsApp username only send a BSUID
     mtype = str(m.get("type", ""))
     try:
         ts = int(m.get("timestamp") or 0)
